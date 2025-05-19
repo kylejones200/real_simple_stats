@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: real_simple_stats
+Version: 1.0
+Summary: Python version of the Real Simple Stats Handbook
+Author: Kyle Jones
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+License-File: LICENSE
+Requires-Dist: numpy
+Requires-Dist: scipy
+Dynamic: author
+Dynamic: classifier
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: summary
