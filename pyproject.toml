@@ -1,3 +1,18 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "real_simple_stats"
+version = "0.1.1"
+description = "Python version of the Real Simple Stats Handbook"
+authors = [
+    { name = "Kyle Jones", email = "kylejones@american.edu" }
+]
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+dependencies = [
+    "numpy",
+    "scipy"
+]

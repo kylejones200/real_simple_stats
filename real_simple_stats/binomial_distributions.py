@@ -45,23 +45,3 @@ def normal_approximation(n: int, p: float, k: int, use_continuity: bool = True) 
     from scipy.stats import norm
     return norm.cdf(z)
 
-# Example usage
-if __name__ == "__main__":
-    # Binomial criteria check
-    print("Is binomial:", is_binomial_experiment(10, ["pass", "fail"], 0.4))
-
-    # Probability of exactly 3 successes in 10 trials with p=0.4
-    print("P(X=3):", binomial_probability(10, 3, 0.4))
-
-    # Mean, variance, std dev
-    n, p = 10, 0.4
-    print("Mean:", binomial_mean(n, p))
-    print("Variance:", binomial_variance(n, p))
-    print("Standard deviation:", binomial_std_dev(n, p))
-
-    # Expected values
-    print("Expected value (single):", expected_value_single(85, 0.2))
-    print("Expected value (multiple):", expected_value_multiple([10, 20, 30], [0.1, 0.5, 0.4]))
-
-    # Normal approximation with continuity
-    print("Normal approximation P(X ≤ 3):", normal_approximation(n, p, 3))

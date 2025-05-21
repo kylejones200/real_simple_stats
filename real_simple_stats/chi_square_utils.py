@@ -11,46 +11,28 @@ def chi_square_statistic(observed: List[int], expected: List[int]) -> float:
         raise ValueError("Observed and expected lists must be the same length.")
     return sum((o - e) ** 2 / e for o, e in zip(observed, expected))
 
-def critical_chi_square_value(alpha: float, df: int, tail: str = "right") -> float:
+def critical_chi_square_value(alpha: float, df: int) -> float:
     """
-    Find the critical chi-square value.
-    
-    Parameters:
-        alpha: significance level (e.g., 0.05)
-        df: degrees of freedom
-        tail: 'right' or 'left'
+    Return the critical chi-square value (right-tailed only).
+
+    Args:
+        alpha: Significance level (e.g., 0.05)
+        df: Degrees of freedom
+
+    Returns:
+        Right-tailed critical value from the chi-square distribution.
     """
-    if tail == "right":
-        return chi2.ppf(1 - alpha, df)
-    elif tail == "left":
-        return chi2.ppf(alpha, df)
-    else:
-        raise ValueError("tail must be 'right' or 'left'")
+    return chi2.ppf(1 - alpha, df)
 
-def reject_null_chi_square(chi_stat: float, critical_value: float, tail: str = "right") -> bool:
+def reject_null_chi_square(chi_stat: float, critical_value: float) -> bool:
     """
-    Determine whether to reject H0 based on the test statistic and critical value.
+    Determine whether to reject H0 based on test statistic and critical value.
+
+    Args:
+        chi_stat: The chi-square statistic.
+        critical_value: The critical value for the given alpha and df.
+
+    Returns:
+        True if the null hypothesis should be rejected.
     """
-    if tail == "right":
-        return chi_stat > critical_value
-    elif tail == "left":
-        return chi_stat < critical_value
-    else:
-        raise ValueError("tail must be 'right' or 'left'")
-
-# Example usage
-if __name__ == "__main__":
-    observed = [20, 30, 25]
-    expected = [25, 25, 25]
-    
-    chi_stat = chi_square_statistic(observed, expected)
-    print("Chi-square statistic:", chi_stat)
-
-    alpha = 0.05
-    df = len(observed) - 1
-    critical_right = critical_chi_square_value(alpha, df, tail="right")
-    critical_left = critical_chi_square_value(alpha, df, tail="left")
-
-    print("Right-tailed critical value (α=0.05, df=2):", critical_right)
-    print("Left-tailed critical value (α=0.05, df=2):", critical_left)
-    print("Reject H0 (right-tailed):", reject_null_chi_square(chi_stat, critical_right, tail="right"))
+    return chi_stat > critical_value

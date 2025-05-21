@@ -77,20 +77,3 @@ def detect_fake_statistics(survey_sponsor: str, is_voluntary: bool, correlation_
         warnings.append("Warning: Correlation does not imply causation")
     return warnings
 
-# Example usage
-if __name__ == "__main__":
-    x = [1, 2, 5, 6, 7, 9, 12, 15, 18, 19, 27]
-    print("Five-number summary:", five_number_summary(x))
-    print("IQR:", interquartile_range(x))
-    print("Sample variance:", sample_variance(x))
-    print("Sample standard deviation:", sample_std_dev(x))
-    print("Coefficient of variation:", coefficient_of_variation(x))
-
-    blood_types = ['A', 'O', 'A', 'B', 'B', 'AB', 'B', 'B', 'O', 'A', 'O', 'O', 'O', 'AB', 'B', 'AB', 'AB', 'A', 'O', 'A']
-    freq_table = draw_frequency_table(blood_types)
-    print("Frequency table:", freq_table)
-
-    values = [1, 1, 2, 2, 3, 3, 3, 4]
-    print("Cumulative frequency:", draw_cumulative_frequency_table(values))
-
-    print("Bias warnings:", detect_fake_statistics("diet pill company", True, True))

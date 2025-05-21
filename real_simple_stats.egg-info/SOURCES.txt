@@ -1,7 +1,6 @@
 LICENSE
 README.md
 pyproject.toml
-setup.py
 real_simple_stats/__init__.py
 real_simple_stats/binomial_distributions.py
 real_simple_stats/chi_square_utils.py
