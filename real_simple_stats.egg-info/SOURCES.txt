@@ -9,6 +9,7 @@ real_simple_stats/glossary.py
 real_simple_stats/hypothesis_testing.py
 real_simple_stats/linear_regression_utils.py
 real_simple_stats/normal_distributions.py
+real_simple_stats/plots.py
 real_simple_stats/pre_statistics.py
 real_simple_stats/probability_distributions.py
 real_simple_stats/probability_utils.py
