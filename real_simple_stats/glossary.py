@@ -24,20 +24,25 @@ GLOSSARY = {
     "Σ": "Summation — sum of a sequence of numbers.",
     "a": "Y-intercept in a linear regression equation.",
     "b": "Slope in a linear regression equation.",
-    "ν": "Degrees of freedom — number of independent values that can vary in an analysis."
+    "ν": "Degrees of freedom — number of independent values that can vary in an analysis.",
 }
+
 
 def lookup(term: str) -> str:
     """
     Look up a statistical term in the glossary.
-    
+
     Args:
         term: A term from the glossary (case-sensitive for symbols).
-        
+
     Returns:
         The definition if found, else a default message.
     """
-    return GLOSSARY.get(term, "Definition not found. Try a symbol (e.g., 'μ') or abbreviation (e.g., 'H0').")
+    return GLOSSARY.get(
+        term,
+        "Definition not found. Try a symbol (e.g., 'μ') or abbreviation (e.g., 'H0').",
+    )
+
 
 # Example usage
 if __name__ == "__main__":

@@ -4,24 +4,34 @@ from scipy.stats import linregress
 
 # --- SCATTER PLOT PREP (data only, no plotting here) ---
 
-def prepare_scatter_data(x: List[float], y: List[float]) -> Tuple[List[float], List[float]]:
+
+def prepare_scatter_data(
+    x: List[float], y: List[float]
+) -> Tuple[List[float], List[float]]:
     """Prepare data for plotting a scatter plot (returns as-is)."""
     return x, y
 
+
 # --- CORRELATION ---
+
 
 def pearson_correlation(x: List[float], y: List[float]) -> float:
     """Computes Pearson's correlation coefficient (r)."""
     return np.corrcoef(x, y)[0, 1]
 
+
 def coefficient_of_determination(x: List[float], y: List[float]) -> float:
     """Returns R^2, the coefficient of determination."""
     r = pearson_correlation(x, y)
-    return r ** 2
+    return r**2
+
 
 # --- LINEAR REGRESSION CALCULATIONS ---
 
-def linear_regression(x: List[float], y: List[float]) -> Tuple[float, float, float, float, float]:
+
+def linear_regression(
+    x: List[float], y: List[float]
+) -> Tuple[float, float, float, float, float]:
     """
     Returns slope, intercept, r_value, p_value, std_err
     Formula: y = a + b*x
@@ -29,11 +39,14 @@ def linear_regression(x: List[float], y: List[float]) -> Tuple[float, float, flo
     result = linregress(x, y)
     return result.slope, result.intercept, result.rvalue, result.pvalue, result.stderr
 
+
 def regression_equation(x: float, slope: float, intercept: float) -> float:
     """Compute predicted y value using regression line."""
     return slope * x + intercept
 
+
 # --- MANUAL SLOPE/INTERCEPT CALCULATION (for education/demo) ---
+
 
 def manual_slope_intercept(x: List[float], y: List[float]) -> Tuple[float, float]:
     """Computes slope and intercept manually."""
@@ -44,6 +57,7 @@ def manual_slope_intercept(x: List[float], y: List[float]) -> Tuple[float, float
     slope = numerator / denominator
     intercept = y_mean - slope * x_mean
     return slope, intercept
+
 
 # Example usage
 if __name__ == "__main__":

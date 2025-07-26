@@ -1,7 +1,8 @@
-from typing import List, Tuple
+from typing import List
 from scipy.stats import chi2
 
 # --- CHI-SQUARE CORE UTILITIES ---
+
 
 def chi_square_statistic(observed: List[int], expected: List[int]) -> float:
     """
@@ -10,6 +11,7 @@ def chi_square_statistic(observed: List[int], expected: List[int]) -> float:
     if len(observed) != len(expected):
         raise ValueError("Observed and expected lists must be the same length.")
     return sum((o - e) ** 2 / e for o, e in zip(observed, expected))
+
 
 def critical_chi_square_value(alpha: float, df: int) -> float:
     """
@@ -23,6 +25,7 @@ def critical_chi_square_value(alpha: float, df: int) -> float:
         Right-tailed critical value from the chi-square distribution.
     """
     return chi2.ppf(1 - alpha, df)
+
 
 def reject_null_chi_square(chi_stat: float, critical_value: float) -> bool:
     """

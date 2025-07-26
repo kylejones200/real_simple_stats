@@ -1,31 +1,81 @@
 import math
-from typing import List, Dict, Tuple
+from typing import List, Tuple, Dict
 
 # --- BASIC PROBABILITY FUNCTIONS ---
 
+
 def probability_not(p: float) -> float:
-    """Returns the probability of an event NOT happening."""
+    """Calculate the probability of an event NOT happening.
+
+    Args:
+        p: Probability of the event (between 0 and 1)
+
+    Returns:
+        Probability of the complement event
+
+    Raises:
+        ValueError: If p is not between 0 and 1
+
+    Example:
+        >>> probability_not(0.3)
+        0.7
+    """
+    if not 0 <= p <= 1:
+        raise ValueError("Probability must be between 0 and 1")
     return 1 - p
 
+
 def joint_probability(p_a: float, p_b: float) -> float:
-    """Returns the joint probability P(A and B) for independent events."""
+    """Calculate the joint probability P(A and B) for independent events.
+
+    Args:
+        p_a: Probability of event A
+        p_b: Probability of event B
+
+    Returns:
+        Joint probability P(A and B) = P(A) × P(B)
+
+    Example:
+        >>> joint_probability(0.5, 0.3)
+        0.15
+    """
     return p_a * p_b
 
+
 def conditional_probability(p_a_and_b: float, p_b: float) -> float:
-    """Returns P(A|B) = P(A and B) / P(B)"""
+    """Calculate conditional probability P(A|B) = P(A and B) / P(B).
+
+    Args:
+        p_a_and_b: Joint probability P(A and B)
+        p_b: Probability of event B
+
+    Returns:
+        Conditional probability P(A|B)
+
+    Raises:
+        ValueError: If P(B) is zero
+
+    Example:
+        >>> conditional_probability(0.15, 0.3)
+        0.5
+    """
     if p_b == 0:
-        raise ValueError("Cannot divide by zero")
+        raise ValueError("Cannot divide by zero: P(B) cannot be 0")
     return p_a_and_b / p_b
+
 
 def mutually_exclusive(p_a: float, p_b: float) -> float:
     """Returns P(A or B) for mutually exclusive events."""
     return p_a + p_b
 
+
 def general_addition_rule(p_a: float, p_b: float, p_a_and_b: float) -> float:
     """Returns P(A or B) = P(A) + P(B) - P(A and B)"""
     return p_a + p_b - p_a_and_b
 
+
 # --- COUNTING PRINCIPLE AND COMBINATORICS ---
+
 
 def fundamental_counting(outcomes: List[int]) -> int:
     """Multiplies choices across stages to get total outcomes."""
@@ -34,15 +84,57 @@ def fundamental_counting(outcomes: List[int]) -> int:
         result *= o
     return result
 
+
 def combinations(n: int, k: int) -> int:
-    """Returns number of combinations (n choose k)."""
+    """Calculate the number of combinations (n choose k).
+
+    Args:
+        n: Total number of items
+        k: Number of items to choose
+
+    Returns:
+        Number of ways to choose k items from n items
+
+    Raises:
+        ValueError: If n < 0, k < 0, or k > n
+
+    Example:
+        >>> combinations(5, 2)
+        10
+    """
+    if n < 0 or k < 0:
+        raise ValueError("n and k must be non-negative")
+    if k > n:
+        raise ValueError("k cannot be greater than n")
     return math.comb(n, k)
 
+
 def permutations(n: int, k: int) -> int:
-    """Returns number of permutations of k items from n."""
+    """Calculate the number of permutations of k items from n.
+
+    Args:
+        n: Total number of items
+        k: Number of items to arrange
+
+    Returns:
+        Number of ways to arrange k items from n items
+
+    Raises:
+        ValueError: If n < 0, k < 0, or k > n
+
+    Example:
+        >>> permutations(5, 2)
+        20
+    """
+    if n < 0 or k < 0:
+        raise ValueError("n and k must be non-negative")
+    if k > n:
+        raise ValueError("k cannot be greater than n")
     return math.perm(n, k)
 
+
 # --- BAYES' THEOREM ---
+
 
 def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
     """Computes P(A|B) using Bayes' Theorem."""
@@ -50,11 +142,13 @@ def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
         raise ValueError("Cannot divide by zero")
     return (p_b_given_a * p_a) / p_b
 
+
 # --- PROBABILITY TREES ---
+
 
 def probability_tree(branches: List[Tuple[float, float]]) -> float:
     """Calculates total probability of desired outcomes through tree branches.
-    
+
     Args:
         branches: list of tuples (P(path1), P(subpath|path1))
 
@@ -63,15 +157,21 @@ def probability_tree(branches: List[Tuple[float, float]]) -> float:
     """
     return sum(p1 * p2 for p1, p2 in branches)
 
+
 # --- DISCRETE PROBABILITY DISTRIBUTIONS ---
 
-def probability_distribution_table(values: List[int], probabilities: List[float]) -> Dict[int, float]:
+
+def probability_distribution_table(
+    values: List[int], probabilities: List[float]
+) -> Dict[int, float]:
     if abs(sum(probabilities) - 1.0) > 1e-6:
         raise ValueError("Probabilities must sum to 1")
     return dict(zip(values, probabilities))
 
+
 def expected_value(values: List[float], probabilities: List[float]) -> float:
     return sum(v * p for v, p in zip(values, probabilities))
+
 
 # Example usage
 if __name__ == "__main__":
@@ -83,7 +183,9 @@ if __name__ == "__main__":
 
     print("Combinations (5 choose 3):", combinations(5, 3))
     print("Permutations (5P3):", permutations(5, 3))
-    print("Counting meals:", fundamental_counting([4, 3, 2, 5]))  # Sandwich, side, dessert, drink
+    print(
+        "Counting meals:", fundamental_counting([4, 3, 2, 5])
+    )  # Sandwich, side, dessert, drink
 
     print("Bayes' Theorem:", bayes_theorem(0.7, 0.5, 0.4))
 

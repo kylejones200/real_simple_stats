@@ -1,50 +1,64 @@
 import math
 from scipy.stats import norm
-from typing import Tuple
+
 
 # --- Z-SCORE CALCULATIONS ---
+
 
 def z_score(x: float, mean: float, std_dev: float) -> float:
     """Calculate the z-score for a single value."""
     return (x - mean) / std_dev
 
-def z_score_standard_error(sample_mean: float, population_mean: float, std_dev: float, sample_size: int) -> float:
+
+def z_score_standard_error(
+    sample_mean: float, population_mean: float, std_dev: float, sample_size: int
+) -> float:
     """Z-score using the standard error of the mean."""
     return (sample_mean - population_mean) / (std_dev / math.sqrt(sample_size))
 
+
 # --- AREA UNDER THE NORMAL CURVE ---
+
 
 def area_between_0_and_z(z: float) -> float:
     """Find area under normal curve between 0 and z (assumes standard normal)."""
     return norm.cdf(abs(z)) - 0.5
 
+
 def area_in_tail(z: float) -> float:
     """Area to the right (or left) of a z-score."""
     return 1 - norm.cdf(z)
+
 
 def area_between_z_scores(z1: float, z2: float) -> float:
     """Area between two z-scores."""
     return abs(norm.cdf(z2) - norm.cdf(z1))
 
+
 def area_left_of_z(z: float) -> float:
     """Cumulative probability to the left of z."""
     return norm.cdf(z)
+
 
 def area_right_of_z(z: float) -> float:
     """Cumulative probability to the right of z."""
     return 1 - norm.cdf(z)
 
+
 def area_outside_range(z1: float, z2: float) -> float:
     """Area outside of range bounded by two z-scores (two-tailed)."""
     return 1 - area_between_z_scores(z1, z2)
 
+
 # --- CHEBYSHEV'S THEOREM ---
+
 
 def chebyshev_theorem(k: float) -> float:
     """Returns minimum proportion of values within k standard deviations of the mean."""
     if k <= 1:
         raise ValueError("k must be greater than 1")
-    return 1 - (1 / k ** 2)
+    return 1 - (1 / k**2)
+
 
 # Example usage
 if __name__ == "__main__":
