@@ -3,8 +3,9 @@
 [![PyPI version](https://badge.fury.io/py/real-simple-stats.svg)](https://badge.fury.io/py/real-simple-stats)
 [![Python versions](https://img.shields.io/pypi/pyversions/real-simple-stats.svg)](https://pypi.org/project/real-simple-stats/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation Status](https://readthedocs.org/projects/real-simple-stats/badge/?version=latest)](https://real-simple-stats.readthedocs.io/en/latest/?badge=latest)
-[![Tests](https://github.com/kylejones200/real_simple_stats/workflows/Tests/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
+[![CI](https://github.com/kylejones200/real_simple_stats/workflows/Continuous%20Integration/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
+[![Documentation](https://github.com/kylejones200/real_simple_stats/workflows/Documentation/badge.svg)](https://kylejones200.github.io/real_simple_stats/)
+[![PyPI Publish](https://github.com/kylejones200/real_simple_stats/workflows/Publish%20to%20PyPI/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
 
 A comprehensive, educational Python statistics library covering basic through advanced statistical concepts. Perfect for students, educators, and anyone learning statistics!
 

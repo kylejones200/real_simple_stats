@@ -1,0 +1,134 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'real_simple_stats/**'
+      - '.github/workflows/docs.yml'
+  
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'real_simple_stats/**'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper versioning
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+        pip install -r docs/requirements.txt
+        
+    - name: Build documentation
+      run: |
+        cd docs
+        make clean
+        make html
+        
+    - name: Check documentation links
+      run: |
+        cd docs
+        make linkcheck || true  # Don't fail on broken external links
+        
+    - name: Upload documentation artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: documentation-html
+        path: docs/build/html/
+        retention-days: 30
+
+  deploy-docs:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download documentation artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: documentation-html
+        path: docs/build/html/
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/build/html/
+        publish_branch: gh-pages
+        force_orphan: true
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy documentation: ${{ github.sha }}'
+
+  # Optional: Deploy to ReadTheDocs webhook
+  trigger-rtd:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Trigger ReadTheDocs build
+      run: |
+        # Uncomment and configure if using ReadTheDocs
+        # curl -X POST -d "branches=main" -d "token=${{ secrets.RTD_WEBHOOK_TOKEN }}" \
+        #      https://readthedocs.org/api/v2/webhook/real-simple-stats/123456/
+        echo "ReadTheDocs webhook would be triggered here"
+
+  docs-preview:
+    needs: build-docs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Download documentation artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: documentation-html
+        path: docs-preview/
+        
+    - name: Deploy PR preview
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs-preview/
+        destination_dir: pr-${{ github.event.number }}
+        publish_branch: gh-pages-preview
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Deploy docs preview for PR #${{ github.event.number }}'
+        
+    - name: Comment PR with preview link
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const prNumber = context.issue.number;
+          const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${prNumber}/`;
+          
+          github.rest.issues.createComment({
+            issue_number: prNumber,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `📖 **Documentation Preview**\n\nThe documentation for this PR has been built and is available at:\n${previewUrl}\n\n*This preview will be updated automatically when you push new commits to this PR.*`
+          });
