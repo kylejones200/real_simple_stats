@@ -4,6 +4,7 @@ pyproject.toml
 real_simple_stats/__init__.py
 real_simple_stats/binomial_distributions.py
 real_simple_stats/chi_square_utils.py
+real_simple_stats/cli.py
 real_simple_stats/descriptive_statistics.py
 real_simple_stats/glossary.py
 real_simple_stats/hypothesis_testing.py
@@ -17,5 +18,9 @@ real_simple_stats/sampling_and_intervals.py
 real_simple_stats.egg-info/PKG-INFO
 real_simple_stats.egg-info/SOURCES.txt
 real_simple_stats.egg-info/dependency_links.txt
+real_simple_stats.egg-info/entry_points.txt
 real_simple_stats.egg-info/requires.txt
 real_simple_stats.egg-info/top_level.txt
+tests/test_descriptive_statistics.py
+tests/test_hypothesis_testing.py
+tests/test_probability_utils.py

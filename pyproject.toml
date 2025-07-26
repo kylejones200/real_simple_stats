@@ -4,15 +4,56 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "real_simple_stats"
-version = "0.1.1"
-description = "Python version of the Real Simple Stats Handbook"
+version = "0.2.0"
+description = "Educational Python statistics library covering basic through advanced statistical concepts"
 authors = [
     { name = "Kyle Jones", email = "kylejones@american.edu" }
 ]
 readme = "README.md"
 requires-python = ">=3.7"
-license = "MIT"
-dependencies = [
-    "numpy",
-    "scipy"
+license = {text = "MIT"}
+keywords = ["statistics", "education", "probability", "hypothesis-testing", "regression", "data-analysis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Education"
 ]
+dependencies = [
+    "numpy>=1.20.0",
+    "scipy>=1.7.0",
+    "matplotlib>=3.3.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy"
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "jupyter",
+    "nbsphinx"
+]
+
+[project.urls]
+Homepage = "https://github.com/kylejones200/real_simple_stats"
+Documentation = "https://real-simple-stats.readthedocs.io/"
+Repository = "https://github.com/kylejones200/real_simple_stats.git"
+"Bug Tracker" = "https://github.com/kylejones200/real_simple_stats/issues"
+
+[project.scripts]
+rss-calc = "real_simple_stats.cli:main"

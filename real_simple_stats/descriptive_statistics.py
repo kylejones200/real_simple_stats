@@ -31,6 +31,8 @@ def five_number_summary(values: List[float]) -> Dict[str, float]:
     }
 
 def median(values: List[float]) -> float:
+    if not values:
+        raise ValueError("Cannot calculate median of empty list")
     sorted_vals = sorted(values)
     n = len(sorted_vals)
     mid = n // 2
@@ -41,6 +43,8 @@ def interquartile_range(values: List[float]) -> float:
     return summary["Q3"] - summary["Q1"]
 
 def sample_variance(values: List[float]) -> float:
+    if len(values) < 2:
+        raise ValueError("Sample variance requires at least 2 values")
     m = sum(values) / len(values)
     return sum((x - m) ** 2 for x in values) / (len(values) - 1)
 
@@ -48,9 +52,14 @@ def sample_std_dev(values: List[float]) -> float:
     return math.sqrt(sample_variance(values))
 
 def coefficient_of_variation(values: List[float]) -> float:
-    return (sample_std_dev(values) / mean(values)) * 100
+    mean_val = mean(values)
+    if mean_val == 0:
+        raise ValueError("Cannot calculate coefficient of variation when mean is zero")
+    return sample_std_dev(values) / mean_val
 
 def mean(values: List[float]) -> float:
+    if not values:
+        raise ValueError("Cannot calculate mean of empty list")
     return sum(values) / len(values)
 
 def draw_frequency_table(values: List[str]) -> Dict[str, int]:
