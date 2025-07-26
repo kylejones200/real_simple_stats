@@ -1,11 +1,47 @@
+# ReadTheDocs configuration file for Real Simple Stats
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
 version: 2
 
-sphinx:
-  configuration: docs/source/conf.py
+# Build documentation in the docs/ directory with Sphinx
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  jobs:
+    post_checkout:
+      # Download and install dependencies
+      - git submodule update --init --recursive
+    pre_build:
+      # Install the package in development mode
+      - pip install -e .
 
+# Sphinx configuration
+sphinx:
+  builder: html
+  configuration: docs/source/conf.py
+  fail_on_warning: false
+
+# Python configuration
 python:
-  version: 3.12
   install:
     - method: pip
       path: .
-    - requirements: requirements.txt
+      extra_requirements:
+        - dev
+    - requirements: docs/requirements.txt
+
+# Formats to build
+formats:
+  - pdf
+  - epub
+
+# Search configuration
+search:
+  ranking:
+    api/**: -1
+    changelog.html: -1
+  ignore:
+    - search.html
+    - search/
+    - 404.html
