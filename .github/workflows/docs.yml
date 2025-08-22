@@ -18,7 +18,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build-docs:
@@ -52,38 +54,26 @@ jobs:
         cd docs
         make linkcheck || true  # Don't fail on broken external links
 
-    - name: Upload documentation artifacts
-      uses: actions/upload-artifact@v4
+    - name: Upload documentation artifact (for Pages)
+      uses: actions/upload-pages-artifact@v3
       with:
-        name: documentation-html
         path: docs/build/html/
-        retention-days: 30
 
   deploy-docs:
     needs: build-docs
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Download documentation artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: documentation-html
-        path: docs/build/html/
+    - name: Configure Pages
+      uses: actions/configure-pages@v5
 
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build/html/
-        publish_branch: gh-pages
-        force_orphan: true
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        commit_message: 'Deploy documentation: ${{ github.sha }}'
+      id: deployment
+      uses: actions/deploy-pages@v4
 
   # Deploy to ReadTheDocs webhook
   trigger-rtd:
@@ -108,39 +98,4 @@ jobs:
           echo "ReadTheDocs webhook not configured - skipping"
         fi
 
-  docs-preview:
-    needs: build-docs
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-    - name: Download documentation artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: documentation-html
-        path: docs-preview/
-
-    - name: Deploy PR preview
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs-preview/
-        destination_dir: pr-${{ github.event.number }}
-        publish_branch: gh-pages-preview
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-        commit_message: 'Deploy docs preview for PR #${{ github.event.number }}'
-
-    - name: Comment PR with preview link
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const prNumber = context.issue.number;
-          const previewUrl = `https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${prNumber}/`;
-
-          github.rest.issues.createComment({
-            issue_number: prNumber,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: `📖 **Documentation Preview**\n\nThe documentation for this PR has been built and is available at:\n${previewUrl}\n\n*This preview will be updated automatically when you push new commits to this PR.*`
-          });
+  # (Optional) PR preview via Pages can be added later using environments
