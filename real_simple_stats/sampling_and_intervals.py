@@ -18,13 +18,13 @@ def clt_probability_greater_than(
 ) -> float:
     """P(sample mean > x) using normal approximation"""
     z = (x - mean) / (std_dev / math.sqrt(n))
-    return 1 - norm.cdf(z)
+    return 1 - float(norm.cdf(z))
 
 
 def clt_probability_less_than(x: float, mean: float, std_dev: float, n: int) -> float:
     """P(sample mean < x)"""
     z = (x - mean) / (std_dev / math.sqrt(n))
-    return norm.cdf(z)
+    return float(norm.cdf(z))
 
 
 def clt_probability_between(
@@ -33,7 +33,7 @@ def clt_probability_between(
     """P(x1 < sample mean < x2)"""
     z1 = (x1 - mean) / (std_dev / math.sqrt(n))
     z2 = (x2 - mean) / (std_dev / math.sqrt(n))
-    return norm.cdf(z2) - norm.cdf(z1)
+    return float(norm.cdf(z2)) - float(norm.cdf(z1))
 
 
 # --- CONFIDENCE INTERVALS ---
@@ -44,7 +44,7 @@ def confidence_interval_known_std(
 ) -> Tuple[float, float]:
     """CI for known population standard deviation using Z-distribution."""
     alpha = 1 - confidence
-    z = norm.ppf(1 - alpha / 2)
+    z = float(norm.ppf(1 - alpha / 2))
     margin = z * (std_dev / math.sqrt(n))
     return (mean - margin, mean + margin)
 
@@ -55,7 +55,7 @@ def confidence_interval_unknown_std(
     """CI for unknown population standard deviation using t-distribution."""
     alpha = 1 - confidence
     df = n - 1
-    t_crit = t.ppf(1 - alpha / 2, df)
+    t_crit = float(t.ppf(1 - alpha / 2, df))
     margin = t_crit * (sample_std / math.sqrt(n))
     return (sample_mean - margin, sample_mean + margin)
 
@@ -63,7 +63,7 @@ def confidence_interval_unknown_std(
 def required_sample_size(confidence: float, width: float, std_dev: float) -> int:
     """Find sample size with known population std dev."""
     alpha = 1 - confidence
-    z = norm.ppf(1 - alpha / 2)
+    z = float(norm.ppf(1 - alpha / 2))
     return math.ceil(((z * std_dev) / (width / 2)) ** 2)
 
 

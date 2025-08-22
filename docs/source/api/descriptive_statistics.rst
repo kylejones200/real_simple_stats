@@ -38,24 +38,24 @@ Calculate common descriptive statistics for a dataset:
 .. code-block:: python
 
     from real_simple_stats import descriptive_statistics as desc
-    
+
     # Sample dataset
     data = [12, 15, 18, 20, 22, 25, 28, 30, 32, 35]
-    
+
     # Central tendency
     mean_val = desc.mean(data)
     median_val = desc.median(data)
     mode_val = desc.mode(data)
-    
+
     print(f"Mean: {mean_val}")
     print(f"Median: {median_val}")
     print(f"Mode: {mode_val}")
-    
+
     # Variability
     variance_val = desc.variance(data)
     std_dev = desc.standard_deviation(data)
     cv = desc.coefficient_of_variation(data)
-    
+
     print(f"Variance: {variance_val:.2f}")
     print(f"Standard Deviation: {std_dev:.2f}")
     print(f"Coefficient of Variation: {cv:.2f}%")
@@ -69,19 +69,19 @@ Understanding the difference between population and sample statistics:
 
     # Same dataset, different calculations
     sample_data = [85, 90, 78, 92, 88, 76, 95, 82, 89, 91]
-    
+
     # Population statistics (when you have the entire population)
     pop_variance = desc.variance(sample_data)
     pop_std = desc.standard_deviation(sample_data)
-    
+
     # Sample statistics (when you have a sample from a larger population)
     sample_variance = desc.sample_variance(sample_data)
     sample_std = desc.sample_standard_deviation(sample_data)
-    
+
     print("Population Statistics:")
     print(f"  Variance: {pop_variance:.2f}")
     print(f"  Standard Deviation: {pop_std:.2f}")
-    
+
     print("Sample Statistics:")
     print(f"  Variance: {sample_variance:.2f}")
     print(f"  Standard Deviation: {sample_std:.2f}")
@@ -94,19 +94,19 @@ The functions include comprehensive error handling:
 .. code-block:: python
 
     import real_simple_stats.descriptive_statistics as desc
-    
+
     # Empty dataset
     try:
         result = desc.mean([])
     except ValueError as e:
         print(f"Error: {e}")
-    
+
     # Single value for sample statistics
     try:
         result = desc.sample_variance([42])
     except ValueError as e:
         print(f"Error: {e}")
-    
+
     # Non-numeric data
     try:
         result = desc.mean([1, 2, "three", 4])

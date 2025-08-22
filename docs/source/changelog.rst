@@ -18,8 +18,8 @@ Added
 * **Enhanced Documentation**: Google-style docstrings with examples and mathematical explanations
 * **Testing Infrastructure**: 35 comprehensive unit tests with pytest framework
 * **Command Line Interface**: ``rss-calc`` CLI tool for quick statistical calculations
-* **Development Tools**: 
-  
+* **Development Tools**:
+
   * Black code formatting
   * Flake8 linting
   * MyPy type checking
@@ -27,14 +27,14 @@ Added
   * Makefile for development tasks
 
 * **Quality Assurance**:
-  
+
   * Automated code formatting
   * Comprehensive error handling
   * Input validation with meaningful error messages
   * Coverage reporting
 
 * **Documentation**:
-  
+
   * Professional Sphinx documentation with RTD theme
   * Installation guide
   * Quick start guide
@@ -44,7 +44,7 @@ Added
   * Jupyter notebook tutorial
 
 * **Package Improvements**:
-  
+
   * Enhanced ``pyproject.toml`` with tool configurations
   * Development dependencies and optional extras
   * Project metadata and classifiers

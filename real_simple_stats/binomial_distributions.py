@@ -1,11 +1,11 @@
 import math
-from typing import List
+from typing import Sequence
 
 # --- BINOMIAL CORE FUNCTIONS ---
 
 
 def is_binomial_experiment(
-    trials: int, outcomes: List[str], probability: float
+    trials: int, outcomes: Sequence[str], probability: float
 ) -> bool:
     """
     Checks if an experiment meets the binomial criteria:
@@ -45,7 +45,9 @@ def expected_value_single(value: float, probability: float) -> float:
     return value * probability
 
 
-def expected_value_multiple(values: List[float], probabilities: List[float]) -> float:
+def expected_value_multiple(
+    values: Sequence[float], probabilities: Sequence[float]
+) -> float:
     return sum(v * p for v, p in zip(values, probabilities))
 
 
@@ -61,4 +63,4 @@ def normal_approximation(
     z = (k + 0.5 - mu) / sigma if use_continuity else (k - mu) / sigma
     from scipy.stats import norm
 
-    return norm.cdf(z)
+    return float(norm.cdf(z))

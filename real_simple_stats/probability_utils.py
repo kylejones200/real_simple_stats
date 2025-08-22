@@ -1,5 +1,5 @@
 import math
-from typing import List, Tuple, Dict
+from typing import Sequence, Tuple, Dict
 
 # --- BASIC PROBABILITY FUNCTIONS ---
 
@@ -77,7 +77,7 @@ def general_addition_rule(p_a: float, p_b: float, p_a_and_b: float) -> float:
 # --- COUNTING PRINCIPLE AND COMBINATORICS ---
 
 
-def fundamental_counting(outcomes: List[int]) -> int:
+def fundamental_counting(outcomes: Sequence[int]) -> int:
     """Multiplies choices across stages to get total outcomes."""
     result = 1
     for o in outcomes:
@@ -146,7 +146,7 @@ def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
 # --- PROBABILITY TREES ---
 
 
-def probability_tree(branches: List[Tuple[float, float]]) -> float:
+def probability_tree(branches: Sequence[Tuple[float, float]]) -> float:
     """Calculates total probability of desired outcomes through tree branches.
 
     Args:
@@ -162,14 +162,14 @@ def probability_tree(branches: List[Tuple[float, float]]) -> float:
 
 
 def probability_distribution_table(
-    values: List[int], probabilities: List[float]
+    values: Sequence[int], probabilities: Sequence[float]
 ) -> Dict[int, float]:
     if abs(sum(probabilities) - 1.0) > 1e-6:
         raise ValueError("Probabilities must sum to 1")
     return dict(zip(values, probabilities))
 
 
-def expected_value(values: List[float], probabilities: List[float]) -> float:
+def expected_value(values: Sequence[float], probabilities: Sequence[float]) -> float:
     return sum(v * p for v, p in zip(values, probabilities))
 
 

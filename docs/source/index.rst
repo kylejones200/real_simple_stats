@@ -1,8 +1,8 @@
 Real Simple Stats Documentation
 ==============================
 
-**Real Simple Stats** is a comprehensive Python library for statistical analysis and education. 
-It provides easy-to-use functions for descriptive statistics, probability calculations, 
+**Real Simple Stats** is a comprehensive Python library for statistical analysis and education.
+It provides easy-to-use functions for descriptive statistics, probability calculations,
 hypothesis testing, and data visualization.
 
 .. image:: https://img.shields.io/pypi/v/real-simple-stats.svg
@@ -39,11 +39,11 @@ Installation::
 Basic usage::
 
     from real_simple_stats import descriptive_statistics as desc
-    
+
     data = [1, 2, 3, 4, 5]
     mean = desc.mean(data)
     std_dev = desc.standard_deviation(data)
-    
+
     print(f"Mean: {mean}")
     print(f"Standard Deviation: {std_dev}")
 

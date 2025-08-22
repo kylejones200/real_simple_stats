@@ -4,7 +4,7 @@ on:
   # Trigger on new releases
   release:
     types: [published]
-  
+
   # Allow manual triggering
   workflow_dispatch:
     inputs:
@@ -23,35 +23,35 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
-        
+
     - name: Run quality checks
       run: |
         # Format check
         black --check real_simple_stats/ tests/
-        
+
         # Linting
         flake8 real_simple_stats/ tests/
-        
+
         # Type checking
         mypy real_simple_stats/
-        
+
         # Tests
         pytest tests/ -v --cov=real_simple_stats --cov-report=xml
-        
+
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11'
       uses: codecov/codecov-action@v3
@@ -63,29 +63,29 @@ jobs:
   build:
     needs: quality-checks
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        
+
     - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
         pip install build twine
-        
+
     - name: Build package
       run: |
         python -m build
-        
+
     - name: Check package
       run: |
         twine check dist/*
-        
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -97,14 +97,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'testpypi'
     environment: testpypi
-    
+
     steps:
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
         name: dist
         path: dist/
-        
+
     - name: Publish to Test PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
@@ -119,20 +119,20 @@ jobs:
       (github.event_name == 'release' && github.event.action == 'published') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi')
     environment: pypi
-    
+
     steps:
     - name: Download build artifacts
       uses: actions/download-artifact@v3
       with:
         name: dist
         path: dist/
-        
+
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
         verbose: true
-        
+
     - name: Create GitHub Release Assets
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v1
@@ -145,30 +145,30 @@ jobs:
     needs: [publish-pypi]
     runs-on: ubuntu-latest
     if: success()
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-        
+
     - name: Verify PyPI installation
       run: |
         # Wait a bit for PyPI to update
         sleep 60
-        
+
         # Try to install the published package
         pip install real-simple-stats --upgrade
-        
+
         # Verify it works
         python -c "import real_simple_stats; print(f'Successfully installed version {real_simple_stats.__version__}')"
-        
+
         # Test CLI
         rss-calc --help
-        
+
     - name: Update documentation
       if: github.event_name == 'release'
       run: |

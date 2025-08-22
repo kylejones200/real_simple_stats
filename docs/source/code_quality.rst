@@ -143,17 +143,17 @@ Automatic quality checks before each commit:
           - id: end-of-file-fixer
           - id: check-yaml
           - id: debug-statements
-      
+
       - repo: https://github.com/psf/black
         rev: 23.1.0
         hooks:
           - id: black
-      
+
       - repo: https://github.com/pycqa/flake8
         rev: 6.0.0
         hooks:
           - id: flake8
-      
+
       - repo: https://github.com/pre-commit/mirrors-mypy
         rev: v1.0.1
         hooks:
@@ -172,7 +172,7 @@ Convenient commands for development tasks:
 
     # Quality checks
     quality: format-check lint type-check test
-    
+
     # Individual tools
     format: black real_simple_stats/ tests/
     lint: flake8 real_simple_stats/ tests/
@@ -196,17 +196,17 @@ All functions must have comprehensive type annotations:
 .. code-block:: python
 
     from typing import List, Union, Optional, Tuple
-    
+
     def calculate_statistics(
-        values: List[Union[int, float]], 
+        values: List[Union[int, float]],
         include_mode: bool = True
     ) -> Tuple[float, float, Optional[Union[int, float]]]:
         """Calculate basic statistics for a dataset.
-        
+
         Args:
             values: List of numeric values
             include_mode: Whether to calculate mode
-            
+
         Returns:
             Tuple of (mean, std_dev, mode)
         """
@@ -220,29 +220,29 @@ Google-style docstrings with comprehensive information:
 
     def standard_deviation(values: List[float]) -> float:
         """Calculate the population standard deviation.
-        
-        The standard deviation measures the amount of variation or 
-        dispersion of a set of values. A low standard deviation indicates 
-        that the values tend to be close to the mean, while a high 
-        standard deviation indicates that the values are spread out 
+
+        The standard deviation measures the amount of variation or
+        dispersion of a set of values. A low standard deviation indicates
+        that the values tend to be close to the mean, while a high
+        standard deviation indicates that the values are spread out
         over a wider range.
-        
+
         Formula: σ = √(Σ(xi - μ)² / N)
-        
+
         Args:
             values: List of numeric values. Must contain at least one value.
-            
+
         Returns:
             The population standard deviation as a float.
-            
+
         Raises:
             ValueError: If the input list is empty.
             TypeError: If values contains non-numeric types.
-            
+
         Example:
             >>> standard_deviation([2, 4, 4, 4, 5, 5, 7, 9])
             2.0
-            
+
         Note:
             This calculates the population standard deviation (divides by N).
             For sample standard deviation, use sample_standard_deviation().
@@ -259,14 +259,14 @@ Comprehensive input validation and meaningful error messages:
         """Calculate coefficient of variation (CV)."""
         if not values:
             raise ValueError("Cannot calculate CV for empty dataset")
-            
+
         if not all(isinstance(x, (int, float)) for x in values):
             raise TypeError("All values must be numeric (int or float)")
-            
+
         mean_val = mean(values)
         if mean_val == 0:
             raise ValueError("Cannot calculate CV when mean is zero")
-            
+
         std_val = standard_deviation(values)
         return (std_val / abs(mean_val)) * 100
 
@@ -282,20 +282,20 @@ We aim for high test coverage with meaningful tests:
 
     class TestDescriptiveStatistics:
         """Test suite for descriptive statistics functions."""
-        
+
         def test_mean_normal_case(self):
             """Test mean calculation with normal input."""
             assert mean([1, 2, 3, 4, 5]) == 3.0
-            
+
         def test_mean_single_value(self):
             """Test mean with single value."""
             assert mean([42]) == 42.0
-            
+
         def test_mean_empty_list(self):
             """Test mean raises error for empty list."""
             with pytest.raises(ValueError, match="empty"):
                 mean([])
-                
+
         @pytest.mark.parametrize("values,expected", [
             ([1, 1, 1], 1.0),
             ([0, 0, 0], 0.0),
@@ -325,14 +325,14 @@ Automated quality checks on every pull request:
 
     name: Quality Checks
     on: [push, pull_request]
-    
+
     jobs:
       test:
         runs-on: ubuntu-latest
         strategy:
           matrix:
             python-version: [3.7, 3.8, 3.9, "3.10", "3.11"]
-            
+
         steps:
         - uses: actions/checkout@v3
         - name: Set up Python

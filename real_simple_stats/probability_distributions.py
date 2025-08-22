@@ -5,12 +5,12 @@ from scipy.stats import poisson, geom, expon, nbinom
 
 def poisson_pmf(k: int, lam: float) -> float:
     """P(X = k) for Poisson distribution with rate λ."""
-    return poisson.pmf(k, lam)
+    return float(poisson.pmf(k, lam))
 
 
 def poisson_cdf(k: int, lam: float) -> float:
     """P(X ≤ k) for Poisson distribution."""
-    return poisson.cdf(k, lam)
+    return float(poisson.cdf(k, lam))
 
 
 # --- GEOMETRIC DISTRIBUTION ---
@@ -18,12 +18,12 @@ def poisson_cdf(k: int, lam: float) -> float:
 
 def geometric_pmf(k: int, p: float) -> float:
     """P(X = k) for geometric distribution (first success on trial k)."""
-    return geom.pmf(k, p)
+    return float(geom.pmf(k, p))
 
 
 def geometric_cdf(k: int, p: float) -> float:
     """P(X ≤ k) for geometric distribution."""
-    return geom.cdf(k, p)
+    return float(geom.cdf(k, p))
 
 
 # --- EXPONENTIAL DISTRIBUTION ---
@@ -31,12 +31,12 @@ def geometric_cdf(k: int, p: float) -> float:
 
 def exponential_pdf(x: float, lam: float) -> float:
     """f(x) for exponential distribution. λ = 1/mean"""
-    return expon.pdf(x, scale=1 / lam)
+    return float(expon.pdf(x, scale=1 / lam))
 
 
 def exponential_cdf(x: float, lam: float) -> float:
     """P(X ≤ x) for exponential distribution."""
-    return expon.cdf(x, scale=1 / lam)
+    return float(expon.cdf(x, scale=1 / lam))
 
 
 # --- NEGATIVE BINOMIAL DISTRIBUTION ---
@@ -44,7 +44,7 @@ def exponential_cdf(x: float, lam: float) -> float:
 
 def negative_binomial_pmf(k: int, r: int, p: float) -> float:
     """P(X = k failures before r successes)"""
-    return nbinom.pmf(k, r, p)
+    return float(nbinom.pmf(k, r, p))
 
 
 # --- SUMMARY OF EXPECTATIONS AND VARIANCE ---

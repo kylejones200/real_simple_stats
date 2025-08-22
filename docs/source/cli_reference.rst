@@ -24,7 +24,7 @@ The CLI uses subcommands for different types of operations::
 Available subcommands:
 
 * ``stats`` - Descriptive statistics calculations
-* ``probability`` - Probability calculations  
+* ``probability`` - Probability calculations
 * ``hypothesis`` - Hypothesis testing
 * ``glossary`` - Statistical term lookup
 
@@ -61,7 +61,7 @@ Options
 .. option:: --stat STATISTIC
 
    Statistic to calculate. Options:
-   
+
    * ``mean`` - Arithmetic mean
    * ``median`` - Middle value
    * ``mode`` - Most frequent value
@@ -107,7 +107,7 @@ Options
 .. option:: --type TYPE
 
    Type of probability calculation:
-   
+
    * ``binomial`` - Binomial probability
    * ``combination`` - Combinations (n choose k)
    * ``permutation`` - Permutations
@@ -192,7 +192,7 @@ Options
 .. option:: --test TEST
 
    Type of hypothesis test:
-   
+
    * ``t-test`` - One-sample t-test
 
 .. option:: --data DATA
@@ -276,7 +276,7 @@ Process multiple datasets::
 
     #!/bin/bash
     datasets=("1,2,3,4,5" "10,20,30" "100,200,300,400")
-    
+
     for data in "${datasets[@]}"; do
         echo "Dataset: $data"
         rss-calc stats --data "$data" --stat mean
@@ -289,13 +289,13 @@ Integration with Scripts
 Use in Python scripts::
 
     import subprocess
-    
+
     result = subprocess.run([
-        'rss-calc', 'stats', 
-        '--data', '1,2,3,4,5', 
+        'rss-calc', 'stats',
+        '--data', '1,2,3,4,5',
         '--stat', 'mean'
     ], capture_output=True, text=True)
-    
+
     print(result.stdout)
 
 Error Handling

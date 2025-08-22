@@ -56,13 +56,13 @@ It's recommended to install Real Simple Stats in a virtual environment::
 
     # Create virtual environment
     python -m venv rss_env
-    
+
     # Activate virtual environment
     # On Windows:
     rss_env\Scripts\activate
     # On macOS/Linux:
     source rss_env/bin/activate
-    
+
     # Install Real Simple Stats
     pip install real-simple-stats
 

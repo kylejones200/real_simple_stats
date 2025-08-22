@@ -22,27 +22,27 @@ def z_score_standard_error(
 
 def area_between_0_and_z(z: float) -> float:
     """Find area under normal curve between 0 and z (assumes standard normal)."""
-    return norm.cdf(abs(z)) - 0.5
+    return float(norm.cdf(abs(z))) - 0.5
 
 
 def area_in_tail(z: float) -> float:
     """Area to the right (or left) of a z-score."""
-    return 1 - norm.cdf(z)
+    return 1 - float(norm.cdf(z))
 
 
 def area_between_z_scores(z1: float, z2: float) -> float:
     """Area between two z-scores."""
-    return abs(norm.cdf(z2) - norm.cdf(z1))
+    return abs(float(norm.cdf(z2)) - float(norm.cdf(z1)))
 
 
 def area_left_of_z(z: float) -> float:
     """Cumulative probability to the left of z."""
-    return norm.cdf(z)
+    return float(norm.cdf(z))
 
 
 def area_right_of_z(z: float) -> float:
     """Cumulative probability to the right of z."""
-    return 1 - norm.cdf(z)
+    return 1 - float(norm.cdf(z))
 
 
 def area_outside_range(z1: float, z2: float) -> float:

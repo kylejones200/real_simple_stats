@@ -28,11 +28,11 @@ def is_two_tailed(test_statistic: float, critical_value: float) -> bool:
 def p_value_method(test_statistic: float, test_type: str = "two-tailed") -> float:
     """Returns the p-value based on the test type."""
     if test_type == "two-tailed":
-        return 2 * (1 - norm.cdf(abs(test_statistic)))
+        return 2 * (1 - float(norm.cdf(abs(test_statistic))))
     elif test_type == "right-tailed":
-        return 1 - norm.cdf(test_statistic)
+        return 1 - float(norm.cdf(test_statistic))
     elif test_type == "left-tailed":
-        return norm.cdf(test_statistic)
+        return float(norm.cdf(test_statistic))
     else:
         raise ValueError("Invalid test_type")
 
@@ -57,18 +57,18 @@ def f_test(var1: float, var2: float) -> float:
 
 def critical_value_z(alpha: float, test_type: str = "two-tailed") -> float:
     if test_type == "two-tailed":
-        return norm.ppf(1 - alpha / 2)
-    return norm.ppf(1 - alpha)
+        return float(norm.ppf(1 - alpha / 2))
+    return float(norm.ppf(1 - alpha))
 
 
 def critical_value_t(alpha: float, df: int, test_type: str = "two-tailed") -> float:
     if test_type == "two-tailed":
-        return t.ppf(1 - alpha / 2, df)
-    return t.ppf(1 - alpha, df)
+        return float(t.ppf(1 - alpha / 2, df))
+    return float(t.ppf(1 - alpha, df))
 
 
 def critical_value_f(alpha: float, dfn: int, dfd: int) -> float:
-    return f.ppf(1 - alpha, dfn, dfd)
+    return float(f.ppf(1 - alpha, dfn, dfd))
 
 
 # Example usage

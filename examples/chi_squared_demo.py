@@ -1,7 +1,7 @@
 from real_simple_stats.chi_squared import (
     chi_square_statistic,
     critical_chi_square_value,
-    reject_null_chi_square
+    reject_null_chi_square,
 )
 from real_simple_stats.plots import plot_observed_vs_expected
 

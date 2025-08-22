@@ -1,11 +1,11 @@
 import math
-from typing import List, Dict, Union
+from typing import Sequence, Dict, Union, List
 from collections import Counter
 
 # --- Basic Descriptive Functions ---
 
 
-def is_discrete(values: List[float]) -> bool:
+def is_discrete(values: Sequence[float]) -> bool:
     """Determine if a variable is discrete (all values are integers).
 
     Args:
@@ -23,7 +23,7 @@ def is_discrete(values: List[float]) -> bool:
     return all(float(v).is_integer() for v in values)
 
 
-def is_continuous(values: List[float]) -> bool:
+def is_continuous(values: Sequence[float]) -> bool:
     """Determine if a variable is continuous (contains non-integer values).
 
     Args:
@@ -41,7 +41,7 @@ def is_continuous(values: List[float]) -> bool:
     return not is_discrete(values)
 
 
-def five_number_summary(values: List[float]) -> Dict[str, float]:
+def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
     """Return the five-number summary: min, Q1, median, Q3, max."""
     sorted_vals = sorted(values)
     n = len(sorted_vals)
@@ -62,7 +62,7 @@ def five_number_summary(values: List[float]) -> Dict[str, float]:
     }
 
 
-def median(values: List[float]) -> float:
+def median(values: Sequence[float]) -> float:
     """Calculate the median (middle value) of a dataset.
 
     Args:
@@ -88,12 +88,12 @@ def median(values: List[float]) -> float:
     return sorted_vals[mid] if n % 2 else (sorted_vals[mid - 1] + sorted_vals[mid]) / 2
 
 
-def interquartile_range(values: List[float]) -> float:
+def interquartile_range(values: Sequence[float]) -> float:
     summary = five_number_summary(values)
     return summary["Q3"] - summary["Q1"]
 
 
-def sample_variance(values: List[float]) -> float:
+def sample_variance(values: Sequence[float]) -> float:
     """Calculate the sample variance of a dataset.
 
     Uses the sample variance formula with (n-1) degrees of freedom (Bessel's correction).
@@ -117,7 +117,7 @@ def sample_variance(values: List[float]) -> float:
     return sum((x - m) ** 2 for x in values) / (len(values) - 1)
 
 
-def sample_std_dev(values: List[float]) -> float:
+def sample_std_dev(values: Sequence[float]) -> float:
     """Calculate the sample standard deviation of a dataset.
 
     Args:
@@ -136,14 +136,14 @@ def sample_std_dev(values: List[float]) -> float:
     return math.sqrt(sample_variance(values))
 
 
-def coefficient_of_variation(values: List[float]) -> float:
+def coefficient_of_variation(values: Sequence[float]) -> float:
     mean_val = mean(values)
     if mean_val == 0:
         raise ValueError("Cannot calculate coefficient of variation when mean is zero")
     return sample_std_dev(values) / mean_val
 
 
-def mean(values: List[float]) -> float:
+def mean(values: Sequence[float]) -> float:
     """Calculate the arithmetic mean (average) of a dataset.
 
     Args:
@@ -164,7 +164,9 @@ def mean(values: List[float]) -> float:
     return sum(values) / len(values)
 
 
-def draw_frequency_table(values: List[Union[str, int]]) -> Dict[Union[str, int], int]:
+def draw_frequency_table(
+    values: Sequence[Union[str, int]],
+) -> Dict[Union[str, int], int]:
     """Generate a frequency table from a list of categorical or discrete values.
 
     Args:
@@ -180,7 +182,7 @@ def draw_frequency_table(values: List[Union[str, int]]) -> Dict[Union[str, int],
     return dict(Counter(values))
 
 
-def draw_cumulative_frequency_table(values: List[int]) -> Dict[int, int]:
+def draw_cumulative_frequency_table(values: Sequence[int]) -> Dict[int, int]:
     """Generate a cumulative frequency table from a list of discrete values.
 
     Args:

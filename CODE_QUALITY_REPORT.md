@@ -16,14 +16,14 @@ This report documents the comprehensive code quality improvements made to the Re
 ```python
 def combinations(n: int, k: int) -> int:
     """Calculate the number of combinations (n choose k).
-    
+
     Args:
         n: Total number of items
         k: Number of items to choose
-        
+
     Returns:
         Number of ways to choose k items from n items
-        
+
     Raises:
         ValueError: If n < 0, k < 0, or k > n
     """
@@ -174,6 +174,6 @@ The package is now ready for broader adoption and contributions from the open-so
 
 ---
 
-**Generated on:** 2025-07-26  
-**Package Version:** 0.2.0  
+**Generated on:** 2025-07-26
+**Package Version:** 0.2.0
 **Python Version:** 3.7+

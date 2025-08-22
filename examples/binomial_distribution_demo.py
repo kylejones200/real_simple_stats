@@ -6,7 +6,7 @@ from real_simple_stats.binomial_distributions import (
     binomial_std_dev,
     expected_value_single,
     expected_value_multiple,
-    normal_approximation
+    normal_approximation,
 )
 
 # Parameters
@@ -26,9 +26,10 @@ print("Standard deviation:", binomial_std_dev(n, p))
 
 # Expected values
 print("Expected value (single outcome):", expected_value_single(85, 0.2))
-print("Expected value (multiple outcomes):", expected_value_multiple(
-    [10, 20, 30], [0.1, 0.5, 0.4]
-))
+print(
+    "Expected value (multiple outcomes):",
+    expected_value_multiple([10, 20, 30], [0.1, 0.5, 0.4]),
+)
 
 # Normal approximation with continuity correction
 print(f"Normal approximation P(X ≤ {k}):", normal_approximation(n, p, k))

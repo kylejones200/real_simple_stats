@@ -1,10 +1,10 @@
-from typing import List
+from typing import Sequence
 from scipy.stats import chi2
 
 # --- CHI-SQUARE CORE UTILITIES ---
 
 
-def chi_square_statistic(observed: List[int], expected: List[int]) -> float:
+def chi_square_statistic(observed: Sequence[int], expected: Sequence[int]) -> float:
     """
     Compute the chi-square statistic: Σ((O - E)^2 / E)
     """
@@ -24,7 +24,7 @@ def critical_chi_square_value(alpha: float, df: int) -> float:
     Returns:
         Right-tailed critical value from the chi-square distribution.
     """
-    return chi2.ppf(1 - alpha, df)
+    return float(chi2.ppf(1 - alpha, df))
 
 
 def reject_null_chi_square(chi_stat: float, critical_value: float) -> bool:

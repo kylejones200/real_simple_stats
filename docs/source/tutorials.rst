@@ -5,7 +5,7 @@ This section contains step-by-step tutorials for using Real Simple Stats in vari
 
 .. toctree::
    :maxdepth: 2
-   
+
    tutorials/basic_statistics
    tutorials/probability_analysis
    tutorials/hypothesis_testing_guide

@@ -20,7 +20,7 @@ Development Setup
     # Create virtual environment
     python -m venv venv
     source venv/bin/activate  # On Windows: venv\Scripts\activate
-    
+
     # Install development dependencies
     make install-dev
     # Or manually: pip install -e ".[dev]"
@@ -74,17 +74,17 @@ Example of properly formatted function::
 
     def calculate_mean(values: List[float]) -> float:
         """Calculate the arithmetic mean of a list of values.
-        
+
         Args:
             values: List of numeric values to calculate mean for.
                    Must contain at least one value.
-        
+
         Returns:
             The arithmetic mean of the input values.
-            
+
         Raises:
             ValueError: If the input list is empty.
-            
+
         Example:
             >>> calculate_mean([1, 2, 3, 4, 5])
             3.0
@@ -107,11 +107,11 @@ Example test structure::
         """Test mean calculation with various inputs."""
         # Test normal case
         assert calculate_mean([1, 2, 3, 4, 5]) == 3.0
-        
+
         # Test edge cases
         assert calculate_mean([5]) == 5.0
         assert calculate_mean([1.5, 2.5]) == 2.0
-        
+
         # Test error conditions
         with pytest.raises(ValueError):
             calculate_mean([])
@@ -215,10 +215,10 @@ Example::
 
     if not isinstance(values, (list, tuple, np.ndarray)):
         raise TypeError("Values must be a list, tuple, or numpy array")
-    
+
     if len(values) == 0:
         raise ValueError("Cannot calculate statistics for empty dataset")
-    
+
     if not all(isinstance(x, (int, float)) for x in values):
         raise ValueError("All values must be numeric (int or float)")
 
@@ -232,24 +232,24 @@ We use Google-style docstrings::
 
     def function_name(param1: Type1, param2: Type2) -> ReturnType:
         """Brief description of what the function does.
-        
+
         Longer description if needed, explaining the mathematical
         background or implementation details.
-        
+
         Args:
             param1: Description of first parameter.
             param2: Description of second parameter.
-            
+
         Returns:
             Description of return value.
-            
+
         Raises:
             ExceptionType: Description of when this exception is raised.
-            
+
         Example:
             >>> function_name(arg1, arg2)
             expected_output
-            
+
         Note:
             Any additional notes about usage or mathematical background.
         """
@@ -279,7 +279,7 @@ Changelog
 All changes are documented in the changelog with:
 
 * **Added**: New features
-* **Changed**: Changes in existing functionality  
+* **Changed**: Changes in existing functionality
 * **Deprecated**: Soon-to-be removed features
 * **Removed**: Removed features
 * **Fixed**: Bug fixes
