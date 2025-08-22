@@ -1,0 +1,594 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Descriptive Statistics &mdash; Real Simple Stats 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="real_simple_stats package" href="../modules.html" />
+    <link rel="prev" title="Command Line Interface Reference" href="../cli_reference.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Real Simple Stats
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli_reference.html">Command Line Interface Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Descriptive Statistics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.coefficient_of_variation"><code class="docutils literal notranslate"><span class="pre">coefficient_of_variation()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.detect_fake_statistics"><code class="docutils literal notranslate"><span class="pre">detect_fake_statistics()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.draw_cumulative_frequency_table"><code class="docutils literal notranslate"><span class="pre">draw_cumulative_frequency_table()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.draw_frequency_table"><code class="docutils literal notranslate"><span class="pre">draw_frequency_table()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.five_number_summary"><code class="docutils literal notranslate"><span class="pre">five_number_summary()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.interquartile_range"><code class="docutils literal notranslate"><span class="pre">interquartile_range()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.is_continuous"><code class="docutils literal notranslate"><span class="pre">is_continuous()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.is_discrete"><code class="docutils literal notranslate"><span class="pre">is_discrete()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.mean"><code class="docutils literal notranslate"><span class="pre">mean()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.median"><code class="docutils literal notranslate"><span class="pre">median()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.sample_std_dev"><code class="docutils literal notranslate"><span class="pre">sample_std_dev()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#real_simple_stats.descriptive_statistics.sample_variance"><code class="docutils literal notranslate"><span class="pre">sample_variance()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions-overview">Functions Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#central-tendency">Central Tendency</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">median()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#variability">Variability</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">sample_variance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">coefficient_of_variation()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-examples">Usage Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-statistics">Basic Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#population-vs-sample-statistics">Population vs Sample Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#mathematical-background">Mathematical Background</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mean-arithmetic-average">Mean (Arithmetic Average)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#median">Median</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variance">Variance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#standard-deviation">Standard Deviation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coefficient-of-variation">Coefficient of Variation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#see-also">See Also</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">real_simple_stats package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing to Real Simple Stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code_quality.html">Code Quality Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Real Simple Stats</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Descriptive Statistics</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/descriptive_statistics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="descriptive-statistics">
+<h1>Descriptive Statistics<a class="headerlink" href="#descriptive-statistics" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">descriptive_statistics</span></code> module provides functions for calculating basic statistical measures that describe the central tendency, variability, and distribution of datasets.</p>
+<dl class="py function" id="module-real_simple_stats.descriptive_statistics">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.coefficient_of_variation">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">coefficient_of_variation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#coefficient_of_variation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.coefficient_of_variation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.detect_fake_statistics">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">detect_fake_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">survey_sponsor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_voluntary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correlation_not_causation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#detect_fake_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.detect_fake_statistics" title="Link to this definition"></a></dt>
+<dd><p>Detect potential issues with statistical claims or studies.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>survey_sponsor</strong> – Organization sponsoring the survey/study</p></li>
+<li><p><strong>is_voluntary</strong> – Whether the survey uses voluntary response sampling</p></li>
+<li><p><strong>correlation_not_causation</strong> – Whether correlation is being presented as causation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of warning messages about potential statistical issues</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">detect_fake_statistics</span><span class="p">(</span><span class="s2">&quot;Diet Pill Company&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="go">[&#39;Potential bias: Self-funded study&#39;, &#39;Warning: Voluntary response samples are biased&#39;,</span>
+<span class="go"> &#39;Warning: Correlation does not imply causation&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.draw_cumulative_frequency_table">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">draw_cumulative_frequency_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#draw_cumulative_frequency_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.draw_cumulative_frequency_table" title="Link to this definition"></a></dt>
+<dd><p>Generate a cumulative frequency table from a list of discrete values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of discrete integer values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping each unique value to its cumulative frequency</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">draw_cumulative_frequency_table</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="go">{1: 3, 2: 5, 3: 6}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.draw_frequency_table">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">draw_frequency_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#draw_frequency_table"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.draw_frequency_table" title="Link to this definition"></a></dt>
+<dd><p>Generate a frequency table from a list of categorical or discrete values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of categorical or discrete values to count</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping each unique value to its frequency</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">draw_frequency_table</span><span class="p">([</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">])</span>
+<span class="go">{&#39;A&#39;: 3, &#39;B&#39;: 2, &#39;C&#39;: 1}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.five_number_summary">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">five_number_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#five_number_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.five_number_summary" title="Link to this definition"></a></dt>
+<dd><p>Return the five-number summary: min, Q1, median, Q3, max.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.interquartile_range">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">interquartile_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#interquartile_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.interquartile_range" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.is_continuous">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">is_continuous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#is_continuous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.is_continuous" title="Link to this definition"></a></dt>
+<dd><p>Determine if a variable is continuous (contains non-integer values).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values to check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if any values are non-integers, False if all are integers</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_continuous</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_continuous</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.is_discrete">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">is_discrete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#is_discrete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.is_discrete" title="Link to this definition"></a></dt>
+<dd><p>Determine if a variable is discrete (all values are integers).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values to check</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if all values are integers, False otherwise</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">is_discrete</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_discrete</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.mean">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.mean" title="Link to this definition"></a></dt>
+<dd><p>Calculate the arithmetic mean (average) of a dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The arithmetic mean</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the input list is empty</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">3.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.median">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.median" title="Link to this definition"></a></dt>
+<dd><p>Calculate the median (middle value) of a dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The median value</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the input list is empty</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">median</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">3.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">median</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="go">2.5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.sample_std_dev">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">sample_std_dev</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#sample_std_dev"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.sample_std_dev" title="Link to this definition"></a></dt>
+<dd><p>Calculate the sample standard deviation of a dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sample standard deviation (square root of sample variance)</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If fewer than 2 values are provided</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sample_std_dev</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">1.5811388300841898</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="real_simple_stats.descriptive_statistics.sample_variance">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">sample_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#sample_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#real_simple_stats.descriptive_statistics.sample_variance" title="Link to this definition"></a></dt>
+<dd><p>Calculate the sample variance of a dataset.</p>
+<p>Uses the sample variance formula with (n-1) degrees of freedom (Bessel’s correction).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sample variance</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If fewer than 2 values are provided</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sample_variance</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">2.5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<section id="functions-overview">
+<h2>Functions Overview<a class="headerlink" href="#functions-overview" title="Link to this heading"></a></h2>
+<section id="central-tendency">
+<h3>Central Tendency<a class="headerlink" href="#central-tendency" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Calculate the arithmetic mean (average) of a dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The arithmetic mean</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the input list is empty</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">3.0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Calculate the median (middle value) of a dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The median value</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the input list is empty</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">median</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">3.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">median</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="go">2.5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="variability">
+<h3>Variability<a class="headerlink" href="#variability" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">sample_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#sample_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Calculate the sample variance of a dataset.</p>
+<p>Uses the sample variance formula with (n-1) degrees of freedom (Bessel’s correction).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> – List of numerical values</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The sample variance</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If fewer than 2 values are provided</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sample_variance</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="go">2.5</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-prename descclassname"><span class="pre">real_simple_stats.descriptive_statistics.</span></span><span class="sig-name descname"><span class="pre">coefficient_of_variation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/real_simple_stats/descriptive_statistics.html#coefficient_of_variation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+<section id="usage-examples">
+<h2>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading"></a></h2>
+<section id="basic-statistics">
+<h3>Basic Statistics<a class="headerlink" href="#basic-statistics" title="Link to this heading"></a></h3>
+<p>Calculate common descriptive statistics for a dataset:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">descriptive_statistics</span> <span class="k">as</span> <span class="n">desc</span>
+
+<span class="c1"># Sample dataset</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">35</span><span class="p">]</span>
+
+<span class="c1"># Central tendency</span>
+<span class="n">mean_val</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">median_val</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">mode_val</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean: </span><span class="si">{</span><span class="n">mean_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Median: </span><span class="si">{</span><span class="n">median_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mode: </span><span class="si">{</span><span class="n">mode_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Variability</span>
+<span class="n">variance_val</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">std_dev</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">cv</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">coefficient_of_variation</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variance: </span><span class="si">{</span><span class="n">variance_val</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Standard Deviation: </span><span class="si">{</span><span class="n">std_dev</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coefficient of Variation: </span><span class="si">{</span><span class="n">cv</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="population-vs-sample-statistics">
+<h3>Population vs Sample Statistics<a class="headerlink" href="#population-vs-sample-statistics" title="Link to this heading"></a></h3>
+<p>Understanding the difference between population and sample statistics:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Same dataset, different calculations</span>
+<span class="n">sample_data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">85</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mi">82</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">91</span><span class="p">]</span>
+
+<span class="c1"># Population statistics (when you have the entire population)</span>
+<span class="n">pop_variance</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+<span class="n">pop_std</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+
+<span class="c1"># Sample statistics (when you have a sample from a larger population)</span>
+<span class="n">sample_variance</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">sample_variance</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+<span class="n">sample_std</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">sample_standard_deviation</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Population Statistics:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Variance: </span><span class="si">{</span><span class="n">pop_variance</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Standard Deviation: </span><span class="si">{</span><span class="n">pop_std</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample Statistics:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Variance: </span><span class="si">{</span><span class="n">sample_variance</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Standard Deviation: </span><span class="si">{</span><span class="n">sample_std</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<p>The functions include comprehensive error handling:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">real_simple_stats.descriptive_statistics</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">desc</span>
+
+<span class="c1"># Empty dataset</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">([])</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Single value for sample statistics</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">sample_variance</span><span class="p">([</span><span class="mi">42</span><span class="p">])</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Non-numeric data</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="mathematical-background">
+<h2>Mathematical Background<a class="headerlink" href="#mathematical-background" title="Link to this heading"></a></h2>
+<section id="mean-arithmetic-average">
+<h3>Mean (Arithmetic Average)<a class="headerlink" href="#mean-arithmetic-average" title="Link to this heading"></a></h3>
+<p>The arithmetic mean is the sum of all values divided by the number of values:</p>
+<div class="math notranslate nohighlight">
+\[\bar{x} = \frac{1}{n} \sum_{i=1}^{n} x_i\]</div>
+<p>Where:
+- <span class="math notranslate nohighlight">\(\bar{x}\)</span> is the sample mean
+- <span class="math notranslate nohighlight">\(n\)</span> is the number of observations
+- <span class="math notranslate nohighlight">\(x_i\)</span> is the i-th observation</p>
+</section>
+<section id="median">
+<h3>Median<a class="headerlink" href="#median" title="Link to this heading"></a></h3>
+<p>The median is the middle value when data is arranged in ascending order:</p>
+<ul class="simple">
+<li><p>For odd n: median = middle value</p></li>
+<li><p>For even n: median = average of two middle values</p></li>
+</ul>
+</section>
+<section id="variance">
+<h3>Variance<a class="headerlink" href="#variance" title="Link to this heading"></a></h3>
+<p><strong>Population Variance:</strong></p>
+<div class="math notranslate nohighlight">
+\[\sigma^2 = \frac{1}{N} \sum_{i=1}^{N} (x_i - \mu)^2\]</div>
+<p><strong>Sample Variance:</strong></p>
+<div class="math notranslate nohighlight">
+\[s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2\]</div>
+</section>
+<section id="standard-deviation">
+<h3>Standard Deviation<a class="headerlink" href="#standard-deviation" title="Link to this heading"></a></h3>
+<p>The standard deviation is the square root of the variance:</p>
+<ul class="simple">
+<li><p>Population: <span class="math notranslate nohighlight">\(\sigma = \sqrt{\sigma^2}\)</span></p></li>
+<li><p>Sample: <span class="math notranslate nohighlight">\(s = \sqrt{s^2}\)</span></p></li>
+</ul>
+</section>
+<section id="coefficient-of-variation">
+<h3>Coefficient of Variation<a class="headerlink" href="#coefficient-of-variation" title="Link to this heading"></a></h3>
+<p>The coefficient of variation expresses the standard deviation as a percentage of the mean:</p>
+<div class="math notranslate nohighlight">
+\[CV = \frac{\sigma}{|\mu|} \times 100\%\]</div>
+<p>This allows comparison of variability between datasets with different units or scales.</p>
+</section>
+</section>
+<section id="see-also">
+<h2>See Also<a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><span class="xref std std-doc">probability_utils</span> - For probability calculations</p></li>
+<li><p><span class="xref std std-doc">hypothesis_testing</span> - For statistical testing</p></li>
+<li><p><span class="xref std std-doc">../tutorials/basic_statistics</span> - Tutorial on descriptive statistics</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../cli_reference.html" class="btn btn-neutral float-left" title="Command Line Interface Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../modules.html" class="btn btn-neutral float-right" title="real_simple_stats package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kyle Jones.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quick Start Guide &mdash; Real Simple Stats 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorials" href="tutorials.html" />
+    <link rel="prev" title="Installation Guide" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Real Simple Stats
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Quick Start Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#import-and-calculate-statistics">Import and Calculate Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#probability-calculations">Probability Calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hypothesis-testing">Hypothesis Testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-distributions">Working with Distributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command Line Interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-statistics">Basic Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Probability Calculations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#glossary-lookup">Glossary Lookup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-workflows">Common Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analyzing-a-dataset">Analyzing a Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#comparing-two-groups">Comparing Two Groups</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#next-steps">Next Steps</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#common-patterns">Common Patterns</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#working-with-different-data-types">Working with Different Data Types</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_reference.html">Command Line Interface Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/descriptive_statistics.html">Descriptive Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">real_simple_stats package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to Real Simple Stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code_quality.html">Code Quality Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Real Simple Stats</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Quick Start Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="quick-start-guide">
+<h1>Quick Start Guide<a class="headerlink" href="#quick-start-guide" title="Link to this heading"></a></h1>
+<p>This guide will get you up and running with Real Simple Stats in just a few minutes.</p>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<section id="import-and-calculate-statistics">
+<h3>Import and Calculate Statistics<a class="headerlink" href="#import-and-calculate-statistics" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">descriptive_statistics</span> <span class="k">as</span> <span class="n">desc</span>
+
+<span class="c1"># Sample data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+
+<span class="c1"># Calculate basic statistics</span>
+<span class="n">mean_val</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">median_val</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">std_dev</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">variance</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean: </span><span class="si">{</span><span class="n">mean_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Median: </span><span class="si">{</span><span class="n">median_val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Standard Deviation: </span><span class="si">{</span><span class="n">std_dev</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variance: </span><span class="si">{</span><span class="n">variance</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mean</span><span class="p">:</span> <span class="mf">5.5</span>
+<span class="n">Median</span><span class="p">:</span> <span class="mf">5.5</span>
+<span class="n">Standard</span> <span class="n">Deviation</span><span class="p">:</span> <span class="mf">3.03</span>
+<span class="n">Variance</span><span class="p">:</span> <span class="mf">9.17</span>
+</pre></div>
+</div>
+</section>
+<section id="probability-calculations">
+<h3>Probability Calculations<a class="headerlink" href="#probability-calculations" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">probability_utils</span> <span class="k">as</span> <span class="n">prob</span>
+
+<span class="c1"># Simple probability</span>
+<span class="n">favorable</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">total</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">simple_prob</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">simple_probability</span><span class="p">(</span><span class="n">favorable</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Simple probability: </span><span class="si">{</span><span class="n">simple_prob</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Combinations and permutations</span>
+<span class="n">n</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span>
+<span class="n">combinations</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+<span class="n">permutations</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Combinations C(</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">combinations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Permutations P(</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">permutations</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Simple</span> <span class="n">probability</span><span class="p">:</span> <span class="mf">0.3</span>
+<span class="n">Combinations</span> <span class="n">C</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span> <span class="mi">120</span>
+<span class="n">Permutations</span> <span class="n">P</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span> <span class="mi">720</span>
+</pre></div>
+</div>
+</section>
+<section id="hypothesis-testing">
+<h3>Hypothesis Testing<a class="headerlink" href="#hypothesis-testing" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">hypothesis_testing</span> <span class="k">as</span> <span class="n">ht</span>
+
+<span class="c1"># Sample data for t-test</span>
+<span class="n">sample_data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">23</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">27</span><span class="p">]</span>
+
+<span class="c1"># Calculate t-score</span>
+<span class="n">sample_mean</span> <span class="o">=</span> <span class="mf">25.6</span>
+<span class="n">population_mean</span> <span class="o">=</span> <span class="mf">24.0</span>
+<span class="n">sample_std</span> <span class="o">=</span> <span class="mf">2.1</span>
+<span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+
+<span class="n">t_score</span> <span class="o">=</span> <span class="n">ht</span><span class="o">.</span><span class="n">t_score</span><span class="p">(</span><span class="n">sample_mean</span><span class="p">,</span> <span class="n">population_mean</span><span class="p">,</span> <span class="n">sample_std</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;T-score: </span><span class="si">{</span><span class="n">t_score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get critical value</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">critical_val</span> <span class="o">=</span> <span class="n">ht</span><span class="o">.</span><span class="n">critical_value_t</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Critical value (α=0.05, df=</span><span class="si">{</span><span class="n">df</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">critical_val</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-distributions">
+<h3>Working with Distributions<a class="headerlink" href="#working-with-distributions" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">binomial_distributions</span> <span class="k">as</span> <span class="n">binom</span>
+
+<span class="c1"># Binomial probability</span>
+<span class="n">n_trials</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">k_successes</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">p_success</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+<span class="n">prob_exact</span> <span class="o">=</span> <span class="n">binom</span><span class="o">.</span><span class="n">binomial_probability</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">k_successes</span><span class="p">,</span> <span class="n">p_success</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;P(X = </span><span class="si">{</span><span class="n">k_successes</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="n">prob_exact</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Expected value and variance</span>
+<span class="n">expected</span> <span class="o">=</span> <span class="n">binom</span><span class="o">.</span><span class="n">binomial_expected_value</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">p_success</span><span class="p">)</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">binom</span><span class="o">.</span><span class="n">binomial_variance</span><span class="p">(</span><span class="n">n_trials</span><span class="p">,</span> <span class="n">p_success</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected value: </span><span class="si">{</span><span class="n">expected</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variance: </span><span class="si">{</span><span class="n">variance</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="command-line-interface">
+<h2>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Link to this heading"></a></h2>
+<p>Real Simple Stats includes a powerful CLI for quick calculations:</p>
+<section id="basic-statistics">
+<h3>Basic Statistics<a class="headerlink" href="#basic-statistics" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate mean</span>
+rss-calc<span class="w"> </span>stats<span class="w"> </span>--data<span class="w"> </span><span class="s2">&quot;1,2,3,4,5&quot;</span><span class="w"> </span>--stat<span class="w"> </span>mean
+
+<span class="c1"># Calculate multiple statistics</span>
+rss-calc<span class="w"> </span>stats<span class="w"> </span>--data<span class="w"> </span><span class="s2">&quot;10,20,30,40,50&quot;</span><span class="w"> </span>--stat<span class="w"> </span>all
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>Probability Calculations<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Binomial probability</span>
+rss-calc<span class="w"> </span>probability<span class="w"> </span>--type<span class="w"> </span>binomial<span class="w"> </span>--n<span class="w"> </span><span class="m">10</span><span class="w"> </span>--k<span class="w"> </span><span class="m">3</span><span class="w"> </span>--p<span class="w"> </span><span class="m">0</span>.5
+
+<span class="c1"># Combinations</span>
+rss-calc<span class="w"> </span>probability<span class="w"> </span>--type<span class="w"> </span>combination<span class="w"> </span>--n<span class="w"> </span><span class="m">10</span><span class="w"> </span>--k<span class="w"> </span><span class="m">3</span>
+</pre></div>
+</div>
+</section>
+<section id="glossary-lookup">
+<h3>Glossary Lookup<a class="headerlink" href="#glossary-lookup" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Look up statistical terms</span>
+rss-calc<span class="w"> </span>glossary<span class="w"> </span>--term<span class="w"> </span><span class="s2">&quot;standard deviation&quot;</span>
+rss-calc<span class="w"> </span>glossary<span class="w"> </span>--term<span class="w"> </span><span class="s2">&quot;p-value&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="common-workflows">
+<h2>Common Workflows<a class="headerlink" href="#common-workflows" title="Link to this heading"></a></h2>
+<section id="analyzing-a-dataset">
+<h3>Analyzing a Dataset<a class="headerlink" href="#analyzing-a-dataset" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">descriptive_statistics</span> <span class="k">as</span> <span class="n">desc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">real_simple_stats.plots</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plots</span>
+
+<span class="c1"># Your dataset</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="mi">78</span><span class="p">,</span> <span class="mi">85</span><span class="p">,</span> <span class="mi">92</span><span class="p">,</span> <span class="mi">88</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">94</span><span class="p">,</span> <span class="mi">82</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">79</span><span class="p">,</span> <span class="mi">86</span><span class="p">]</span>
+
+<span class="c1"># Comprehensive analysis</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dataset Analysis&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sample size: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Median: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mode: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">mode</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Range: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nb">min</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Standard deviation: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coefficient of variation: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">coefficient_of_variation</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="comparing-two-groups">
+<h3>Comparing Two Groups<a class="headerlink" href="#comparing-two-groups" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">descriptive_statistics</span> <span class="k">as</span> <span class="n">desc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">hypothesis_testing</span> <span class="k">as</span> <span class="n">ht</span>
+
+<span class="c1"># Two groups of data</span>
+<span class="n">group_a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">23</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">29</span><span class="p">]</span>
+<span class="n">group_b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+
+<span class="c1"># Compare means</span>
+<span class="n">mean_a</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_a</span><span class="p">)</span>
+<span class="n">mean_b</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">group_b</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Group A mean: </span><span class="si">{</span><span class="n">mean_a</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Group B mean: </span><span class="si">{</span><span class="n">mean_b</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Difference: </span><span class="si">{</span><span class="n">mean_b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">mean_a</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Calculate effect size (if available)</span>
+<span class="n">std_a</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">(</span><span class="n">group_a</span><span class="p">)</span>
+<span class="n">std_b</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">(</span><span class="n">group_b</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Group A std: </span><span class="si">{</span><span class="n">std_a</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Group B std: </span><span class="si">{</span><span class="n">std_b</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="next-steps">
+<h2>Next Steps<a class="headerlink" href="#next-steps" title="Link to this heading"></a></h2>
+<p>Now that you’ve learned the basics:</p>
+<ol class="arabic simple">
+<li><p><strong>Explore the API Reference</strong> - Learn about all available functions</p></li>
+<li><p><strong>Check out Tutorials</strong> - Work through detailed examples</p></li>
+<li><p><strong>Try the CLI</strong> - Use the command-line interface for quick calculations</p></li>
+<li><p><strong>Read the Examples</strong> - See real-world applications</p></li>
+</ol>
+</section>
+<section id="common-patterns">
+<h2>Common Patterns<a class="headerlink" href="#common-patterns" title="Link to this heading"></a></h2>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">real_simple_stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">descriptive_statistics</span> <span class="k">as</span> <span class="n">desc</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">([])</span>  <span class="c1"># Empty list</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">standard_deviation</span><span class="p">([</span><span class="mi">5</span><span class="p">])</span>  <span class="c1"># Single value</span>
+<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-different-data-types">
+<h3>Working with Different Data Types<a class="headerlink" href="#working-with-different-data-types" title="Link to this heading"></a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Real Simple Stats works with various numeric types</span>
+<span class="n">integers</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">floats</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.7</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.8</span><span class="p">,</span> <span class="mf">5.1</span><span class="p">]</span>
+<span class="n">mixed</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+
+<span class="c1"># All work the same way</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Integer mean: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">integers</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Float mean: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">floats</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mixed mean: </span><span class="si">{</span><span class="n">desc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mixed</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Documentation</strong>: You’re reading it! Check the API reference for detailed function documentation.</p></li>
+<li><p><strong>Examples</strong>: See the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> directory in the repository.</p></li>
+<li><p><strong>Issues</strong>: Report bugs or request features on <a class="reference external" href="https://github.com/kylejones200/real_simple_stats/issues">GitHub</a>.</p></li>
+<li><p><strong>Community</strong>: Join discussions and ask questions.</p></li>
+</ul>
+<p>Ready to dive deeper? Check out the <a class="reference internal" href="tutorials.html"><span class="doc">Tutorials</span></a> section for more comprehensive examples!</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kyle Jones.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

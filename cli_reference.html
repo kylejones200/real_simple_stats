@@ -1,0 +1,554 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command Line Interface Reference &mdash; Real Simple Stats 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Descriptive Statistics" href="api/descriptive_statistics.html" />
+    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Real Simple Stats
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command Line Interface Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation-and-setup">Installation and Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-options">Global Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistics-commands">Statistics Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#probability-commands">Probability Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#binomial-distribution-options">Binomial Distribution Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#combination-permutation-options">Combination/Permutation Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simple-probability-options">Simple Probability Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hypothesis-testing-commands">Hypothesis Testing Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#glossary-commands">Glossary Commands</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id8">Basic Usage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">Examples</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-usage">Advanced Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#piping-and-redirection">Piping and Redirection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#batch-processing">Batch Processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#integration-with-scripts">Integration with Scripts</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-handling">Error Handling</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-errors-and-solutions">Common Errors and Solutions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tips-and-best-practices">Tips and Best Practices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#output-formats">Output Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-more-help">Getting More Help</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/descriptive_statistics.html">Descriptive Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">real_simple_stats package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to Real Simple Stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code_quality.html">Code Quality Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Real Simple Stats</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Command Line Interface Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cli_reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line-interface-reference">
+<h1>Command Line Interface Reference<a class="headerlink" href="#command-line-interface-reference" title="Link to this heading"></a></h1>
+<p>Real Simple Stats provides a comprehensive command-line interface (CLI) for quick statistical calculations without writing Python code.</p>
+<section id="installation-and-setup">
+<h2>Installation and Setup<a class="headerlink" href="#installation-and-setup" title="Link to this heading"></a></h2>
+<p>The CLI is automatically installed with the package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">real</span><span class="o">-</span><span class="n">simple</span><span class="o">-</span><span class="n">stats</span>
+</pre></div>
+</div>
+<p>Verify installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="o">--</span><span class="n">help</span>
+</pre></div>
+</div>
+</section>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h2>
+<p>The CLI uses subcommands for different types of operations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="o">&lt;</span><span class="n">subcommand</span><span class="o">&gt;</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Available subcommands:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">stats</span></code> - Descriptive statistics calculations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">probability</span></code> - Probability calculations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hypothesis</span></code> - Hypothesis testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">glossary</span></code> - Statistical term lookup</p></li>
+</ul>
+</section>
+<section id="global-options">
+<h2>Global Options<a class="headerlink" href="#global-options" title="Link to this heading"></a></h2>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-help">
+<span id="cmdoption-h"></span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-help" title="Link to this definition"></a></dt>
+<dd><p>Show help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-version">
+<span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-version" title="Link to this definition"></a></dt>
+<dd><p>Show version information</p>
+</dd></dl>
+
+</section>
+<section id="statistics-commands">
+<h2>Statistics Commands<a class="headerlink" href="#statistics-commands" title="Link to this heading"></a></h2>
+<p>Calculate descriptive statistics for datasets.</p>
+<section id="id1">
+<h3>Basic Usage<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rss-calc<span class="w"> </span>stats<span class="w"> </span>--data<span class="w"> </span><span class="s2">&quot;1,2,3,4,5&quot;</span><span class="w"> </span>--stat<span class="w"> </span>mean
+</pre></div>
+</div>
+</section>
+<section id="options">
+<h3>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-data">
+<span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">DATA</span></span><a class="headerlink" href="#cmdoption-data" title="Link to this definition"></a></dt>
+<dd><p>Comma-separated list of numeric values (required)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-stat">
+<span class="sig-name descname"><span class="pre">--stat</span></span><span class="sig-prename descclassname"> <span class="pre">STATISTIC</span></span><a class="headerlink" href="#cmdoption-stat" title="Link to this definition"></a></dt>
+<dd><p>Statistic to calculate. Options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mean</span></code> - Arithmetic mean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">median</span></code> - Middle value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mode</span></code> - Most frequent value</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">variance</span></code> - Population variance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">std</span></code> - Standard deviation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cv</span></code> - Coefficient of variation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all</span></code> - All available statistics</p></li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<p>Calculate mean:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">stats</span> <span class="o">--</span><span class="n">data</span> <span class="s2">&quot;10,20,30,40,50&quot;</span> <span class="o">--</span><span class="n">stat</span> <span class="n">mean</span>
+<span class="c1"># Output: Mean: 30.0</span>
+</pre></div>
+</div>
+<p>Calculate all statistics:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">stats</span> <span class="o">--</span><span class="n">data</span> <span class="s2">&quot;1,2,2,3,4,5&quot;</span> <span class="o">--</span><span class="n">stat</span> <span class="nb">all</span>
+<span class="c1"># Output:</span>
+<span class="c1"># Mean: 2.83</span>
+<span class="c1"># Median: 2.5</span>
+<span class="c1"># Mode: 2</span>
+<span class="c1"># Variance: 2.47</span>
+<span class="c1"># Standard Deviation: 1.57</span>
+<span class="c1"># Coefficient of Variation: 55.56%</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="probability-commands">
+<h2>Probability Commands<a class="headerlink" href="#probability-commands" title="Link to this heading"></a></h2>
+<p>Perform probability calculations and work with distributions.</p>
+<section id="id2">
+<h3>Basic Usage<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rss-calc<span class="w"> </span>probability<span class="w"> </span>--type<span class="w"> </span>binomial<span class="w"> </span>--n<span class="w"> </span><span class="m">10</span><span class="w"> </span>--k<span class="w"> </span><span class="m">3</span><span class="w"> </span>--p<span class="w"> </span><span class="m">0</span>.5
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>Options<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-type">
+<span class="sig-name descname"><span class="pre">--type</span></span><span class="sig-prename descclassname"> <span class="pre">TYPE</span></span><a class="headerlink" href="#cmdoption-type" title="Link to this definition"></a></dt>
+<dd><p>Type of probability calculation:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">binomial</span></code> - Binomial probability</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">combination</span></code> - Combinations (n choose k)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">permutation</span></code> - Permutations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">simple</span></code> - Simple probability</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">normal</span></code> - Normal distribution (planned)</p></li>
+</ul>
+</dd></dl>
+
+</section>
+<section id="binomial-distribution-options">
+<h3>Binomial Distribution Options<a class="headerlink" href="#binomial-distribution-options" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-n">
+<span class="sig-name descname"><span class="pre">--n</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-n" title="Link to this definition"></a></dt>
+<dd><p>Number of trials (required for binomial)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-k">
+<span class="sig-name descname"><span class="pre">--k</span></span><span class="sig-prename descclassname"> <span class="pre">K</span></span><a class="headerlink" href="#cmdoption-k" title="Link to this definition"></a></dt>
+<dd><p>Number of successes (required for binomial)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-p">
+<span class="sig-name descname"><span class="pre">--p</span></span><span class="sig-prename descclassname"> <span class="pre">P</span></span><a class="headerlink" href="#cmdoption-p" title="Link to this definition"></a></dt>
+<dd><p>Probability of success (required for binomial)</p>
+</dd></dl>
+
+</section>
+<section id="combination-permutation-options">
+<h3>Combination/Permutation Options<a class="headerlink" href="#combination-permutation-options" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-0">
+<span class="sig-name descname"><span class="pre">--n</span></span><span class="sig-prename descclassname"> <span class="pre">N</span></span><a class="headerlink" href="#cmdoption-0" title="Link to this definition"></a></dt>
+<dd><p>Total number of items</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-1">
+<span class="sig-name descname"><span class="pre">--k</span></span><span class="sig-prename descclassname"> <span class="pre">K</span></span><a class="headerlink" href="#cmdoption-1" title="Link to this definition"></a></dt>
+<dd><p>Number of items to choose/arrange</p>
+</dd></dl>
+
+</section>
+<section id="simple-probability-options">
+<h3>Simple Probability Options<a class="headerlink" href="#simple-probability-options" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-favorable">
+<span class="sig-name descname"><span class="pre">--favorable</span></span><span class="sig-prename descclassname"> <span class="pre">F</span></span><a class="headerlink" href="#cmdoption-favorable" title="Link to this definition"></a></dt>
+<dd><p>Number of favorable outcomes</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-total">
+<span class="sig-name descname"><span class="pre">--total</span></span><span class="sig-prename descclassname"> <span class="pre">T</span></span><a class="headerlink" href="#cmdoption-total" title="Link to this definition"></a></dt>
+<dd><p>Total number of possible outcomes</p>
+</dd></dl>
+
+</section>
+<section id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>Binomial probability:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">probability</span> <span class="o">--</span><span class="nb">type</span> <span class="n">binomial</span> <span class="o">--</span><span class="n">n</span> <span class="mi">10</span> <span class="o">--</span><span class="n">k</span> <span class="mi">3</span> <span class="o">--</span><span class="n">p</span> <span class="mf">0.5</span>
+<span class="c1"># Output: P(X = 3) = 0.1172</span>
+</pre></div>
+</div>
+<p>Combinations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">probability</span> <span class="o">--</span><span class="nb">type</span> <span class="n">combination</span> <span class="o">--</span><span class="n">n</span> <span class="mi">10</span> <span class="o">--</span><span class="n">k</span> <span class="mi">3</span>
+<span class="c1"># Output: C(10,3) = 120</span>
+</pre></div>
+</div>
+<p>Permutations:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">probability</span> <span class="o">--</span><span class="nb">type</span> <span class="n">permutation</span> <span class="o">--</span><span class="n">n</span> <span class="mi">10</span> <span class="o">--</span><span class="n">k</span> <span class="mi">3</span>
+<span class="c1"># Output: P(10,3) = 720</span>
+</pre></div>
+</div>
+<p>Simple probability:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">probability</span> <span class="o">--</span><span class="nb">type</span> <span class="n">simple</span> <span class="o">--</span><span class="n">favorable</span> <span class="mi">3</span> <span class="o">--</span><span class="n">total</span> <span class="mi">10</span>
+<span class="c1"># Output: Probability = 0.3</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="hypothesis-testing-commands">
+<h2>Hypothesis Testing Commands<a class="headerlink" href="#hypothesis-testing-commands" title="Link to this heading"></a></h2>
+<p>Perform statistical hypothesis tests.</p>
+<section id="id5">
+<h3>Basic Usage<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rss-calc<span class="w"> </span>hypothesis<span class="w"> </span>--test<span class="w"> </span>t-test<span class="w"> </span>--data<span class="w"> </span><span class="s2">&quot;1,2,3,4,5&quot;</span><span class="w"> </span>--mu<span class="w"> </span><span class="m">3</span>.0
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>Options<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-test">
+<span class="sig-name descname"><span class="pre">--test</span></span><span class="sig-prename descclassname"> <span class="pre">TEST</span></span><a class="headerlink" href="#cmdoption-test" title="Link to this definition"></a></dt>
+<dd><p>Type of hypothesis test:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t-test</span></code> - One-sample t-test</p></li>
+</ul>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-2">
+<span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">DATA</span></span><a class="headerlink" href="#cmdoption-2" title="Link to this definition"></a></dt>
+<dd><p>Comma-separated sample data (required)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-mu">
+<span class="sig-name descname"><span class="pre">--mu</span></span><span class="sig-prename descclassname"> <span class="pre">MU</span></span><a class="headerlink" href="#cmdoption-mu" title="Link to this definition"></a></dt>
+<dd><p>Null hypothesis mean (required for t-test)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-alpha">
+<span class="sig-name descname"><span class="pre">--alpha</span></span><span class="sig-prename descclassname"> <span class="pre">ALPHA</span></span><a class="headerlink" href="#cmdoption-alpha" title="Link to this definition"></a></dt>
+<dd><p>Significance level (default: 0.05)</p>
+</dd></dl>
+
+</section>
+<section id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>One-sample t-test:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">hypothesis</span> <span class="o">--</span><span class="n">test</span> <span class="n">t</span><span class="o">-</span><span class="n">test</span> <span class="o">--</span><span class="n">data</span> <span class="s2">&quot;23,25,27,24,26&quot;</span> <span class="o">--</span><span class="n">mu</span> <span class="mf">24.0</span> <span class="o">--</span><span class="n">alpha</span> <span class="mf">0.05</span>
+<span class="c1"># Output:</span>
+<span class="c1"># One-sample t-test:</span>
+<span class="c1"># Sample data: [23.0, 25.0, 27.0, 24.0, 26.0]</span>
+<span class="c1"># Null hypothesis mean: 24.0</span>
+<span class="c1"># Significance level: α = 0.05</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="glossary-commands">
+<h2>Glossary Commands<a class="headerlink" href="#glossary-commands" title="Link to this heading"></a></h2>
+<p>Look up definitions of statistical terms.</p>
+<section id="id8">
+<h3>Basic Usage<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>rss-calc<span class="w"> </span>glossary<span class="w"> </span>--term<span class="w"> </span><span class="s2">&quot;standard deviation&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h3>Options<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-term">
+<span class="sig-name descname"><span class="pre">--term</span></span><span class="sig-prename descclassname"> <span class="pre">TERM</span></span><a class="headerlink" href="#cmdoption-term" title="Link to this definition"></a></dt>
+<dd><p>Statistical term to look up (required)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-list">
+<span class="sig-name descname"><span class="pre">--list</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-list" title="Link to this definition"></a></dt>
+<dd><p>List all available terms</p>
+</dd></dl>
+
+</section>
+<section id="id10">
+<h3>Examples<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<p>Look up a term:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">glossary</span> <span class="o">--</span><span class="n">term</span> <span class="s2">&quot;p-value&quot;</span>
+<span class="c1"># Output: [Definition of p-value]</span>
+</pre></div>
+</div>
+<p>List all terms:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">glossary</span> <span class="o">--</span><span class="nb">list</span>
+<span class="c1"># Output: [List of all available terms]</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-usage">
+<h2>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Link to this heading"></a></h2>
+<section id="piping-and-redirection">
+<h3>Piping and Redirection<a class="headerlink" href="#piping-and-redirection" title="Link to this heading"></a></h3>
+<p>Save results to file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">stats</span> <span class="o">--</span><span class="n">data</span> <span class="s2">&quot;1,2,3,4,5&quot;</span> <span class="o">--</span><span class="n">stat</span> <span class="nb">all</span> <span class="o">&gt;</span> <span class="n">results</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+<p>Use with other commands:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;10,20,30,40,50&quot;</span> <span class="o">|</span> <span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">stats</span> <span class="o">--</span><span class="n">stat</span> <span class="n">mean</span>
+</pre></div>
+</div>
+</section>
+<section id="batch-processing">
+<h3>Batch Processing<a class="headerlink" href="#batch-processing" title="Link to this heading"></a></h3>
+<p>Process multiple datasets:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="n">datasets</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;1,2,3,4,5&quot;</span> <span class="s2">&quot;10,20,30&quot;</span> <span class="s2">&quot;100,200,300,400&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="s2">&quot;$</span><span class="si">{datasets[@]}</span><span class="s2">&quot;</span><span class="p">;</span> <span class="n">do</span>
+    <span class="n">echo</span> <span class="s2">&quot;Dataset: $data&quot;</span>
+    <span class="n">rss</span><span class="o">-</span><span class="n">calc</span> <span class="n">stats</span> <span class="o">--</span><span class="n">data</span> <span class="s2">&quot;$data&quot;</span> <span class="o">--</span><span class="n">stat</span> <span class="n">mean</span>
+    <span class="n">echo</span> <span class="s2">&quot;---&quot;</span>
+<span class="n">done</span>
+</pre></div>
+</div>
+</section>
+<section id="integration-with-scripts">
+<h3>Integration with Scripts<a class="headerlink" href="#integration-with-scripts" title="Link to this heading"></a></h3>
+<p>Use in Python scripts:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
+    <span class="s1">&#39;rss-calc&#39;</span><span class="p">,</span> <span class="s1">&#39;stats&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--data&#39;</span><span class="p">,</span> <span class="s1">&#39;1,2,3,4,5&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;--stat&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span>
+<span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="error-handling">
+<h2>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h2>
+<section id="common-errors-and-solutions">
+<h3>Common Errors and Solutions<a class="headerlink" href="#common-errors-and-solutions" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt><strong>Command not found: rss-calc</strong></dt><dd><ul class="simple">
+<li><p>Ensure the package is installed: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">real-simple-stats</span></code></p></li>
+<li><p>Check if it’s in your PATH</p></li>
+<li><p>Try: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">real_simple_stats.cli</span> <span class="pre">--help</span></code></p></li>
+</ul>
+</dd>
+<dt><strong>Invalid data format</strong></dt><dd><ul class="simple">
+<li><p>Use comma-separated values without spaces: <code class="docutils literal notranslate"><span class="pre">&quot;1,2,3,4,5&quot;</span></code></p></li>
+<li><p>Ensure all values are numeric</p></li>
+<li><p>Quote the data string to prevent shell interpretation</p></li>
+</ul>
+</dd>
+<dt><strong>Missing required arguments</strong></dt><dd><ul class="simple">
+<li><p>Check the help for required options: <code class="docutils literal notranslate"><span class="pre">rss-calc</span> <span class="pre">&lt;subcommand&gt;</span> <span class="pre">--help</span></code></p></li>
+<li><p>Ensure all required parameters are provided</p></li>
+</ul>
+</dd>
+<dt><strong>Invalid statistic type</strong></dt><dd><ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">--stat</span> <span class="pre">all</span></code> to see available options</p></li>
+<li><p>Check spelling of statistic names</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+</section>
+<section id="tips-and-best-practices">
+<h2>Tips and Best Practices<a class="headerlink" href="#tips-and-best-practices" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p><strong>Quote your data</strong>: Always quote comma-separated data to prevent shell issues</p></li>
+<li><p><strong>Use meaningful filenames</strong>: When redirecting output, use descriptive names</p></li>
+<li><p><strong>Check help first</strong>: Use <code class="docutils literal notranslate"><span class="pre">--help</span></code> with any command to see available options</p></li>
+<li><p><strong>Validate your data</strong>: Ensure your input data makes sense for the calculation</p></li>
+<li><p><strong>Use appropriate precision</strong>: Consider rounding results for readability</p></li>
+</ol>
+</section>
+<section id="output-formats">
+<h2>Output Formats<a class="headerlink" href="#output-formats" title="Link to this heading"></a></h2>
+<p>The CLI provides human-readable output by default. Future versions may include:</p>
+<ul class="simple">
+<li><p>JSON output for programmatic use</p></li>
+<li><p>CSV format for spreadsheet import</p></li>
+<li><p>Formatted tables for complex results</p></li>
+</ul>
+</section>
+<section id="getting-more-help">
+<h2>Getting More Help<a class="headerlink" href="#getting-more-help" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">--help</span></code> with any command for detailed usage</p></li>
+<li><p>Check the main documentation for Python API details</p></li>
+<li><p>Report CLI bugs on <a class="reference external" href="https://github.com/kylejones200/real_simple_stats/issues">GitHub Issues</a></p></li>
+<li><p>Request new CLI features through GitHub</p></li>
+</ul>
+<p>The CLI is designed to be intuitive and powerful. Start with simple commands and gradually explore more advanced features!</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api/descriptive_statistics.html" class="btn btn-neutral float-right" title="Descriptive Statistics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kyle Jones.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

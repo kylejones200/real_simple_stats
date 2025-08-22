@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Quality Standards &mdash; Real Simple Stats 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Changelog" href="changelog.html" />
+    <link rel="prev" title="Contributing to Real Simple Stats" href="contributing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Real Simple Stats
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_reference.html">Command Line Interface Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/descriptive_statistics.html">Descriptive Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">real_simple_stats package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing to Real Simple Stats</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code Quality Standards</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#quality-metrics">Quality Metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#current-status">Current Status</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#tools-and-standards">Tools and Standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-formatting">Code Formatting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#linting">Linting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-checking">Type Checking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing">Testing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#development-workflow">Development Workflow</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pre-commit-hooks">Pre-commit Hooks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#makefile-commands">Makefile Commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-standards">Code Standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#type-hints">Type Hints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docstrings">Docstrings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-standards">Testing Standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#test-coverage">Test Coverage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-organization">Test Organization</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#continuous-integration">Continuous Integration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#github-actions">GitHub Actions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-gates">Quality Gates</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-and-reporting">Monitoring and Reporting</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coverage-reports">Coverage Reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Quality Metrics</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#future-improvements">Future Improvements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#planned-enhancements">Planned Enhancements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tools-under-consideration">Tools Under Consideration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#best-practices-summary">Best Practices Summary</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#for-contributors">For Contributors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#for-maintainers">For Maintainers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Real Simple Stats</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Code Quality Standards</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/code_quality.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="code-quality-standards">
+<h1>Code Quality Standards<a class="headerlink" href="#code-quality-standards" title="Link to this heading"></a></h1>
+<p>Real Simple Stats maintains high code quality standards to ensure reliability, maintainability, and ease of use. This document outlines our quality practices and tools.</p>
+<section id="quality-metrics">
+<h2>Quality Metrics<a class="headerlink" href="#quality-metrics" title="Link to this heading"></a></h2>
+<section id="current-status">
+<h3>Current Status<a class="headerlink" href="#current-status" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Quality Metrics</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Metric</p></th>
+<th class="head"><p>Current</p></th>
+<th class="head"><p>Target</p></th>
+<th class="head"><p>Status</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Test Coverage</p></td>
+<td><p>41%</p></td>
+<td><p>80%+</p></td>
+<td><p>🟡 Improving</p></td>
+</tr>
+<tr class="row-odd"><td><p>Type Coverage</p></td>
+<td><p>95%</p></td>
+<td><p>100%</p></td>
+<td><p>🟢 Excellent</p></td>
+</tr>
+<tr class="row-even"><td><p>Linting Issues</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>🟢 Clean</p></td>
+</tr>
+<tr class="row-odd"><td><p>Documentation</p></td>
+<td><p>90%</p></td>
+<td><p>95%</p></td>
+<td><p>🟢 Good</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="tools-and-standards">
+<h2>Tools and Standards<a class="headerlink" href="#tools-and-standards" title="Link to this heading"></a></h2>
+<section id="code-formatting">
+<h3>Code Formatting<a class="headerlink" href="#code-formatting" title="Link to this heading"></a></h3>
+<p><strong>Black</strong> - Automatic code formatting</p>
+<ul class="simple">
+<li><p>Line length: 88 characters</p></li>
+<li><p>Consistent style across entire codebase</p></li>
+<li><p>Integrated with pre-commit hooks</p></li>
+</ul>
+<p>Configuration in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">black</span><span class="p">]</span>
+<span class="n">line</span><span class="o">-</span><span class="n">length</span> <span class="o">=</span> <span class="mi">88</span>
+<span class="n">target</span><span class="o">-</span><span class="n">version</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;py37&#39;</span><span class="p">]</span>
+<span class="n">include</span> <span class="o">=</span> <span class="s1">&#39;\.pyi?$&#39;</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="nb">format</span>        <span class="c1"># Format all code</span>
+<span class="n">make</span> <span class="nb">format</span><span class="o">-</span><span class="n">check</span>  <span class="c1"># Check formatting without changes</span>
+</pre></div>
+</div>
+</section>
+<section id="linting">
+<h3>Linting<a class="headerlink" href="#linting" title="Link to this heading"></a></h3>
+<p><strong>Flake8</strong> - Code style and error checking</p>
+<ul class="simple">
+<li><p>Enforces PEP 8 style guide</p></li>
+<li><p>Catches common errors and code smells</p></li>
+<li><p>Custom configuration for compatibility with Black</p></li>
+</ul>
+<p>Configuration in <code class="docutils literal notranslate"><span class="pre">.flake8</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">flake8</span><span class="p">]</span>
+<span class="nb">max</span><span class="o">-</span><span class="n">line</span><span class="o">-</span><span class="n">length</span> <span class="o">=</span> <span class="mi">88</span>
+<span class="n">extend</span><span class="o">-</span><span class="n">ignore</span> <span class="o">=</span> <span class="n">E203</span><span class="p">,</span> <span class="n">W503</span><span class="p">,</span> <span class="n">E501</span>
+<span class="n">exclude</span> <span class="o">=</span> <span class="o">.</span><span class="n">git</span><span class="p">,</span> <span class="n">__pycache__</span><span class="p">,</span> <span class="o">.</span><span class="n">pytest_cache</span><span class="p">,</span> <span class="n">venv</span><span class="p">,</span> <span class="n">build</span><span class="p">,</span> <span class="n">dist</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">lint</span>  <span class="c1"># Run linting checks</span>
+</pre></div>
+</div>
+</section>
+<section id="type-checking">
+<h3>Type Checking<a class="headerlink" href="#type-checking" title="Link to this heading"></a></h3>
+<p><strong>MyPy</strong> - Static type checking</p>
+<ul class="simple">
+<li><p>Comprehensive type hints required</p></li>
+<li><p>Strict type checking enabled</p></li>
+<li><p>Integration with popular libraries</p></li>
+</ul>
+<p>Configuration in <code class="docutils literal notranslate"><span class="pre">mypy.ini</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">mypy</span><span class="p">]</span>
+<span class="n">python_version</span> <span class="o">=</span> <span class="mf">3.7</span>
+<span class="n">warn_return_any</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">warn_unused_configs</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">disallow_untyped_defs</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">disallow_incomplete_defs</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">check_untyped_defs</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">disallow_untyped_decorators</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="nb">type</span><span class="o">-</span><span class="n">check</span>  <span class="c1"># Run type checking</span>
+</pre></div>
+</div>
+</section>
+<section id="testing">
+<h3>Testing<a class="headerlink" href="#testing" title="Link to this heading"></a></h3>
+<p><strong>Pytest</strong> - Testing framework</p>
+<ul class="simple">
+<li><p>Comprehensive test suite with 35+ tests</p></li>
+<li><p>Coverage reporting with pytest-cov</p></li>
+<li><p>Parameterized tests for multiple scenarios</p></li>
+</ul>
+<p>Configuration in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">tool</span><span class="o">.</span><span class="n">pytest</span><span class="o">.</span><span class="n">ini_options</span><span class="p">]</span>
+<span class="n">testpaths</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tests&quot;</span><span class="p">]</span>
+<span class="n">python_files</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;test_*.py&quot;</span><span class="p">]</span>
+<span class="n">python_classes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Test*&quot;</span><span class="p">]</span>
+<span class="n">python_functions</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;test_*&quot;</span><span class="p">]</span>
+<span class="n">addopts</span> <span class="o">=</span> <span class="s2">&quot;--strict-markers --strict-config&quot;</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">test</span>      <span class="c1"># Run all tests</span>
+<span class="n">make</span> <span class="n">test</span><span class="o">-</span><span class="n">cov</span>  <span class="c1"># Run tests with coverage report</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="development-workflow">
+<h2>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h2>
+<section id="pre-commit-hooks">
+<h3>Pre-commit Hooks<a class="headerlink" href="#pre-commit-hooks" title="Link to this heading"></a></h3>
+<p>Automatic quality checks before each commit:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/pre-commit/pre-commit-hooks</span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v4.4.0</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trailing-whitespace</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">end-of-file-fixer</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">check-yaml</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">debug-statements</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/psf/black</span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">23.1.0</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">black</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/pycqa/flake8</span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6.0.0</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flake8</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/pre-commit/mirrors-mypy</span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.0.1</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mypy</span>
+</pre></div>
+</div>
+<p>Installation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">pre</span><span class="o">-</span><span class="n">commit</span><span class="o">-</span><span class="n">install</span>
+</pre></div>
+</div>
+</section>
+<section id="makefile-commands">
+<h3>Makefile Commands<a class="headerlink" href="#makefile-commands" title="Link to this heading"></a></h3>
+<p>Convenient commands for development tasks:</p>
+<div class="highlight-makefile notranslate"><div class="highlight"><pre><span></span><span class="c"># Quality checks</span>
+<span class="nf">quality</span><span class="o">:</span><span class="w"> </span><span class="n">format</span>-<span class="n">check</span> <span class="n">lint</span> <span class="n">type</span>-<span class="n">check</span> <span class="n">test</span>
+
+<span class="c"># Individual tools</span>
+<span class="nf">format</span><span class="o">:</span><span class="w"> </span><span class="n">black</span> <span class="n">real_simple_stats</span>/ <span class="n">tests</span>/
+<span class="nf">lint</span><span class="o">:</span><span class="w"> </span><span class="n">flake</span>8 <span class="n">real_simple_stats</span>/ <span class="n">tests</span>/
+<span class="nf">type-check</span><span class="o">:</span><span class="w"> </span><span class="n">mypy</span> <span class="n">real_simple_stats</span>/
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span><span class="n">pytest</span> <span class="n">tests</span>/ -<span class="n">v</span>
+<span class="nf">test-cov</span><span class="o">:</span><span class="w"> </span><span class="n">pytest</span> <span class="n">tests</span>/ --<span class="n">cov</span>=<span class="n">real_simple_stats</span> --<span class="n">cov</span>-<span class="n">report</span>=<span class="n">html</span>
+</pre></div>
+</div>
+<p>Usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">quality</span>  <span class="c1"># Run all quality checks</span>
+<span class="n">make</span> <span class="n">help</span>     <span class="c1"># Show all available commands</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="code-standards">
+<h2>Code Standards<a class="headerlink" href="#code-standards" title="Link to this heading"></a></h2>
+<section id="type-hints">
+<h3>Type Hints<a class="headerlink" href="#type-hints" title="Link to this heading"></a></h3>
+<p>All functions must have comprehensive type annotations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_statistics</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="n">include_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate basic statistics for a dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numeric values</span>
+<span class="sd">        include_mode: Whether to calculate mode</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple of (mean, std_dev, mode)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="docstrings">
+<h3>Docstrings<a class="headerlink" href="#docstrings" title="Link to this heading"></a></h3>
+<p>Google-style docstrings with comprehensive information:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">standard_deviation</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the population standard deviation.</span>
+
+<span class="sd">    The standard deviation measures the amount of variation or</span>
+<span class="sd">    dispersion of a set of values. A low standard deviation indicates</span>
+<span class="sd">    that the values tend to be close to the mean, while a high</span>
+<span class="sd">    standard deviation indicates that the values are spread out</span>
+<span class="sd">    over a wider range.</span>
+
+<span class="sd">    Formula: σ = √(Σ(xi - μ)² / N)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numeric values. Must contain at least one value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The population standard deviation as a float.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the input list is empty.</span>
+<span class="sd">        TypeError: If values contains non-numeric types.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; standard_deviation([2, 4, 4, 4, 5, 5, 7, 9])</span>
+<span class="sd">        2.0</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This calculates the population standard deviation (divides by N).</span>
+<span class="sd">        For sample standard deviation, use sample_standard_deviation().</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<p>Comprehensive input validation and meaningful error messages:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">coefficient_of_variation</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate coefficient of variation (CV).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate CV for empty dataset&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;All values must be numeric (int or float)&quot;</span><span class="p">)</span>
+
+    <span class="n">mean_val</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mean_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate CV when mean is zero&quot;</span><span class="p">)</span>
+
+    <span class="n">std_val</span> <span class="o">=</span> <span class="n">standard_deviation</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">std_val</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mean_val</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="testing-standards">
+<h2>Testing Standards<a class="headerlink" href="#testing-standards" title="Link to this heading"></a></h2>
+<section id="test-coverage">
+<h3>Test Coverage<a class="headerlink" href="#test-coverage" title="Link to this heading"></a></h3>
+<p>We aim for high test coverage with meaningful tests:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">TestDescriptiveStatistics</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test suite for descriptive statistics functions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_mean_normal_case</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test mean calculation with normal input.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">mean</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mf">3.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_mean_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test mean with single value.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">mean</span><span class="p">([</span><span class="mi">42</span><span class="p">])</span> <span class="o">==</span> <span class="mf">42.0</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_mean_empty_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test mean raises error for empty list.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="s2">&quot;empty&quot;</span><span class="p">):</span>
+            <span class="n">mean</span><span class="p">([])</span>
+
+    <span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span><span class="s2">&quot;values,expected&quot;</span><span class="p">,</span> <span class="p">[</span>
+        <span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">),</span>
+        <span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">),</span>
+    <span class="p">])</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_mean_edge_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">expected</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test mean with various edge cases.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="n">expected</span>
+</pre></div>
+</div>
+</section>
+<section id="test-organization">
+<h3>Test Organization<a class="headerlink" href="#test-organization" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Descriptive names</strong>: Test names clearly describe what is being tested</p></li>
+<li><p><strong>Arrange-Act-Assert</strong>: Clear test structure</p></li>
+<li><p><strong>Edge cases</strong>: Test boundary conditions and error states</p></li>
+<li><p><strong>Parameterized tests</strong>: Test multiple scenarios efficiently</p></li>
+</ul>
+</section>
+</section>
+<section id="continuous-integration">
+<h2>Continuous Integration<a class="headerlink" href="#continuous-integration" title="Link to this heading"></a></h2>
+<section id="github-actions">
+<h3>GitHub Actions<a class="headerlink" href="#github-actions" title="Link to this heading"></a></h3>
+<p>Automated quality checks on every pull request:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Quality Checks</span>
+<span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">push</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3.7</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3.8</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3.9</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;3.10&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;3.11&quot;</span><span class="p p-Indicator">]</span>
+
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v3</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set up Python</span>
+<span class="w">      </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v4</span>
+<span class="w">      </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.python-version }}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Install dependencies</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">pip install -e &quot;.[dev]&quot;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run quality checks</span>
+<span class="w">      </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">make quality</span>
+</pre></div>
+</div>
+</section>
+<section id="quality-gates">
+<h3>Quality Gates<a class="headerlink" href="#quality-gates" title="Link to this heading"></a></h3>
+<p>Pull requests must pass all quality checks:</p>
+<ul class="simple">
+<li><p>✅ All tests pass</p></li>
+<li><p>✅ No linting errors</p></li>
+<li><p>✅ Type checking passes</p></li>
+<li><p>✅ Code is properly formatted</p></li>
+<li><p>✅ Documentation is updated</p></li>
+</ul>
+</section>
+</section>
+<section id="monitoring-and-reporting">
+<h2>Monitoring and Reporting<a class="headerlink" href="#monitoring-and-reporting" title="Link to this heading"></a></h2>
+<section id="coverage-reports">
+<h3>Coverage Reports<a class="headerlink" href="#coverage-reports" title="Link to this heading"></a></h3>
+<p>HTML coverage reports generated automatically:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">test</span><span class="o">-</span><span class="n">cov</span>
+<span class="nb">open</span> <span class="n">htmlcov</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+</pre></div>
+</div>
+<p>Coverage badges in README show current status.</p>
+</section>
+<section id="id1">
+<h3>Quality Metrics<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Regular monitoring of:</p>
+<ul class="simple">
+<li><p>Test coverage percentage</p></li>
+<li><p>Number of linting issues</p></li>
+<li><p>Type checking errors</p></li>
+<li><p>Documentation coverage</p></li>
+<li><p>Code complexity metrics</p></li>
+</ul>
+</section>
+</section>
+<section id="future-improvements">
+<h2>Future Improvements<a class="headerlink" href="#future-improvements" title="Link to this heading"></a></h2>
+<section id="planned-enhancements">
+<h3>Planned Enhancements<a class="headerlink" href="#planned-enhancements" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Increase Test Coverage</strong> to 80%+</p></li>
+<li><p><strong>Add Performance Benchmarks</strong></p></li>
+<li><p><strong>Implement Security Scanning</strong></p></li>
+<li><p><strong>Add Complexity Analysis</strong></p></li>
+<li><p><strong>Enhance Documentation Coverage</strong></p></li>
+</ol>
+</section>
+<section id="tools-under-consideration">
+<h3>Tools Under Consideration<a class="headerlink" href="#tools-under-consideration" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Bandit</strong> - Security linting</p></li>
+<li><p><strong>Radon</strong> - Code complexity analysis</p></li>
+<li><p><strong>Safety</strong> - Dependency vulnerability checking</p></li>
+<li><p><strong>Sphinx</strong> - Enhanced documentation generation</p></li>
+</ul>
+</section>
+</section>
+<section id="best-practices-summary">
+<h2>Best Practices Summary<a class="headerlink" href="#best-practices-summary" title="Link to this heading"></a></h2>
+<section id="for-contributors">
+<h3>For Contributors<a class="headerlink" href="#for-contributors" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Run quality checks</strong> before committing: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">quality</span></code></p></li>
+<li><p><strong>Write comprehensive tests</strong> for new functionality</p></li>
+<li><p><strong>Add type hints</strong> to all new functions</p></li>
+<li><p><strong>Document thoroughly</strong> with examples</p></li>
+<li><p><strong>Follow existing patterns</strong> in the codebase</p></li>
+</ol>
+</section>
+<section id="for-maintainers">
+<h3>For Maintainers<a class="headerlink" href="#for-maintainers" title="Link to this heading"></a></h3>
+<ol class="arabic simple">
+<li><p><strong>Review quality metrics</strong> regularly</p></li>
+<li><p><strong>Update tools and dependencies</strong> periodically</p></li>
+<li><p><strong>Monitor test coverage</strong> trends</p></li>
+<li><p><strong>Ensure CI/CD pipelines</strong> are working</p></li>
+<li><p><strong>Document quality standards</strong> clearly</p></li>
+</ol>
+<p>The quality standards ensure Real Simple Stats remains reliable, maintainable, and easy to contribute to. These practices help us deliver a professional-grade statistical library that users can trust.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing to Real Simple Stats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="changelog.html" class="btn btn-neutral float-right" title="Changelog" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kyle Jones.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

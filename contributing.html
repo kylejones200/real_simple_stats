@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing to Real Simple Stats &mdash; Real Simple Stats 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Code Quality Standards" href="code_quality.html" />
+    <link rel="prev" title="real_simple_stats package" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Real Simple Stats
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_reference.html">Command Line Interface Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/descriptive_statistics.html">Descriptive Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">real_simple_stats package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing to Real Simple Stats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#getting-started">Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#development-setup">Development Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-workflow">Development Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#code-quality-standards">Code Quality Standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-style">Code Style</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-requirements">Testing Requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-checks">Quality Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#types-of-contributions">Types of Contributions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bug-reports">Bug Reports</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#feature-requests">Feature Requests</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-contributions">Code Contributions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coding-guidelines">Coding Guidelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#function-design">Function Design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistical-accuracy">Statistical Accuracy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#error-handling">Error Handling</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation-standards">Documentation Standards</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#docstring-format">Docstring Format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#code-comments">Code Comments</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#release-process">Release Process</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#version-numbers">Version Numbers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#changelog">Changelog</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#communication">Communication</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#recognition">Recognition</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="code_quality.html">Code Quality Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Real Simple Stats</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing to Real Simple Stats</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing-to-real-simple-stats">
+<h1>Contributing to Real Simple Stats<a class="headerlink" href="#contributing-to-real-simple-stats" title="Link to this heading"></a></h1>
+<p>We welcome contributions to Real Simple Stats! This guide will help you get started with contributing to the project.</p>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<section id="development-setup">
+<h3>Development Setup<a class="headerlink" href="#development-setup" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Fork the repository</strong> on GitHub</p></li>
+<li><p><strong>Clone your fork</strong> locally:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">yourusername</span><span class="o">/</span><span class="n">real_simple_stats</span><span class="o">.</span><span class="n">git</span>
+<span class="n">cd</span> <span class="n">real_simple_stats</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Set up development environment</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create virtual environment</span>
+<span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">venv</span> <span class="n">venv</span>
+<span class="n">source</span> <span class="n">venv</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>  <span class="c1"># On Windows: venv\Scripts\activate</span>
+
+<span class="c1"># Install development dependencies</span>
+<span class="n">make</span> <span class="n">install</span><span class="o">-</span><span class="n">dev</span>
+<span class="c1"># Or manually: pip install -e &quot;.[dev]&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Install pre-commit hooks</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">pre</span><span class="o">-</span><span class="n">commit</span><span class="o">-</span><span class="n">install</span>
+<span class="c1"># Or manually: pre-commit install</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Verify setup</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">test</span>
+<span class="n">make</span> <span class="n">lint</span>
+<span class="n">make</span> <span class="nb">type</span><span class="o">-</span><span class="n">check</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="development-workflow">
+<h3>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Create a feature branch</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">feature</span><span class="o">/</span><span class="n">your</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Make your changes</strong> following our coding standards</p></li>
+<li><p><strong>Run quality checks</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">quality</span>  <span class="c1"># Runs tests, linting, formatting, and type checking</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Commit your changes</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="o">.</span>
+<span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;Add your descriptive commit message&quot;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Push and create pull request</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span> <span class="n">origin</span> <span class="n">feature</span><span class="o">/</span><span class="n">your</span><span class="o">-</span><span class="n">feature</span><span class="o">-</span><span class="n">name</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="code-quality-standards">
+<h2>Code Quality Standards<a class="headerlink" href="#code-quality-standards" title="Link to this heading"></a></h2>
+<p>We maintain high code quality standards. All contributions must meet these requirements:</p>
+<section id="code-style">
+<h3>Code Style<a class="headerlink" href="#code-style" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Formatting</strong>: Code is automatically formatted with Black (88 character line length)</p></li>
+<li><p><strong>Linting</strong>: Must pass Flake8 linting with our configuration</p></li>
+<li><p><strong>Type Hints</strong>: All functions must have comprehensive type annotations</p></li>
+<li><p><strong>Docstrings</strong>: All public functions must have Google-style docstrings</p></li>
+</ul>
+<p>Example of properly formatted function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">calculate_mean</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the arithmetic mean of a list of values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numeric values to calculate mean for.</span>
+<span class="sd">               Must contain at least one value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The arithmetic mean of the input values.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the input list is empty.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; calculate_mean([1, 2, 3, 4, 5])</span>
+<span class="sd">        3.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate mean of empty list&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="testing-requirements">
+<h3>Testing Requirements<a class="headerlink" href="#testing-requirements" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Test Coverage</strong>: New code should maintain or improve test coverage</p></li>
+<li><p><strong>Test Types</strong>: Include unit tests for all new functions</p></li>
+<li><p><strong>Edge Cases</strong>: Test error conditions and edge cases</p></li>
+<li><p><strong>Documentation</strong>: Test examples in docstrings should work</p></li>
+</ul>
+<p>Example test structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">test_calculate_mean</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test mean calculation with various inputs.&quot;&quot;&quot;</span>
+    <span class="c1"># Test normal case</span>
+    <span class="k">assert</span> <span class="n">calculate_mean</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mf">3.0</span>
+
+    <span class="c1"># Test edge cases</span>
+    <span class="k">assert</span> <span class="n">calculate_mean</span><span class="p">([</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="mf">5.0</span>
+    <span class="k">assert</span> <span class="n">calculate_mean</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">])</span> <span class="o">==</span> <span class="mf">2.0</span>
+
+    <span class="c1"># Test error conditions</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">calculate_mean</span><span class="p">([])</span>
+</pre></div>
+</div>
+</section>
+<section id="quality-checks">
+<h3>Quality Checks<a class="headerlink" href="#quality-checks" title="Link to this heading"></a></h3>
+<p>Before submitting, ensure all quality checks pass:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="nb">format</span><span class="o">-</span><span class="n">check</span>  <span class="c1"># Check code formatting</span>
+<span class="n">make</span> <span class="n">lint</span>         <span class="c1"># Check code style</span>
+<span class="n">make</span> <span class="nb">type</span><span class="o">-</span><span class="n">check</span>   <span class="c1"># Check type annotations</span>
+<span class="n">make</span> <span class="n">test</span>         <span class="c1"># Run all tests</span>
+<span class="n">make</span> <span class="n">test</span><span class="o">-</span><span class="n">cov</span>     <span class="c1"># Run tests with coverage report</span>
+</pre></div>
+</div>
+<p>Or run everything at once:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">quality</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="types-of-contributions">
+<h2>Types of Contributions<a class="headerlink" href="#types-of-contributions" title="Link to this heading"></a></h2>
+<section id="bug-reports">
+<h3>Bug Reports<a class="headerlink" href="#bug-reports" title="Link to this heading"></a></h3>
+<p>When reporting bugs, please include:</p>
+<ul class="simple">
+<li><p><strong>Clear description</strong> of the issue</p></li>
+<li><p><strong>Steps to reproduce</strong> the problem</p></li>
+<li><p><strong>Expected vs actual behavior</strong></p></li>
+<li><p><strong>Environment details</strong> (Python version, OS, package version)</p></li>
+<li><p><strong>Minimal code example</strong> that demonstrates the issue</p></li>
+</ul>
+</section>
+<section id="feature-requests">
+<h3>Feature Requests<a class="headerlink" href="#feature-requests" title="Link to this heading"></a></h3>
+<p>For new features, please:</p>
+<ul class="simple">
+<li><p><strong>Check existing issues</strong> to avoid duplicates</p></li>
+<li><p><strong>Describe the use case</strong> and why it’s needed</p></li>
+<li><p><strong>Provide examples</strong> of how it would be used</p></li>
+<li><p><strong>Consider implementation complexity</strong></p></li>
+</ul>
+</section>
+<section id="code-contributions">
+<h3>Code Contributions<a class="headerlink" href="#code-contributions" title="Link to this heading"></a></h3>
+<p>We welcome various types of code contributions:</p>
+<dl class="simple">
+<dt><strong>New Statistical Functions</strong></dt><dd><ul class="simple">
+<li><p>Implement additional statistical tests</p></li>
+<li><p>Add new probability distributions</p></li>
+<li><p>Extend descriptive statistics</p></li>
+</ul>
+</dd>
+<dt><strong>Performance Improvements</strong></dt><dd><ul class="simple">
+<li><p>Optimize existing algorithms</p></li>
+<li><p>Add vectorized operations</p></li>
+<li><p>Improve memory efficiency</p></li>
+</ul>
+</dd>
+<dt><strong>Documentation</strong></dt><dd><ul class="simple">
+<li><p>Improve existing documentation</p></li>
+<li><p>Add examples and tutorials</p></li>
+<li><p>Fix typos and clarify explanations</p></li>
+</ul>
+</dd>
+<dt><strong>Testing</strong></dt><dd><ul class="simple">
+<li><p>Increase test coverage</p></li>
+<li><p>Add integration tests</p></li>
+<li><p>Improve test quality</p></li>
+</ul>
+</dd>
+<dt><strong>Infrastructure</strong></dt><dd><ul class="simple">
+<li><p>Improve build processes</p></li>
+<li><p>Enhance CI/CD pipelines</p></li>
+<li><p>Update development tools</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+</section>
+<section id="coding-guidelines">
+<h2>Coding Guidelines<a class="headerlink" href="#coding-guidelines" title="Link to this heading"></a></h2>
+<section id="function-design">
+<h3>Function Design<a class="headerlink" href="#function-design" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Single Responsibility</strong>: Each function should do one thing well</p></li>
+<li><p><strong>Clear Naming</strong>: Use descriptive names that explain what the function does</p></li>
+<li><p><strong>Input Validation</strong>: Validate inputs and provide clear error messages</p></li>
+<li><p><strong>Educational Value</strong>: Include mathematical explanations in docstrings</p></li>
+</ul>
+</section>
+<section id="statistical-accuracy">
+<h3>Statistical Accuracy<a class="headerlink" href="#statistical-accuracy" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Verify Formulas</strong>: Ensure statistical formulas are mathematically correct</p></li>
+<li><p><strong>Test Against Known Values</strong>: Compare results with established statistical software</p></li>
+<li><p><strong>Handle Edge Cases</strong>: Consider what happens with small samples, extreme values, etc.</p></li>
+<li><p><strong>Document Assumptions</strong>: Clearly state any assumptions made by the function</p></li>
+</ul>
+</section>
+<section id="error-handling">
+<h3>Error Handling<a class="headerlink" href="#error-handling" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Meaningful Messages</strong>: Error messages should help users understand what went wrong</p></li>
+<li><p><strong>Appropriate Exceptions</strong>: Use standard Python exceptions (ValueError, TypeError, etc.)</p></li>
+<li><p><strong>Input Validation</strong>: Check inputs early and provide clear feedback</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Values must be a list, tuple, or numpy array&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate statistics for empty dataset&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;All values must be numeric (int or float)&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="documentation-standards">
+<h2>Documentation Standards<a class="headerlink" href="#documentation-standards" title="Link to this heading"></a></h2>
+<section id="docstring-format">
+<h3>Docstring Format<a class="headerlink" href="#docstring-format" title="Link to this heading"></a></h3>
+<p>We use Google-style docstrings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">function_name</span><span class="p">(</span><span class="n">param1</span><span class="p">:</span> <span class="n">Type1</span><span class="p">,</span> <span class="n">param2</span><span class="p">:</span> <span class="n">Type2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ReturnType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Brief description of what the function does.</span>
+
+<span class="sd">    Longer description if needed, explaining the mathematical</span>
+<span class="sd">    background or implementation details.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1: Description of first parameter.</span>
+<span class="sd">        param2: Description of second parameter.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Description of return value.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ExceptionType: Description of when this exception is raised.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; function_name(arg1, arg2)</span>
+<span class="sd">        expected_output</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Any additional notes about usage or mathematical background.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="code-comments">
+<h3>Code Comments<a class="headerlink" href="#code-comments" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Explain Why</strong>: Comments should explain why something is done, not what is done</p></li>
+<li><p><strong>Mathematical Context</strong>: Explain statistical concepts and formulas</p></li>
+<li><p><strong>Complex Logic</strong>: Break down complex calculations with comments</p></li>
+</ul>
+</section>
+</section>
+<section id="release-process">
+<h2>Release Process<a class="headerlink" href="#release-process" title="Link to this heading"></a></h2>
+<section id="version-numbers">
+<h3>Version Numbers<a class="headerlink" href="#version-numbers" title="Link to this heading"></a></h3>
+<p>We follow semantic versioning (MAJOR.MINOR.PATCH):</p>
+<ul class="simple">
+<li><p><strong>MAJOR</strong>: Breaking changes to the API</p></li>
+<li><p><strong>MINOR</strong>: New features, backward compatible</p></li>
+<li><p><strong>PATCH</strong>: Bug fixes, backward compatible</p></li>
+</ul>
+</section>
+<section id="changelog">
+<h3>Changelog<a class="headerlink" href="#changelog" title="Link to this heading"></a></h3>
+<p>All changes are documented in the changelog with:</p>
+<ul class="simple">
+<li><p><strong>Added</strong>: New features</p></li>
+<li><p><strong>Changed</strong>: Changes in existing functionality</p></li>
+<li><p><strong>Deprecated</strong>: Soon-to-be removed features</p></li>
+<li><p><strong>Removed</strong>: Removed features</p></li>
+<li><p><strong>Fixed</strong>: Bug fixes</p></li>
+<li><p><strong>Security</strong>: Security improvements</p></li>
+</ul>
+</section>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
+<p>If you need help with contributing:</p>
+<ul class="simple">
+<li><p><strong>Check Documentation</strong>: Read through this guide and the API documentation</p></li>
+<li><p><strong>Ask Questions</strong>: Open a GitHub issue with the “question” label</p></li>
+<li><p><strong>Join Discussions</strong>: Participate in GitHub discussions</p></li>
+<li><p><strong>Review Examples</strong>: Look at existing code for patterns and style</p></li>
+</ul>
+</section>
+<section id="communication">
+<h2>Communication<a class="headerlink" href="#communication" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Be Respectful</strong>: Follow our code of conduct</p></li>
+<li><p><strong>Be Patient</strong>: Maintainers review contributions in their spare time</p></li>
+<li><p><strong>Be Descriptive</strong>: Provide clear descriptions in issues and pull requests</p></li>
+<li><p><strong>Be Collaborative</strong>: We’re all working together to improve the project</p></li>
+</ul>
+</section>
+<section id="recognition">
+<h2>Recognition<a class="headerlink" href="#recognition" title="Link to this heading"></a></h2>
+<p>Contributors are recognized in:</p>
+<ul class="simple">
+<li><p><strong>README</strong>: Major contributors listed</p></li>
+<li><p><strong>Changelog</strong>: Contributors credited for their changes</p></li>
+<li><p><strong>Documentation</strong>: Authors acknowledged in relevant sections</p></li>
+</ul>
+<p>Thank you for contributing to Real Simple Stats! Your efforts help make statistical analysis more accessible to everyone.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="real_simple_stats package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="code_quality.html" class="btn btn-neutral float-right" title="Code Quality Standards" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kyle Jones.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

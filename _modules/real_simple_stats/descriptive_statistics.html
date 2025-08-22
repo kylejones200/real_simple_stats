@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>real_simple_stats.descriptive_statistics &mdash; Real Simple Stats 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #2980B9" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Real Simple Stats
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quick Start Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli_reference.html">Command Line Interface Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/descriptive_statistics.html">Descriptive Statistics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">real_simple_stats package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing to Real Simple Stats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code_quality.html">Code Quality Standards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #2980B9" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Real Simple Stats</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">real_simple_stats.descriptive_statistics</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for real_simple_stats.descriptive_statistics</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="c1"># --- Basic Descriptive Functions ---</span>
+
+
+<div class="viewcode-block" id="is_discrete">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.is_discrete">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_discrete</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine if a variable is discrete (all values are integers).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numerical values to check</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        True if all values are integers, False otherwise</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; is_discrete([1.0, 2.0, 3.0])</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; is_discrete([1.5, 2.0, 3.0])</span>
+<span class="sd">        False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">is_integer</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="is_continuous">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.is_continuous">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_continuous</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine if a variable is continuous (contains non-integer values).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numerical values to check</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        True if any values are non-integers, False if all are integers</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; is_continuous([1.5, 2.0, 3.0])</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; is_continuous([1.0, 2.0, 3.0])</span>
+<span class="sd">        False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">is_discrete</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="five_number_summary">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.five_number_summary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">five_number_summary</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the five-number summary: min, Q1, median, Q3, max.&quot;&quot;&quot;</span>
+    <span class="n">sorted_vals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_vals</span><span class="p">)</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="n">median_val</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">(</span><span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="p">)</span>
+    <span class="n">lower_half</span> <span class="o">=</span> <span class="n">sorted_vals</span><span class="p">[:</span><span class="n">mid</span><span class="p">]</span>
+    <span class="n">upper_half</span> <span class="o">=</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span><span class="p">:]</span>
+    <span class="n">Q1</span> <span class="o">=</span> <span class="n">median</span><span class="p">(</span><span class="n">lower_half</span><span class="p">)</span>
+    <span class="n">Q3</span> <span class="o">=</span> <span class="n">median</span><span class="p">(</span><span class="n">upper_half</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="s2">&quot;Q1&quot;</span><span class="p">:</span> <span class="n">Q1</span><span class="p">,</span>
+        <span class="s2">&quot;median&quot;</span><span class="p">:</span> <span class="n">median_val</span><span class="p">,</span>
+        <span class="s2">&quot;Q3&quot;</span><span class="p">:</span> <span class="n">Q3</span><span class="p">,</span>
+        <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="median">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.median">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">median</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the median (middle value) of a dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numerical values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The median value</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the input list is empty</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; median([1, 2, 3, 4, 5])</span>
+<span class="sd">        3.0</span>
+<span class="sd">        &gt;&gt;&gt; median([1, 2, 3, 4])</span>
+<span class="sd">        2.5</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate median of empty list&quot;</span><span class="p">)</span>
+    <span class="n">sorted_vals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sorted_vals</span><span class="p">)</span>
+    <span class="n">mid</span> <span class="o">=</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span><span class="p">]</span> <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">(</span><span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sorted_vals</span><span class="p">[</span><span class="n">mid</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span></div>
+
+
+
+<div class="viewcode-block" id="interquartile_range">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.interquartile_range">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interquartile_range</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">five_number_summary</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Q3&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Q1&quot;</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="sample_variance">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.sample_variance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_variance</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the sample variance of a dataset.</span>
+
+<span class="sd">    Uses the sample variance formula with (n-1) degrees of freedom (Bessel&#39;s correction).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numerical values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The sample variance</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If fewer than 2 values are provided</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; sample_variance([1, 2, 3, 4, 5])</span>
+<span class="sd">        2.5</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Sample variance requires at least 2 values&quot;</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">m</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="sample_std_dev">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.sample_std_dev">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_std_dev</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the sample standard deviation of a dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numerical values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The sample standard deviation (square root of sample variance)</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If fewer than 2 values are provided</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; sample_std_dev([1, 2, 3, 4, 5])</span>
+<span class="sd">        1.5811388300841898</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sample_variance</span><span class="p">(</span><span class="n">values</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="coefficient_of_variation">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.coefficient_of_variation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coefficient_of_variation</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">mean_val</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mean_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate coefficient of variation when mean is zero&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">sample_std_dev</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="n">mean_val</span></div>
+
+
+
+<div class="viewcode-block" id="mean">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.mean">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the arithmetic mean (average) of a dataset.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of numerical values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The arithmetic mean</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the input list is empty</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; mean([1, 2, 3, 4, 5])</span>
+<span class="sd">        3.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">values</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot calculate mean of empty list&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="draw_frequency_table">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.draw_frequency_table">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_frequency_table</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a frequency table from a list of categorical or discrete values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of categorical or discrete values to count</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dictionary mapping each unique value to its frequency</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; draw_frequency_table([&#39;A&#39;, &#39;B&#39;, &#39;A&#39;, &#39;C&#39;, &#39;B&#39;, &#39;A&#39;])</span>
+<span class="sd">        {&#39;A&#39;: 3, &#39;B&#39;: 2, &#39;C&#39;: 1}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">values</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="draw_cumulative_frequency_table">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.draw_cumulative_frequency_table">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_cumulative_frequency_table</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a cumulative frequency table from a list of discrete values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: List of discrete integer values</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dictionary mapping each unique value to its cumulative frequency</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; draw_cumulative_frequency_table([1, 2, 1, 3, 2, 1])</span>
+<span class="sd">        {1: 3, 2: 5, 3: 6}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">sorted_keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+    <span class="n">cumulative</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">sorted_keys</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">freq</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="n">cumulative</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span>
+    <span class="k">return</span> <span class="n">cumulative</span></div>
+
+
+
+<div class="viewcode-block" id="detect_fake_statistics">
+<a class="viewcode-back" href="../../api/descriptive_statistics.html#real_simple_stats.descriptive_statistics.detect_fake_statistics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_fake_statistics</span><span class="p">(</span>
+    <span class="n">survey_sponsor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">is_voluntary</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">correlation_not_causation</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect potential issues with statistical claims or studies.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        survey_sponsor: Organization sponsoring the survey/study</span>
+<span class="sd">        is_voluntary: Whether the survey uses voluntary response sampling</span>
+<span class="sd">        correlation_not_causation: Whether correlation is being presented as causation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of warning messages about potential statistical issues</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; detect_fake_statistics(&quot;Diet Pill Company&quot;, True, True)</span>
+<span class="sd">        [&#39;Potential bias: Self-funded study&#39;, &#39;Warning: Voluntary response samples are biased&#39;,</span>
+<span class="sd">         &#39;Warning: Correlation does not imply causation&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">survey_sponsor</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">{</span>
+        <span class="s2">&quot;diet pill company&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;political campaign&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;egg company&quot;</span><span class="p">,</span>
+    <span class="p">}:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Potential bias: Self-funded study&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_voluntary</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Warning: Voluntary response samples are biased&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">correlation_not_causation</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Warning: Correlation does not imply causation&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">warnings</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kyle Jones.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
