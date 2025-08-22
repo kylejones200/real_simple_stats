@@ -68,7 +68,7 @@ def required_sample_size(confidence: float, width: float, std_dev: float) -> int
 
 
 def slovins_formula(N: int, e: float) -> int:
-    """Slovin’s formula: n = N / (1 + N * e^2)"""
+    """Slovin's formula: n = N / (1 + N * e^2)"""
     return int(N / (1 + N * (e**2)))
 
 

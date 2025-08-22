@@ -10,7 +10,7 @@ authors = [
     { name = "Kyle Jones", email = "kylejones@american.edu" }
 ]
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {text = "MIT"}
 keywords = ["statistics", "education", "probability", "hypothesis-testing", "regression", "data-analysis"]
 classifiers = [
@@ -19,7 +19,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -60,7 +59,7 @@ rss-calc = "real_simple_stats.cli:main"
 
 [tool.black]
 line-length = 88
-target-version = ['py37']
+target-version = ['py38']
 include = '\.pyi?$'
 extend-exclude = '''
 # A regex preceded by ^/ will apply only to files and directories
@@ -98,7 +97,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 check_untyped_defs = true

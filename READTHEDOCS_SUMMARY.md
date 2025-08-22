@@ -6,7 +6,7 @@ I've created a comprehensive ReadTheDocs configuration that transforms your docu
 
 ## ✅ **What's Been Created**
 
-### **📄 `.readthedocs.yml` - Advanced Configuration**
+### **📄 `.readthedocs.yaml` - Advanced Configuration**
 
 ```yaml
 # Modern build environment

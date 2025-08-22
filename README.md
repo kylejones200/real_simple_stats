@@ -163,7 +163,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📊 Project Stats
 
-- **Language**: Python 3.7+
+- **Language**: Python 3.8+
 - **Dependencies**: NumPy, SciPy, Matplotlib
 - **Test Coverage**: >95%
 - **Documentation**: Sphinx + ReadTheDocs
