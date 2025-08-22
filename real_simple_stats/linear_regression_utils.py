@@ -54,7 +54,9 @@ def regression_equation(x: float, slope: float, intercept: float) -> float:
 # --- MANUAL SLOPE/INTERCEPT CALCULATION (for education/demo) ---
 
 
-def manual_slope_intercept(x: Sequence[float], y: Sequence[float]) -> Tuple[float, float]:
+def manual_slope_intercept(
+    x: Sequence[float], y: Sequence[float]
+) -> Tuple[float, float]:
     """Computes slope and intercept manually."""
     x_mean = float(np.mean(x))
     y_mean = float(np.mean(y))
