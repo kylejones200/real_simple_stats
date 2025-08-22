@@ -37,7 +37,13 @@ def linear_regression(
     Formula: y = a + b*x
     """
     result = linregress(x, y)
-    return result.slope, result.intercept, result.rvalue, result.pvalue, result.stderr
+    return (
+        float(result.slope),
+        float(result.intercept),
+        float(result.rvalue),
+        float(result.pvalue),
+        float(result.stderr),
+    )
 
 
 def regression_equation(x: float, slope: float, intercept: float) -> float:
@@ -48,16 +54,14 @@ def regression_equation(x: float, slope: float, intercept: float) -> float:
 # --- MANUAL SLOPE/INTERCEPT CALCULATION (for education/demo) ---
 
 
-def manual_slope_intercept(
-    x: Sequence[float], y: Sequence[float]
-) -> Tuple[float, float]:
+def manual_slope_intercept(x: Sequence[float], y: Sequence[float]) -> Tuple[float, float]:
     """Computes slope and intercept manually."""
-    x_mean = np.mean(x)
-    y_mean = np.mean(y)
+    x_mean = float(np.mean(x))
+    y_mean = float(np.mean(y))
     numerator = sum((xi - x_mean) * (yi - y_mean) for xi, yi in zip(x, y))
     denominator = sum((xi - x_mean) ** 2 for xi in x)
-    slope = numerator / denominator
-    intercept = y_mean - slope * x_mean
+    slope = float(numerator / denominator)
+    intercept = float(y_mean - slope * x_mean)
     return slope, intercept
 
 
