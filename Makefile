@@ -65,15 +65,8 @@ docs-clean:  ## Clean documentation build
 	@echo "Cleaning documentation build..."
 	cd docs && make clean
 
-pre-commit-install:  ## Install pre-commit hooks
-	pre-commit install
-
-pre-commit-run:  ## Run pre-commit on all files
-	pre-commit run --all-files
-
 setup-dev:  ## Set up development environment
 	python -m venv venv
 	. venv/bin/activate && pip install --upgrade pip
 	. venv/bin/activate && make install-dev
-	. venv/bin/activate && make pre-commit-install
 	@echo "Development environment set up! Activate with: source venv/bin/activate"

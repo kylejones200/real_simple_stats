@@ -269,7 +269,8 @@ def bootstrap_hypothesis_test(
     Examples:
         >>> data1 = [1, 2, 3, 4, 5]
         >>> data2 = [3, 4, 5, 6, 7]
-        >>> result = bootstrap_hypothesis_test(data1, data2, lambda x, y: np.mean(x) - np.mean(y))
+        >>> stat = lambda x, y: np.mean(x) - np.mean(y)
+        >>> result = bootstrap_hypothesis_test(data1, data2, stat)
         >>> 'p_value' in result
         True
     """
@@ -339,7 +340,8 @@ def permutation_test(
     Examples:
         >>> data1 = [1, 2, 3, 4, 5]
         >>> data2 = [3, 4, 5, 6, 7]
-        >>> result = permutation_test(data1, data2, lambda x, y: np.mean(x) - np.mean(y))
+        >>> stat = lambda x, y: np.mean(x) - np.mean(y)
+        >>> result = permutation_test(data1, data2, stat)
         >>> 0 <= result['p_value'] <= 1
         True
     """
