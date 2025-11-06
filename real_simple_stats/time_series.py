@@ -117,9 +117,7 @@ def autocorrelation(data: List[float], max_lag: int = None) -> List[float]:
         if lag == 0:
             acf.append(1.0)
         else:
-            numerator = np.sum(
-                (data_array[:-lag] - mean) * (data_array[lag:] - mean)
-            )
+            numerator = np.sum((data_array[:-lag] - mean) * (data_array[lag:] - mean))
             denominator = len(data_array) * var
             acf.append(numerator / denominator)
 
@@ -279,7 +277,9 @@ def seasonal_decompose(
 
     for i in range(period):
         season_values = [
-            detrended[j] for j in range(i, len(data), period) if not np.isnan(detrended[j])
+            detrended[j]
+            for j in range(i, len(data), period)
+            if not np.isnan(detrended[j])
         ]
         if season_values:
             seasonal_avg[i] = np.mean(season_values)

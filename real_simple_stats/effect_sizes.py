@@ -382,7 +382,9 @@ def odds_ratio(contingency_table: List[List[int]]) -> Tuple[float, Tuple[float, 
     return float(or_value), (float(ci_lower), float(ci_upper))
 
 
-def relative_risk(contingency_table: List[List[int]]) -> Tuple[float, Tuple[float, float]]:
+def relative_risk(
+    contingency_table: List[List[int]],
+) -> Tuple[float, Tuple[float, float]]:
     """Calculate relative risk and 95% confidence interval for 2x2 table.
 
     Args:

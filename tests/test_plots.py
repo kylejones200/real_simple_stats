@@ -36,7 +36,9 @@ class TestPlotNormHist:
         # Mock hist to return bins_edges
         mock_hist.return_value = (None, np.linspace(20, 80, 31), None)
 
-        plot_norm_hist(data, mean, std, bins=30, show_pdf=True, show_lines=True, title=True)
+        plot_norm_hist(
+            data, mean, std, bins=30, show_pdf=True, show_lines=True, title=True
+        )
 
         # Verify hist was called
         assert mock_hist.called
@@ -124,7 +126,9 @@ class TestPlotNormHist:
 
         mock_hist.return_value = (None, np.linspace(20, 80, 51), None)
 
-        plot_norm_hist(data, mean, std, bins=50, show_pdf=False, show_lines=False, title=False)
+        plot_norm_hist(
+            data, mean, std, bins=50, show_pdf=False, show_lines=False, title=False
+        )
 
         # Verify bins parameter was passed
         call_args = mock_hist.call_args

@@ -238,14 +238,14 @@ class TestIntegration:
     def test_poisson_workflow(self):
         """Test complete Poisson distribution workflow."""
         lam = 3
-        
+
         # Calculate probabilities
         pmf_2 = poisson_pmf(2, lam)
         cdf_2 = poisson_cdf(2, lam)
-        
+
         # CDF should be >= PMF
         assert cdf_2 >= pmf_2
-        
+
         # Check expectations
         mean = expected_value_poisson(lam)
         var = variance_poisson(lam)
@@ -254,14 +254,14 @@ class TestIntegration:
     def test_geometric_workflow(self):
         """Test complete geometric distribution workflow."""
         p = 0.25
-        
+
         # Calculate probabilities
         pmf_3 = geometric_pmf(3, p)
         cdf_3 = geometric_cdf(3, p)
-        
+
         # CDF should be >= PMF
         assert cdf_3 >= pmf_3
-        
+
         # Check expectations
         mean = expected_value_geometric(p)
         var = variance_geometric(p)
@@ -272,16 +272,16 @@ class TestIntegration:
         """Test complete exponential distribution workflow."""
         lam = 0.5
         x = 2
-        
+
         # Calculate probabilities
         pdf_x = exponential_pdf(x, lam)
         cdf_x = exponential_cdf(x, lam)
-        
+
         # PDF should be non-negative
         assert pdf_x >= 0
         # CDF should be between 0 and 1
         assert 0 <= cdf_x <= 1
-        
+
         # Check expectations
         mean = expected_value_exponential(lam)
         var = variance_exponential(lam)
@@ -293,15 +293,15 @@ class TestIntegration:
         # Poisson with λ=4
         poisson_mean = expected_value_poisson(4)
         poisson_var = variance_poisson(4)
-        
+
         # Geometric with p=0.25
         geom_mean = expected_value_geometric(0.25)
         geom_var = variance_geometric(0.25)
-        
+
         # Exponential with λ=0.25
         exp_mean = expected_value_exponential(0.25)
         exp_var = variance_exponential(0.25)
-        
+
         # All should have positive mean and variance
         assert all(m > 0 for m in [poisson_mean, geom_mean, exp_mean])
         assert all(v > 0 for v in [poisson_var, geom_var, exp_var])

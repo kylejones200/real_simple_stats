@@ -138,7 +138,7 @@ class TestMean:
         [
             ([10, 20, 30], 20.0),
             ([1, 1, 1, 1], 1.0),
-            ([0, 0, 10], 10/3),
+            ([0, 0, 10], 10 / 3),
         ],
     )
     def test_mean_parametrized(self, values, expected):
@@ -167,8 +167,8 @@ class TestMode:
         assert set(result) == {1, 2, 3, 4, 5}
 
     def test_mode_with_strings(self):
-        result = mode(['a', 'b', 'b', 'c'])
-        assert result == ['b']
+        result = mode(["a", "b", "b", "c"])
+        assert result == ["b"]
 
     def test_mode_from_example(self):
         data = [2, 19, 44, 44, 44, 51, 56, 78, 86, 99, 99]
@@ -291,11 +291,11 @@ class TestIntegration:
         """Test converting between percentages and decimals."""
         # Start with a percentage
         percent = 75.0
-        
+
         # Convert to decimal
         decimal = percent_to_decimal(percent)
         assert decimal == pytest.approx(0.75)
-        
+
         # Convert back to percent
         back_to_percent = decimal_to_percent(decimal)
         assert back_to_percent == pytest.approx(percent)
@@ -303,15 +303,15 @@ class TestIntegration:
     def test_descriptive_stats_workflow(self):
         """Test calculating multiple descriptive statistics."""
         data = [2, 19, 44, 44, 44, 51, 56, 78, 86, 99, 99]
-        
+
         # Calculate mean
         mean_val = mean(data)
         assert mean_val > 0
-        
+
         # Calculate median
         median_val = median(data)
         assert median_val == 51
-        
+
         # Calculate mode
         mode_val = mode(data)
         assert 44 in mode_val
@@ -321,15 +321,15 @@ class TestIntegration:
         # Exam scores with different weights
         exam1, exam2, final = 80, 85, 90
         weight1, weight2, weight_final = 0.3, 0.3, 0.4
-        
+
         scores = [exam1, exam2, final]
         weights = [weight1, weight2, weight_final]
-        
+
         final_grade = weighted_mean(scores, weights)
-        
+
         # Verify it's between min and max
         assert min(scores) <= final_grade <= max(scores)
-        
+
         # Round to 2 decimal places
         final_grade_rounded = round_to_decimal_places(final_grade, 2)
         assert isinstance(final_grade_rounded, float)
@@ -338,12 +338,12 @@ class TestIntegration:
         """Test rounding in a practical context."""
         # Calculate something that needs rounding
         raw_value = 3.14159265359
-        
+
         # Round to different precisions
         rounded_1 = round_to_decimal_places(raw_value, 1)
         rounded_2 = round_to_decimal_places(raw_value, 2)
         rounded_3 = round_to_decimal_places(raw_value, 3)
-        
+
         assert rounded_1 == pytest.approx(3.1)
         assert rounded_2 == pytest.approx(3.14)
         assert rounded_3 == pytest.approx(3.142)

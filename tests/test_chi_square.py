@@ -136,17 +136,17 @@ class TestIntegration:
         observed = [10, 20, 30, 40]
         # Expected frequencies (uniform distribution)
         expected = [25, 25, 25, 25]
-        
+
         # Calculate chi-square statistic
         chi_stat = chi_square_statistic(observed, expected)
         assert chi_stat > 0
-        
+
         # Get critical value (alpha=0.05, df=3)
         critical_value = critical_chi_square_value(0.05, 3)
-        
+
         # Make decision
         reject = reject_null_chi_square(chi_stat, critical_value)
-        
+
         # This should reject (chi_stat should be > 7.815)
         assert isinstance(reject, bool)
 
@@ -155,10 +155,10 @@ class TestIntegration:
         # Roll a die 60 times, expect each face 10 times
         observed = [8, 12, 9, 11, 10, 10]
         expected = [10, 10, 10, 10, 10, 10]
-        
+
         chi_stat = chi_square_statistic(observed, expected)
         critical_value = critical_chi_square_value(0.05, 5)  # df = 6-1 = 5
-        
+
         # Should not reject (die appears fair)
         reject = reject_null_chi_square(chi_stat, critical_value)
         assert reject is False  # Chi-stat should be small
@@ -166,17 +166,17 @@ class TestIntegration:
     def test_different_alpha_levels(self):
         """Test that different alpha levels give different critical values."""
         df = 5
-        
+
         cv_10 = critical_chi_square_value(0.10, df)
         cv_05 = critical_chi_square_value(0.05, df)
         cv_01 = critical_chi_square_value(0.01, df)
-        
+
         # More stringent alpha requires larger chi-square to reject
         assert cv_10 < cv_05 < cv_01
-        
+
         # Test with a chi-square statistic that will reject at 0.10
         chi_stat = 10.0
-        
+
         # Should reject at alpha=0.10 (cv ~9.24)
         assert reject_null_chi_square(chi_stat, cv_10) is True
         # May or may not reject at 0.05 (cv ~11.07) - depends on chi_stat value

@@ -165,7 +165,9 @@ def credible_interval(
         dist = stats.norm(params["mean"], params["std"])
     elif distribution == "gamma":
         if "shape" not in params or "rate" not in params:
-            raise ValueError("Gamma distribution requires 'shape' and 'rate' parameters")
+            raise ValueError(
+                "Gamma distribution requires 'shape' and 'rate' parameters"
+            )
         # scipy uses scale = 1/rate
         dist = stats.gamma(params["shape"], scale=1 / params["rate"])
     else:
@@ -296,9 +298,7 @@ def posterior_predictive(
     elif distribution == "normal":
         if "mean" not in params or "std" not in params:
             raise ValueError("Normal requires 'mean' and 'std' parameters")
-        predictions = stats.norm.rvs(
-            params["mean"], params["std"], size=n_samples
-        )
+        predictions = stats.norm.rvs(params["mean"], params["std"], size=n_samples)
         return predictions.tolist()
 
     elif distribution == "gamma":

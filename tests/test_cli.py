@@ -265,7 +265,18 @@ class TestMainCLI:
 
     @patch(
         "sys.argv",
-        ["rss-calc", "prob", "--type", "binomial", "--n", "10", "--k", "3", "--p", "0.5"],
+        [
+            "rss-calc",
+            "prob",
+            "--type",
+            "binomial",
+            "--n",
+            "10",
+            "--k",
+            "3",
+            "--p",
+            "0.5",
+        ],
     )
     @patch("sys.stdout", new_callable=StringIO)
     def test_main_prob_binomial(self, mock_stdout):
@@ -296,7 +307,16 @@ class TestMainCLI:
 
     @patch(
         "sys.argv",
-        ["rss-calc", "test", "--data", "23,25,28,30,32", "--type", "t_test", "--mu", "30"],
+        [
+            "rss-calc",
+            "test",
+            "--data",
+            "23,25,28,30,32",
+            "--type",
+            "t_test",
+            "--mu",
+            "30",
+        ],
     )
     @patch("sys.stdout", new_callable=StringIO)
     def test_main_test_t_test(self, mock_stdout):

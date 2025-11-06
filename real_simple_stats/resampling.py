@@ -10,14 +10,18 @@ from scipy import stats
 
 try:
     from numba import jit
+
     NUMBA_AVAILABLE = True
 except ImportError:
     NUMBA_AVAILABLE = False
+
     # Fallback decorator that does nothing
     def jit(*args, **kwargs):
         def decorator(func):
             return func
+
         return decorator
+
 
 # Module-level constants
 VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
@@ -27,38 +31,38 @@ VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
 @jit(nopython=True)
 def _bootstrap_mean_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.ndarray:
     """JIT-compiled bootstrap for mean calculation.
-    
+
     Args:
         data: Input data array
         n_iterations: Number of bootstrap iterations
         seed: Random seed
-        
+
     Returns:
         Array of bootstrap statistics
     """
     np.random.seed(seed)
     n = len(data)
     results = np.empty(n_iterations)
-    
+
     for i in range(n_iterations):
         sample_sum = 0.0
         for j in range(n):
             idx = np.random.randint(0, n)
             sample_sum += data[idx]
         results[i] = sample_sum / n
-    
+
     return results
 
 
 @jit(nopython=True)
 def _bootstrap_median_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.ndarray:
     """JIT-compiled bootstrap for median calculation.
-    
+
     Args:
         data: Input data array
         n_iterations: Number of bootstrap iterations
         seed: Random seed
-        
+
     Returns:
         Array of bootstrap statistics
     """
@@ -66,25 +70,25 @@ def _bootstrap_median_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.
     n = len(data)
     results = np.empty(n_iterations)
     sample = np.empty(n)
-    
+
     for i in range(n_iterations):
         for j in range(n):
             idx = np.random.randint(0, n)
             sample[j] = data[idx]
         results[i] = np.median(sample)
-    
+
     return results
 
 
 @jit(nopython=True)
 def _bootstrap_std_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.ndarray:
     """JIT-compiled bootstrap for standard deviation calculation.
-    
+
     Args:
         data: Input data array
         n_iterations: Number of bootstrap iterations
         seed: Random seed
-        
+
     Returns:
         Array of bootstrap statistics
     """
@@ -92,27 +96,28 @@ def _bootstrap_std_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.nda
     n = len(data)
     results = np.empty(n_iterations)
     sample = np.empty(n)
-    
+
     for i in range(n_iterations):
         for j in range(n):
             idx = np.random.randint(0, n)
             sample[j] = data[idx]
         results[i] = np.std(sample)
-    
+
     return results
 
 
 @jit(nopython=True)
-def _permutation_mean_diff_jit(data1: np.ndarray, data2: np.ndarray, 
-                                n_permutations: int, seed: int) -> np.ndarray:
+def _permutation_mean_diff_jit(
+    data1: np.ndarray, data2: np.ndarray, n_permutations: int, seed: int
+) -> np.ndarray:
     """JIT-compiled permutation test for mean difference.
-    
+
     Args:
         data1: First sample
         data2: Second sample
         n_permutations: Number of permutations
         seed: Random seed
-        
+
     Returns:
         Array of permutation statistics
     """
@@ -121,13 +126,13 @@ def _permutation_mean_diff_jit(data1: np.ndarray, data2: np.ndarray,
     n1 = len(data1)
     n_total = len(pooled)
     results = np.empty(n_permutations)
-    
+
     for i in range(n_permutations):
         # Shuffle pooled data
         for j in range(n_total - 1, 0, -1):
             k = np.random.randint(0, j + 1)
             pooled[j], pooled[k] = pooled[k], pooled[j]
-        
+
         # Calculate mean difference
         sum1 = 0.0
         sum2 = 0.0
@@ -135,11 +140,11 @@ def _permutation_mean_diff_jit(data1: np.ndarray, data2: np.ndarray,
             sum1 += pooled[j]
         for j in range(n1, n_total):
             sum2 += pooled[j]
-        
+
         mean1 = sum1 / n1
         mean2 = sum2 / (n_total - n1)
         results[i] = mean1 - mean2
-    
+
     return results
 
 
@@ -185,23 +190,23 @@ def bootstrap(
 
     data_array = np.asarray(data)
     n = len(data_array)
-    
+
     # Set random seed
     seed = random_seed if random_seed is not None else np.random.randint(0, 2**31)
-    
+
     # Calculate original statistic
     original_stat = statistic(data)
-    
+
     # Use JIT-compiled versions for common statistics (10-50x faster)
     if NUMBA_AVAILABLE and n_iterations >= 100:
         # Check if statistic is a common function
-        stat_name = getattr(statistic, '__name__', '')
-        
-        if statistic is np.mean or stat_name == 'mean':
+        stat_name = getattr(statistic, "__name__", "")
+
+        if statistic is np.mean or stat_name == "mean":
             bootstrap_stats = _bootstrap_mean_jit(data_array, n_iterations, seed)
-        elif statistic is np.median or stat_name == 'median':
+        elif statistic is np.median or stat_name == "median":
             bootstrap_stats = _bootstrap_median_jit(data_array, n_iterations, seed)
-        elif statistic is np.std or stat_name == 'std':
+        elif statistic is np.std or stat_name == "std":
             bootstrap_stats = _bootstrap_std_jit(data_array, n_iterations, seed)
         else:
             # Fall back to standard Python loop for custom statistics
@@ -349,13 +354,13 @@ def permutation_test(
 
     data1_array = np.asarray(data1)
     data2_array = np.asarray(data2)
-    
+
     # Set random seed
     seed = random_seed if random_seed is not None else np.random.randint(0, 2**31)
-    
+
     # Calculate observed statistic
     observed_stat = statistic(data1, data2)
-    
+
     # Use JIT-compiled version for mean difference (10-50x faster)
     if NUMBA_AVAILABLE and n_permutations >= 100:
         # Check if this is a mean difference test
@@ -363,7 +368,7 @@ def permutation_test(
             # Test if statistic computes mean difference
             test_result = statistic([1.0, 2.0], [3.0, 4.0])
             expected_mean_diff = 1.5 - 3.5  # -2.0
-            
+
             if abs(test_result - expected_mean_diff) < 1e-10:
                 # Use JIT-compiled version
                 permutation_stats = _permutation_mean_diff_jit(

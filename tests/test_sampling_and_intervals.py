@@ -174,7 +174,7 @@ class TestConfidenceIntervalKnownStd:
         # 99% CI should be wider than 95% CI
         lower_95, upper_95 = confidence_interval_known_std(100, 15, 36, 0.95)
         lower_99, upper_99 = confidence_interval_known_std(100, 15, 36, 0.99)
-        
+
         width_95 = upper_95 - lower_95
         width_99 = upper_99 - lower_99
         assert width_99 > width_95
@@ -183,7 +183,7 @@ class TestConfidenceIntervalKnownStd:
         # Larger sample should give narrower CI
         lower_small, upper_small = confidence_interval_known_std(100, 15, 36, 0.95)
         lower_large, upper_large = confidence_interval_known_std(100, 15, 144, 0.95)
-        
+
         width_small = upper_small - lower_small
         width_large = upper_large - lower_large
         assert width_large < width_small
@@ -219,7 +219,7 @@ class TestConfidenceIntervalUnknownStd:
         # t-distribution CI should be slightly wider than z-distribution CI
         lower_z, upper_z = confidence_interval_known_std(100, 15, 36, 0.95)
         lower_t, upper_t = confidence_interval_unknown_std(100, 15, 36, 0.95)
-        
+
         width_z = upper_z - lower_z
         width_t = upper_t - lower_t
         assert width_t >= width_z  # t-CI should be at least as wide
@@ -228,7 +228,7 @@ class TestConfidenceIntervalUnknownStd:
         # Small sample should give wider CI
         lower_small, upper_small = confidence_interval_unknown_std(100, 15, 10, 0.95)
         lower_large, upper_large = confidence_interval_unknown_std(100, 15, 100, 0.95)
-        
+
         width_small = upper_small - lower_small
         width_large = upper_large - lower_large
         assert width_small > width_large
@@ -337,19 +337,19 @@ class TestIntegration:
         pop_mean = 80
         pop_std = 10
         sample_size = 100
-        
+
         # Sampling distribution properties
         mean_of_means = sampling_distribution_mean(pop_mean)
         var_of_means = sampling_distribution_variance(pop_std, sample_size)
-        
+
         assert mean_of_means == pop_mean
         assert var_of_means == pytest.approx(1.0)
-        
+
         # Probability calculations
         p_greater = clt_probability_greater_than(82, pop_mean, pop_std, sample_size)
         p_less = clt_probability_less_than(78, pop_mean, pop_std, sample_size)
         p_between = clt_probability_between(78, 82, pop_mean, pop_std, sample_size)
-        
+
         assert 0 < p_greater < 0.5
         assert 0 < p_less < 0.5
         assert p_between > 0
@@ -359,15 +359,15 @@ class TestIntegration:
         sample_mean = 100
         sample_std = 15
         n = 36
-        
+
         # Calculate both types of CI
         ci_known = confidence_interval_known_std(sample_mean, sample_std, n, 0.95)
         ci_unknown = confidence_interval_unknown_std(sample_mean, sample_std, n, 0.95)
-        
+
         # Both should contain the mean
         assert ci_known[0] < sample_mean < ci_known[1]
         assert ci_unknown[0] < sample_mean < ci_unknown[1]
-        
+
         # t-CI should be slightly wider
         width_known = ci_known[1] - ci_known[0]
         width_unknown = ci_unknown[1] - ci_unknown[0]
@@ -379,12 +379,12 @@ class TestIntegration:
         desired_width = 10
         confidence = 0.95
         pop_std = 15
-        
+
         n_required = required_sample_size(confidence, desired_width, pop_std)
-        
+
         # Verify the CI with this sample size has approximately the desired width
         ci = confidence_interval_known_std(100, pop_std, n_required, confidence)
         actual_width = ci[1] - ci[0]
-        
+
         # Should be close to desired width (within 10%)
         assert abs(actual_width - desired_width) / desired_width < 0.1

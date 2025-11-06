@@ -88,7 +88,9 @@ def multiple_regression(
     p_value = 1 - stats.f.cdf(f_statistic, df_regression, df_residual)
 
     result = {
-        "coefficients": coefficients[1:].tolist() if include_intercept else coefficients.tolist(),
+        "coefficients": (
+            coefficients[1:].tolist() if include_intercept else coefficients.tolist()
+        ),
         "intercept": float(coefficients[0]) if include_intercept else None,
         "r_squared": float(r_squared),
         "adjusted_r_squared": float(adjusted_r_squared),
@@ -101,9 +103,7 @@ def multiple_regression(
     return result
 
 
-def pca(
-    X: List[List[float]], n_components: Optional[int] = None
-) -> Dict[str, any]:
+def pca(X: List[List[float]], n_components: Optional[int] = None) -> Dict[str, any]:
     """Perform Principal Component Analysis (PCA).
 
     Args:
@@ -164,7 +164,9 @@ def pca(
 
     # Calculate explained variance
     total_variance = np.sum(eigenvalues)
-    explained_variance_ratio = eigenvalues / total_variance if total_variance > 0 else eigenvalues
+    explained_variance_ratio = (
+        eigenvalues / total_variance if total_variance > 0 else eigenvalues
+    )
 
     return {
         "components": eigenvectors.T.tolist(),
@@ -254,7 +256,9 @@ def factor_analysis(
         factor_scores = X_standardized @ loadings @ np.linalg.inv(loadings.T @ loadings)
     except np.linalg.LinAlgError:
         # Use pseudoinverse for singular matrices
-        factor_scores = X_standardized @ loadings @ np.linalg.pinv(loadings.T @ loadings)
+        factor_scores = (
+            X_standardized @ loadings @ np.linalg.pinv(loadings.T @ loadings)
+        )
 
     return {
         "loadings": loadings.T.tolist(),
@@ -264,9 +268,7 @@ def factor_analysis(
     }
 
 
-def canonical_correlation(
-    X: List[List[float]], Y: List[List[float]]
-) -> Dict[str, any]:
+def canonical_correlation(X: List[List[float]], Y: List[List[float]]) -> Dict[str, any]:
     """Perform Canonical Correlation Analysis (CCA).
 
     Args:
