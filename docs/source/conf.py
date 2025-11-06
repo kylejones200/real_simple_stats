@@ -15,8 +15,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 project = "Real Simple Stats"
 copyright = "2025, Kyle Jones"
 author = "Kyle Jones"
-release = "0.2.0"
-version = "0.2.0"
+release = "0.3.0"
+version = "0.3.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -30,6 +30,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.coverage",
     "sphinx.ext.githubpages",
+    "myst_parser",
 ]
 
 autodoc_default_options = {
@@ -40,6 +41,16 @@ autodoc_default_options = {
 
 templates_path = ["_templates"]
 exclude_patterns: list[str] = []
+
+# MyST Parser configuration
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "amsmath",
+    "html_image",
+]
+myst_heading_anchors = 3
 
 
 # -- Options for HTML output -------------------------------------------------

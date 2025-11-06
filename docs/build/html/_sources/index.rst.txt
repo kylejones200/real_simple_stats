@@ -25,6 +25,12 @@ Key Features
 * **Hypothesis Testing**: t-tests, F-tests, chi-square tests with p-values
 * **Probability Distributions**: Normal, binomial, Poisson distributions
 * **Linear Regression**: Simple and multiple regression analysis
+* **Time Series Analysis**: Moving averages, autocorrelation, seasonal decomposition
+* **Bayesian Statistics**: Conjugate priors, credible intervals, Bayes factors
+* **Resampling Methods**: Bootstrap, permutation tests, cross-validation
+* **Effect Sizes**: Cohen's d, eta-squared, Cramér's V, odds ratios
+* **Power Analysis**: Sample size calculations, power for various tests
+* **Multivariate Analysis**: PCA, multiple regression, factor analysis
 * **Data Visualization**: Statistical plots and charts
 * **Command Line Interface**: Easy-to-use CLI for quick calculations
 * **Educational Focus**: Clear explanations and examples for learning
@@ -63,6 +69,17 @@ Documentation Contents
    quickstart
    tutorials
    cli_reference
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Comprehensive Guides
+
+   guides/api_comparison
+   guides/mathematical_formulas
+   guides/interactive_examples
+   guides/faq
+   guides/troubleshooting
+   guides/migration_guide
 
 .. toctree::
    :maxdepth: 2
