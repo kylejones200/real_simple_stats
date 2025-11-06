@@ -8,6 +8,9 @@ from typing import List, Tuple, Callable, Dict, Optional
 import numpy as np
 from scipy import stats
 
+# Module-level constants
+VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
+
 
 def bootstrap(
     data: List[float],
@@ -191,8 +194,8 @@ def permutation_test(
         raise ValueError("Both samples must contain at least 1 value")
     if n_permutations < 1:
         raise ValueError("n_permutations must be at least 1")
-    if alternative not in ["two-sided", "greater", "less"]:
-        raise ValueError("alternative must be 'two-sided', 'greater', or 'less'")
+    if alternative not in VALID_ALTERNATIVES:
+        raise ValueError(f"alternative must be one of {VALID_ALTERNATIVES}")
 
     if random_seed is not None:
         np.random.seed(random_seed)
