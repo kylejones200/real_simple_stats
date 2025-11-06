@@ -30,3 +30,4 @@ from .bayesian_stats import *  # noqa: F403, F401
 from .resampling import *  # noqa: F403, F401
 from .effect_sizes import *  # noqa: F403, F401
 from .power_analysis import *  # noqa: F403, F401
+from .monte_carlo import *  # noqa: F403, F401
