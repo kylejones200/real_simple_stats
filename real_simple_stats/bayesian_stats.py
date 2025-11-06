@@ -259,7 +259,7 @@ def posterior_predictive(
     """Generate samples from posterior predictive distribution.
 
     Args:
-        distribution: Type of distribution ('beta_binomial', 'normal', 'gamma_poisson')
+        distribution: Type of distribution ('beta', 'beta_binomial', 'normal', 'gamma', 'gamma_poisson')
         params: Dictionary of posterior parameters
         n_samples: Number of samples to generate
 
@@ -277,7 +277,13 @@ def posterior_predictive(
     if n_samples < 1:
         raise ValueError("n_samples must be at least 1")
 
-    if distribution == "beta_binomial":
+    if distribution == "beta":
+        if "alpha" not in params or "beta" not in params:
+            raise ValueError("Beta requires 'alpha' and 'beta' parameters")
+        predictions = stats.beta.rvs(params["alpha"], params["beta"], size=n_samples)
+        return predictions.tolist()
+
+    elif distribution == "beta_binomial":
         if "alpha" not in params or "beta" not in params or "n" not in params:
             raise ValueError(
                 "Beta-binomial requires 'alpha', 'beta', and 'n' parameters"
@@ -292,6 +298,14 @@ def posterior_predictive(
             raise ValueError("Normal requires 'mean' and 'std' parameters")
         predictions = stats.norm.rvs(
             params["mean"], params["std"], size=n_samples
+        )
+        return predictions.tolist()
+
+    elif distribution == "gamma":
+        if "shape" not in params or "rate" not in params:
+            raise ValueError("Gamma requires 'shape' and 'rate' parameters")
+        predictions = stats.gamma.rvs(
+            params["shape"], scale=1 / params["rate"], size=n_samples
         )
         return predictions.tolist()
 
@@ -337,8 +351,8 @@ def empirical_bayes_estimate(data: List[float]) -> Dict[str, float]:
     variance = np.var(data_array, ddof=1)
 
     return {
-        "prior_mean": float(mean),
-        "prior_variance": float(variance),
+        "mean": float(mean),
+        "variance": float(variance),
     }
 
 
@@ -361,24 +375,28 @@ def conjugate_prior_summary(family: str) -> Dict[str, str]:
     """
     conjugate_priors = {
         "binomial": {
+            "likelihood": "Binomial",
             "prior": "Beta",
             "parameters": "alpha, beta",
             "posterior": "Beta(alpha + successes, beta + failures)",
             "interpretation": "Beta distribution is conjugate for binomial likelihood",
         },
         "normal": {
+            "likelihood": "Normal",
             "prior": "Normal (known variance)",
             "parameters": "mean, variance",
             "posterior": "Normal with updated mean and variance",
             "interpretation": "Normal prior is conjugate for normal likelihood with known variance",
         },
         "poisson": {
+            "likelihood": "Poisson",
             "prior": "Gamma",
             "parameters": "shape, rate",
             "posterior": "Gamma(shape + sum(data), rate + n)",
             "interpretation": "Gamma distribution is conjugate for Poisson likelihood",
         },
         "exponential": {
+            "likelihood": "Exponential",
             "prior": "Gamma",
             "parameters": "shape, rate",
             "posterior": "Gamma(shape + n, rate + sum(data))",

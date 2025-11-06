@@ -250,7 +250,11 @@ def factor_analysis(
         uniquenesses = new_uniquenesses
 
     # Calculate factor scores using regression method
-    factor_scores = X_standardized @ loadings @ np.linalg.inv(loadings.T @ loadings)
+    try:
+        factor_scores = X_standardized @ loadings @ np.linalg.inv(loadings.T @ loadings)
+    except np.linalg.LinAlgError:
+        # Use pseudoinverse for singular matrices
+        factor_scores = X_standardized @ loadings @ np.linalg.pinv(loadings.T @ loadings)
 
     return {
         "loadings": loadings.T.tolist(),
@@ -272,8 +276,8 @@ def canonical_correlation(
     Returns:
         Dictionary containing:
             - correlations: Canonical correlations
-            - x_weights: Weights for X variables
-            - y_weights: Weights for Y variables
+            - X_weights: Weights for X variables
+            - Y_weights: Weights for Y variables
 
     Raises:
         ValueError: If dimensions don't match or data is insufficient
@@ -319,8 +323,8 @@ def canonical_correlation(
 
         U, S, Vt = np.linalg.svd(M)
 
-        # Canonical correlations
-        correlations = S[: min(p, q)]
+        # Canonical correlations (clip to avoid numerical errors > 1.0)
+        correlations = np.clip(S[: min(p, q)], 0.0, 1.0)
 
         # Canonical weights
         x_weights = Cxx_inv_sqrt @ U
@@ -331,8 +335,8 @@ def canonical_correlation(
 
     return {
         "correlations": correlations.tolist(),
-        "x_weights": x_weights.tolist(),
-        "y_weights": y_weights.tolist(),
+        "X_weights": x_weights.tolist(),
+        "Y_weights": y_weights.tolist(),
     }
 
 

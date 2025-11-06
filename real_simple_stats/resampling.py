@@ -256,7 +256,7 @@ def bootstrap_hypothesis_test(
     Returns:
         Dictionary containing:
             - observed_statistic: Observed test statistic
-            - null_distribution: Bootstrap null distribution
+            - bootstrap_distribution: Bootstrap null distribution
             - p_value: Two-tailed p-value
 
     Raises:
@@ -301,7 +301,7 @@ def bootstrap_hypothesis_test(
 
     return {
         "observed_statistic": float(observed_stat),
-        "null_distribution": null_distribution.tolist(),
+        "bootstrap_distribution": null_distribution.tolist(),
         "p_value": float(p_value),
     }
 
@@ -496,7 +496,7 @@ def cross_validate(
 
     Returns:
         Dictionary containing:
-            - fold_scores: Score for each fold (MSE)
+            - scores: Score for each fold (MSE)
             - mean_score: Mean cross-validation score
             - std_score: Standard deviation of scores
 
@@ -554,7 +554,7 @@ def cross_validate(
         fold_scores.append(float(mse))
 
     return {
-        "fold_scores": fold_scores,
+        "scores": fold_scores,
         "mean_score": float(np.mean(fold_scores)),
         "std_score": float(np.std(fold_scores)),
     }
