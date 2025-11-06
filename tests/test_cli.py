@@ -1,7 +1,6 @@
 """Tests for CLI module."""
 
 import pytest
-import sys
 from io import StringIO
 from unittest.mock import patch
 from real_simple_stats.cli import (

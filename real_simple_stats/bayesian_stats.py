@@ -4,9 +4,9 @@ This module provides functions for Bayesian statistical analysis including
 prior/posterior distributions and credible intervals.
 """
 
-from typing import List, Tuple, Dict, Callable, Optional
+from typing import List, Tuple, Dict
 import numpy as np
-from scipy import stats, integrate
+from scipy import stats
 
 
 def beta_binomial_update(

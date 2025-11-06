@@ -1,6 +1,5 @@
 """Tests for resampling methods module."""
 
-import pytest
 import numpy as np
 from real_simple_stats.resampling import (
     bootstrap,

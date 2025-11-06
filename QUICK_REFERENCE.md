@@ -316,6 +316,6 @@ smoothed = rss.moving_average(detrended, window_size=5)
 
 ---
 
-**Version**: 0.3.0  
-**Last Updated**: 2025  
+**Version**: 0.3.0
+**Last Updated**: 2025
 **License**: MIT

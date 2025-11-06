@@ -22,7 +22,7 @@ pip install git+https://github.com/kylejones200/real_simple_stats.git
 
 ### Q: What are the system requirements?
 
-**A:** 
+**A:**
 - **Python**: 3.7 or higher
 - **Dependencies**: NumPy, SciPy (automatically installed)
 - **Optional**: matplotlib (for plotting), pandas (for data handling)
@@ -91,7 +91,7 @@ result = rss.mean(data)
 
 ### Q: What's the difference between sample and population functions?
 
-**A:** 
+**A:**
 - **Sample functions** (e.g., `sample_std_dev`): Use $n-1$ in denominator (Bessel's correction)
 - **Population functions** (e.g., `population_std_dev`): Use $n$ in denominator
 
@@ -295,7 +295,7 @@ result = rss.bootstrap(data, np.mean, n_iterations=1000)
 print(f"95% CI: {result['confidence_interval']}")
 
 # Permutation test for hypothesis
-result = rss.permutation_test(group1, group2, 
+result = rss.permutation_test(group1, group2,
                                lambda d1, d2: np.mean(d1) - np.mean(d2))
 print(f"p-value: {result['p_value']}")
 ```
@@ -321,7 +321,7 @@ post_alpha, post_beta = rss.beta_binomial_update(
 )
 
 # Credible interval (Bayesian CI)
-lower, upper = rss.credible_interval('beta', 
+lower, upper = rss.credible_interval('beta',
                                       {'alpha': post_alpha, 'beta': post_beta})
 ```
 
@@ -475,7 +475,7 @@ However, always validate results for critical applications.
 
 ### Q: How does this compare to R or SPSS?
 
-**A:** 
+**A:**
 - **Simpler**: Easier to learn than R
 - **More accessible**: Free and open-source (unlike SPSS)
 - **Python-based**: Integrates with data science ecosystem
@@ -529,7 +529,7 @@ y = [4, 5, 6]  # Same length
 
 ### Q: Plots don't show up
 
-**A:** 
+**A:**
 ```python
 import matplotlib.pyplot as plt
 import real_simple_stats as rss
@@ -597,7 +597,7 @@ print(f"t({len(data)-1}) = {t_stat:.2f}, p = {p_value:.3f}, d = {d:.2f}")
 
 **Example**:
 ```
-"A two-sample t-test revealed a significant difference between groups, 
+"A two-sample t-test revealed a significant difference between groups,
 t(18) = 2.45, p = .025, d = 0.73, 95% CI [0.5, 3.2]."
 ```
 
@@ -630,7 +630,7 @@ alpha_corrected = 0.05 / 3
 
 ### Q: How do I report bugs or request features?
 
-**A:** 
+**A:**
 1. Check [existing issues](https://github.com/kylejones200/real_simple_stats/issues)
 2. Create a new issue with:
    - Description of problem/feature
@@ -653,5 +653,5 @@ alpha_corrected = 0.05 / 3
 
 ---
 
-**Last Updated**: 2025  
+**Last Updated**: 2025
 **Version**: 0.3.0

@@ -5,9 +5,8 @@ geometric Brownian motion for financial modeling and general-purpose
 simulation techniques.
 """
 
-from typing import List, Tuple, Callable, Dict, Optional, Union
+from typing import List, Callable, Dict, Optional, Union
 import numpy as np
-from scipy import stats
 
 try:
     from numba import jit

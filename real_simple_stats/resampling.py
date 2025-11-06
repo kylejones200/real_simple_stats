@@ -6,7 +6,6 @@ and cross-validation techniques.
 
 from typing import List, Tuple, Callable, Dict, Optional
 import numpy as np
-from scipy import stats
 
 try:
     from numba import jit
@@ -288,7 +287,6 @@ def bootstrap_hypothesis_test(
     # Pool data under null hypothesis
     pooled_data = np.concatenate([data1, data2])
     n1 = len(data1)
-    n2 = len(data2)
 
     # Bootstrap under null hypothesis
     null_distribution = []
@@ -386,7 +384,7 @@ def permutation_test(
                     perm_sample2 = shuffled[n1:]
                     permutation_stats.append(statistic(perm_sample1, perm_sample2))
                 permutation_stats = np.array(permutation_stats)
-        except:
+        except Exception:
             # Fall back to standard loop if test fails
             np.random.seed(seed)
             pooled_data = np.concatenate([data1_array, data2_array])

@@ -294,9 +294,9 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Release Date**: 2025  
-**Version**: 0.3.0  
-**Python**: 3.8+  
+**Release Date**: 2025
+**Version**: 0.3.0
+**Python**: 3.8+
 **Dependencies**: numpy>=1.20.0, scipy>=1.7.0, matplotlib>=3.3.0
 
 ---

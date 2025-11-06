@@ -1,7 +1,6 @@
 """Comprehensive tests for sampling and confidence intervals."""
 
 import pytest
-import math
 from real_simple_stats.sampling_and_intervals import (
     sampling_distribution_mean,
     sampling_distribution_variance,

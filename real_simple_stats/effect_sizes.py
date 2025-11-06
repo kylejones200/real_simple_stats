@@ -4,7 +4,7 @@ This module provides functions for calculating various effect size measures
 including Cohen's d, eta-squared, Cramér's V, and odds ratios.
 """
 
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 import numpy as np
 from scipy import stats
 

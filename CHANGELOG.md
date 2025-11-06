@@ -16,21 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Linear trend analysis and detrending
   - Seasonal decomposition
   - Differencing operations
-  
+
 - **Multivariate Analysis** (`multivariate.py`)
   - Multiple linear regression with diagnostics
   - Principal Component Analysis (PCA)
   - Factor analysis
   - Canonical Correlation Analysis
   - Mahalanobis distance
-  
+
 - **Bayesian Statistics** (`bayesian_stats.py`)
   - Conjugate prior updates (Beta-Binomial, Normal-Normal, Gamma-Poisson)
   - Credible intervals and HDI
   - Bayes factors
   - Posterior predictive distributions
   - Empirical Bayes estimation
-  
+
 - **Resampling Methods** (`resampling.py`)
   - Bootstrap with confidence intervals
   - Bootstrap hypothesis testing
@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Jackknife estimation
   - K-fold cross-validation
   - Stratified train-test splitting
-  
+
 - **Effect Sizes** (`effect_sizes.py`)
   - Cohen's d, Hedges' g, Glass's delta
   - Eta-squared, partial eta-squared, omega-squared
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Odds ratios and relative risk
   - Cohen's h for proportions
   - Effect size interpretation
-  
+
 - **Power Analysis** (`power_analysis.py`)
   - Power analysis for t-tests
   - Power analysis for proportion tests
@@ -68,28 +68,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Function comparison tables with NumPy, SciPy, pandas, statsmodels
   - Quick lookup by use case
   - 40+ comparison tables
-  
+
 - **Mathematical Formulas** (`docs/MATHEMATICAL_FORMULAS.md`)
   - 60+ LaTeX formulas for all functions
   - Complete mathematical reference
   - Parameter definitions and interpretations
-  
+
 - **Interactive Examples** (`docs/INTERACTIVE_EXAMPLES.md`)
   - Google Colab and Binder integration
   - 8 comprehensive tutorial notebooks
   - Interactive widgets and visualizations
   - Browser-based learning (no installation required)
-  
+
 - **FAQ** (`docs/FAQ.md`)
   - 50+ common questions answered
   - Installation, usage, and troubleshooting
   - Best practices and tips
-  
+
 - **Troubleshooting Guide** (`docs/TROUBLESHOOTING.md`)
   - 30+ common errors with solutions
   - Debugging strategies
   - Performance optimization tips
-  
+
 - **Migration Guide** (`docs/MIGRATION_GUIDE.md`)
   - From R, SciPy, statsmodels, SPSS, Excel
   - Side-by-side code comparisons

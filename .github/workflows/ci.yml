@@ -161,9 +161,9 @@ jobs:
     - name: Test package installation
       run: |
         # Install only the newest wheel to avoid resolver conflicts across versions
-        LATEST_WHl=$(ls -1 dist/real_simple_stats-*.whl | sort -V | tail -n1)
-        echo "Installing wheel: ${LATEST_WHl}"
-        pip install "${LATEST_WHl}"
+        LATEST_WHL=$(ls -1 dist/real_simple_stats-*.whl | sort -V | tail -n1)
+        echo "Installing wheel: ${LATEST_WHL}"
+        pip install "${LATEST_WHL}"
         python -c "import real_simple_stats; print(f'Package version: {real_simple_stats.__version__}')"
         rss-calc --help
 

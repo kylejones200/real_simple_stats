@@ -188,7 +188,7 @@ print(f"95% CI: {result['confidence_interval']}")
 # Permutation test
 group1 = [1, 2, 3, 4, 5]
 group2 = [3, 4, 5, 6, 7]
-result = rss.permutation_test(group1, group2, 
+result = rss.permutation_test(group1, group2,
                                lambda d1, d2: np.mean(d1) - np.mean(d2))
 print(f"p-value: {result['p_value']:.3f}")
 ```
@@ -278,12 +278,12 @@ import real_simple_stats as rss
 prior_alpha, prior_beta = 1, 1  # Uniform prior
 successes, trials = 7, 10
 
-post_alpha, post_beta = rss.beta_binomial_update(prior_alpha, prior_beta, 
+post_alpha, post_beta = rss.beta_binomial_update(prior_alpha, prior_beta,
                                                    successes, trials)
 
 # Calculate credible interval
-lower, upper = rss.credible_interval('beta', 
-                                      {'alpha': post_alpha, 'beta': post_beta}, 
+lower, upper = rss.credible_interval('beta',
+                                      {'alpha': post_alpha, 'beta': post_beta},
                                       0.95)
 print(f"95% Credible Interval: [{lower:.3f}, {upper:.3f}]")
 ```

@@ -1,7 +1,5 @@
 """Tests for multivariate analysis module."""
 
-import pytest
-import numpy as np
 from real_simple_stats.multivariate import (
     multiple_regression,
     pca,

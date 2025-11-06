@@ -150,7 +150,7 @@ print(f"p-value: {p_value:.4f}")
    result$p.value
    result$conf.int
    ```
-   
+
    ```python
    # Python returns tuple
    t_stat, p_value = rss.two_sample_t_test(x, y)
@@ -163,7 +163,7 @@ print(f"p-value: {p_value:.4f}")
    df <- data.frame(x=c(1,2,3), y=c(4,5,6))
    cor(df$x, df$y)
    ```
-   
+
    ```python
    # Python uses lists or pandas
    import pandas as pd
@@ -176,7 +176,7 @@ print(f"p-value: {p_value:.4f}")
    # R handles NA automatically
    mean(c(1, 2, NA, 4), na.rm=TRUE)
    ```
-   
+
    ```python
    # Python requires manual handling
    data = [1, 2, None, 4]
@@ -292,7 +292,7 @@ slope, intercept, r_value, p_value, std_err = rss.linear_regression(x, y)
    from scipy import stats
    from scipy.stats import norm, binom
    import numpy as np
-   
+
    # Real Simple Stats
    import real_simple_stats as rss
    ```
@@ -301,7 +301,7 @@ slope, intercept, r_value, p_value, std_err = rss.linear_regression(x, y)
    ```python
    # SciPy
    stats.ttest_ind(group1, group2)
-   
+
    # Real Simple Stats (more descriptive)
    rss.two_sample_t_test(group1, group2)
    ```
@@ -579,7 +579,7 @@ d <- cohen.d(group1, group2)
 # Report
 cat(sprintf("Group 1: M=%.2f, SD=%.2f\n", mean1, sd1))
 cat(sprintf("Group 2: M=%.2f, SD=%.2f\n", mean2, sd2))
-cat(sprintf("t(%.0f)=%.2f, p=%.3f\n", 
+cat(sprintf("t(%.0f)=%.2f, p=%.3f\n",
             result$parameter, result$statistic, result$p.value))
 cat(sprintf("Cohen's d=%.2f\n", d$estimate))
 ```
@@ -688,5 +688,5 @@ qnorm(p, mean, sd)         → rss.normal_ppf(p, mu, sigma)
 
 **Need help migrating?** [Open an issue](https://github.com/kylejones200/real_simple_stats/issues) with your use case!
 
-**Last Updated**: 2025  
+**Last Updated**: 2025
 **Version**: 0.3.0

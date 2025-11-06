@@ -118,7 +118,7 @@ from real_simple_stats import nonexistent_function
    ```python
    # Correct
    from real_simple_stats import mean, median
-   
+
    # Or
    import real_simple_stats as rss
    rss.mean([1, 2, 3])
@@ -411,7 +411,7 @@ if len(observed) != len(expected):
 1. **Check data validity:**
    ```python
    import numpy as np
-   
+
    # Check for NaN or inf
    if any(np.isnan(data)) or any(np.isinf(data)):
        print("Data contains NaN or inf values")
@@ -457,7 +457,7 @@ rss.plot_normal_histogram(data)
    ```python
    import matplotlib.pyplot as plt
    import real_simple_stats as rss
-   
+
    rss.plot_normal_histogram(data)
    plt.show()  # Add this!
    ```
@@ -466,7 +466,7 @@ rss.plot_normal_histogram(data)
    ```python
    %matplotlib inline
    import real_simple_stats as rss
-   
+
    rss.plot_normal_histogram(data)
    ```
 
@@ -474,7 +474,7 @@ rss.plot_normal_histogram(data)
    ```python
    import matplotlib
    print(matplotlib.get_backend())
-   
+
    # Change if needed
    matplotlib.use('TkAgg')  # or 'Qt5Agg', 'MacOSX'
    ```
@@ -553,7 +553,7 @@ result = rss.pca(X, n_components=n_components)
    ```python
    # Fast (for testing)
    result = rss.bootstrap(data, np.mean, n_iterations=100)
-   
+
    # Accurate (for final analysis)
    result = rss.bootstrap(data, np.mean, n_iterations=10000)
    ```
@@ -561,7 +561,7 @@ result = rss.pca(X, n_components=n_components)
 2. **Use progress indicator:**
    ```python
    from tqdm import tqdm
-   
+
    # Custom implementation with progress bar
    results = []
    for i in tqdm(range(n_iterations)):
@@ -626,10 +626,10 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
 1. **Use NumPy arrays:**
    ```python
    import numpy as np
-   
+
    # Slower
    data_list = list(range(10000))
-   
+
    # Faster
    data_array = np.array(data_list)
    ```
@@ -638,7 +638,7 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
    ```python
    # Faster
    result = rss.bootstrap(data, np.mean, n_iterations=1000)
-   
+
    # Slower but more accurate
    result = rss.bootstrap(data, np.mean, n_iterations=10000)
    ```
@@ -646,7 +646,7 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
 3. **Profile your code:**
    ```python
    import time
-   
+
    start = time.time()
    result = rss.some_function(data)
    print(f"Time: {time.time() - start:.2f}s")
@@ -690,7 +690,7 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
 5. **Enable detailed errors:**
    ```python
    import traceback
-   
+
    try:
        result = rss.some_function(data)
    except Exception as e:
@@ -766,7 +766,7 @@ result = rss.some_function(data)
 2. **Use type hints:**
    ```python
    from typing import List
-   
+
    def my_analysis(data: List[float]) -> float:
        return rss.mean(data)
    ```
@@ -783,7 +783,7 @@ result = rss.some_function(data)
 
 4. **Document your assumptions:**
    ```python
-   # Assumes: 
+   # Assumes:
    # - Data is normally distributed
    # - Equal variances
    # - Independent samples
@@ -792,7 +792,7 @@ result = rss.some_function(data)
 
 ---
 
-**Last Updated**: 2025  
+**Last Updated**: 2025
 **Version**: 0.3.0
 
 **Still stuck?** [Open an issue](https://github.com/kylejones200/real_simple_stats/issues) on GitHub!

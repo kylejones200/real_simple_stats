@@ -1,8 +1,7 @@
 """Tests for plotting functions."""
 
-import pytest
 import numpy as np
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 from real_simple_stats.plots import (
     set_minimalist_style,
     plot_norm_hist,

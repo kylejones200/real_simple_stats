@@ -300,14 +300,14 @@ import real_simple_stats as rss
 
 def effect_size_calculator(group1, group2):
     """Interactive effect size calculator"""
-    
+
     # Calculate multiple effect sizes
     d = rss.cohens_d(group1, group2)
     g = rss.hedges_g(group1, group2)
-    
+
     # Interpret
     d_interp = rss.interpret_effect_size(d, 'd')
-    
+
     print("=" * 50)
     print("EFFECT SIZE ANALYSIS")
     print("=" * 50)
@@ -333,38 +333,38 @@ import real_simple_stats as rss
 import matplotlib.pyplot as plt
 import numpy as np
 
-def simulate_confidence_intervals(true_mean=100, true_std=15, n=30, 
+def simulate_confidence_intervals(true_mean=100, true_std=15, n=30,
                                    n_simulations=100, confidence=0.95):
     """Simulate confidence intervals to show coverage"""
-    
+
     covers_true_mean = 0
-    
+
     plt.figure(figsize=(12, 8))
-    
+
     for i in range(n_simulations):
         # Generate sample
         sample = np.random.normal(true_mean, true_std, n)
-        
+
         # Calculate CI
         sample_mean = rss.mean(sample)
         sample_std = rss.sample_std_dev(sample)
         lower, upper = rss.confidence_interval_unknown_std(
             sample_mean, sample_std, n, confidence
         )
-        
+
         # Check if CI covers true mean
         covers = lower <= true_mean <= upper
         covers_true_mean += covers
-        
+
         # Plot
         color = 'green' if covers else 'red'
         plt.plot([lower, upper], [i, i], color=color, alpha=0.5)
         plt.plot(sample_mean, i, 'o', color=color, markersize=3)
-    
+
     # Add true mean line
-    plt.axvline(true_mean, color='blue', linestyle='--', linewidth=2, 
+    plt.axvline(true_mean, color='blue', linestyle='--', linewidth=2,
                 label=f'True Mean ({true_mean})')
-    
+
     coverage = covers_true_mean / n_simulations
     plt.title(f'{confidence*100}% Confidence Intervals\n'
               f'Coverage: {coverage*100:.1f}% (Expected: {confidence*100}%)')
@@ -373,7 +373,7 @@ def simulate_confidence_intervals(true_mean=100, true_std=15, n=30,
     plt.legend()
     plt.tight_layout()
     plt.show()
-    
+
     print(f"Coverage rate: {coverage*100:.1f}%")
     print(f"Expected: {confidence*100}%")
 
@@ -392,24 +392,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-def visualize_bayesian_update(prior_alpha=1, prior_beta=1, 
+def visualize_bayesian_update(prior_alpha=1, prior_beta=1,
                                successes=7, trials=10):
     """Visualize Bayesian updating"""
-    
+
     # Update
     post_alpha, post_beta = rss.beta_binomial_update(
         prior_alpha, prior_beta, successes, trials
     )
-    
+
     # Plot
     x = np.linspace(0, 1, 1000)
     prior = stats.beta.pdf(x, prior_alpha, prior_beta)
     posterior = stats.beta.pdf(x, post_alpha, post_beta)
-    
+
     plt.figure(figsize=(10, 6))
     plt.plot(x, prior, label='Prior', linewidth=2)
     plt.plot(x, posterior, label='Posterior', linewidth=2)
-    plt.axvline(successes/trials, color='red', linestyle='--', 
+    plt.axvline(successes/trials, color='red', linestyle='--',
                 label=f'MLE ({successes}/{trials})')
     plt.xlabel('Probability')
     plt.ylabel('Density')
@@ -456,29 +456,29 @@ import real_simple_stats as rss
 )
 def run_test(test_type, alpha):
     """Interactive test runner"""
-    
+
     if test_type == 'One-Sample t-test':
         data = [23, 25, 28, 30, 32]
         mu0 = 30
         t_stat, p_value = rss.one_sample_t_test(data, mu0)
         print(f"One-Sample t-test (H₀: μ = {mu0})")
-        
+
     elif test_type == 'Two-Sample t-test':
         group1 = [23, 25, 28, 30, 32]
         group2 = [28, 30, 35, 38, 40]
         t_stat, p_value = rss.two_sample_t_test(group1, group2)
         print(f"Two-Sample t-test")
-        
+
     elif test_type == 'Paired t-test':
         before = [23, 25, 28, 30, 32]
         after = [25, 27, 30, 33, 35]
         t_stat, p_value = rss.paired_t_test(before, after)
         print(f"Paired t-test")
-    
+
     print(f"t-statistic: {t_stat:.3f}")
     print(f"p-value: {p_value:.4f}")
     print(f"Significance level: {alpha}")
-    
+
     if p_value < alpha:
         print(f"✓ Reject H₀ (p < {alpha})")
     else:
