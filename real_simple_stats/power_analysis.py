@@ -2,11 +2,71 @@
 
 This module provides functions for calculating statistical power and
 required sample sizes for various statistical tests.
+
+Refactored for Pythonic elegance and maintainability.
 """
 
-from typing import Optional, Dict
+from typing import Optional, Dict, Callable
 import numpy as np
 from scipy import stats, optimize
+
+# Module-level constants
+VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
+VALID_TEST_TYPES = {"t-test", "proportion", "correlation"}
+
+
+def _get_tails(alternative: str) -> int:
+    """Convert alternative hypothesis to number of tails.
+    
+    Args:
+        alternative: 'two-sided', 'greater', or 'less'
+        
+    Returns:
+        2 for two-sided, 1 for one-sided
+    """
+    return 2 if alternative == "two-sided" else 1
+
+
+def _get_alpha_adjusted(sig_level: float, tails: int) -> float:
+    """Get adjusted alpha for one or two-tailed test.
+    
+    Args:
+        sig_level: Significance level
+        tails: Number of tails (1 or 2)
+        
+    Returns:
+        Adjusted significance level
+    """
+    return sig_level / 2 if tails == 2 else sig_level
+
+
+def _validate_alternative(alternative: str) -> None:
+    """Validate alternative hypothesis parameter.
+    
+    Args:
+        alternative: Alternative hypothesis type
+        
+    Raises:
+        ValueError: If alternative is not valid
+    """
+    if alternative not in VALID_ALTERNATIVES:
+        raise ValueError(f"alternative must be one of {VALID_ALTERNATIVES}")
+
+
+def _validate_none_count(params: Dict[str, Optional[float]], expected: int = 1) -> None:
+    """Validate that exactly the expected number of parameters are None.
+    
+    Args:
+        params: Dictionary of parameter names to values
+        expected: Expected number of None values
+        
+    Raises:
+        ValueError: If wrong number of parameters are None
+    """
+    none_count = sum(v is None for v in params.values())
+    if none_count != expected:
+        param_names = ", ".join(params.keys())
+        raise ValueError(f"Exactly {expected} of {param_names} must be None")
 
 
 def power_t_test(
@@ -41,94 +101,86 @@ def power_t_test(
         >>> result['n'] > 0
         True
     """
-    # Count how many parameters are None
-    none_count = sum([n is None, delta is None, power is None])
-
-    if none_count != 1:
-        raise ValueError("Exactly one of n, delta, or power must be None")
-
-    if alternative not in ["two-sided", "greater", "less"]:
-        raise ValueError("alternative must be 'two-sided', 'greater', or 'less'")
-
-    if alternative == "two-sided":
-        tails = 2
-    else:
-        tails = 1
-
+    # Validation
+    _validate_none_count({"n": n, "delta": delta, "power": power})
+    _validate_alternative(alternative)
+    
+    tails = _get_tails(alternative)
+    base_params = {
+        "sd": sd,
+        "sig_level": sig_level,
+        "alternative": alternative,
+    }
+    
+    # Dispatch to appropriate calculator
     if n is None:
-        # Calculate required sample size
-        if delta == 0:
-            raise ValueError("delta cannot be zero when calculating sample size")
-
-        effect_size = abs(delta) / sd
-
-        # Critical value
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
-
-        z_beta = stats.norm.ppf(power)
-
-        # Approximate sample size formula
-        n_calculated = ((z_alpha + z_beta) ** 2) / (effect_size**2)
-        n_calculated = int(np.ceil(n_calculated))
-
-        return {
-            "n": n_calculated,
-            "delta": delta,
-            "sd": sd,
-            "sig_level": sig_level,
-            "power": power,
-            "alternative": alternative,
-        }
-
+        return _calculate_t_test_n(delta, power, tails, base_params)
     elif delta is None:
-        # Calculate detectable effect size
-        if tails == 2:
-            t_crit = stats.t.ppf(1 - sig_level / 2, df=n - 1)
-        else:
-            t_crit = stats.t.ppf(1 - sig_level, df=n - 1)
-
-        t_beta = stats.t.ppf(power, df=n - 1)
-
-        effect_size = (t_crit + abs(t_beta)) / np.sqrt(n)
-        delta_calculated = effect_size * sd
-
-        return {
-            "n": n,
-            "delta": delta_calculated,
-            "sd": sd,
-            "sig_level": sig_level,
-            "power": power,
-            "alternative": alternative,
-        }
-
+        return _calculate_t_test_delta(n, power, tails, base_params)
     else:  # power is None
-        # Calculate power
-        effect_size = abs(delta) / sd
-        ncp = effect_size * np.sqrt(n)  # Non-centrality parameter
+        return _calculate_t_test_power(n, delta, tails, base_params)
 
-        if tails == 2:
-            t_crit = stats.t.ppf(1 - sig_level / 2, df=n - 1)
-        else:
-            t_crit = stats.t.ppf(1 - sig_level, df=n - 1)
 
-        # Power is probability of rejecting null when alternative is true
-        power_calculated = 1 - stats.nct.cdf(t_crit, df=n - 1, nc=ncp)
+def _calculate_t_test_n(delta: float, power: float, tails: int, 
+                        base_params: Dict) -> Dict[str, float]:
+    """Calculate required sample size for t-test."""
+    if delta == 0:
+        raise ValueError("delta cannot be zero when calculating sample size")
+    
+    effect_size = abs(delta) / base_params["sd"]
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = stats.norm.ppf(power)
+    
+    n_calculated = int(np.ceil(((z_alpha + z_beta) ** 2) / (effect_size**2)))
+    
+    return {
+        "n": n_calculated,
+        "delta": delta,
+        "power": power,
+        **base_params,
+    }
 
-        if tails == 2:
-            # Add lower tail for two-sided test
-            power_calculated += stats.nct.cdf(-t_crit, df=n - 1, nc=ncp)
 
-        return {
-            "n": n,
-            "delta": delta,
-            "sd": sd,
-            "sig_level": sig_level,
-            "power": float(power_calculated),
-            "alternative": alternative,
-        }
+def _calculate_t_test_delta(n: int, power: float, tails: int,
+                             base_params: Dict) -> Dict[str, float]:
+    """Calculate detectable effect size for t-test."""
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    t_crit = stats.t.ppf(1 - alpha_adj, df=n - 1)
+    t_beta = stats.t.ppf(power, df=n - 1)
+    
+    effect_size = (t_crit + abs(t_beta)) / np.sqrt(n)
+    delta_calculated = effect_size * base_params["sd"]
+    
+    return {
+        "n": n,
+        "delta": delta_calculated,
+        "power": power,
+        **base_params,
+    }
+
+
+def _calculate_t_test_power(n: int, delta: float, tails: int,
+                             base_params: Dict) -> Dict[str, float]:
+    """Calculate statistical power for t-test."""
+    effect_size = abs(delta) / base_params["sd"]
+    ncp = effect_size * np.sqrt(n)
+    
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    t_crit = stats.t.ppf(1 - alpha_adj, df=n - 1)
+    
+    power_calculated = 1 - stats.nct.cdf(t_crit, df=n - 1, nc=ncp)
+    
+    if tails == 2:
+        power_calculated += stats.nct.cdf(-t_crit, df=n - 1, nc=ncp)
+    
+    return {
+        "n": n,
+        "delta": delta,
+        "power": float(power_calculated),
+        **base_params,
+    }
 
 
 def power_proportion_test(
@@ -160,91 +212,87 @@ def power_proportion_test(
         >>> result['n'] > 0
         True
     """
-    none_count = sum([n is None, p1 is None, power is None])
-
-    if none_count != 1:
-        raise ValueError("Exactly one of n, p1, or power must be None")
-
+    # Validation
+    _validate_none_count({"n": n, "p1": p1, "power": power})
+    _validate_alternative(alternative)
+    
     if not 0 < p2 < 1:
         raise ValueError("p2 must be between 0 and 1")
-
-    if alternative not in ["two-sided", "greater", "less"]:
-        raise ValueError("alternative must be 'two-sided', 'greater', or 'less'")
-
-    if alternative == "two-sided":
-        tails = 2
-    else:
-        tails = 1
-
+    
+    tails = _get_tails(alternative)
+    base_params = {
+        "p2": p2,
+        "sig_level": sig_level,
+        "alternative": alternative,
+    }
+    
+    # Dispatch to appropriate calculator
     if n is None:
-        # Calculate required sample size
-        if p1 is None or p1 == p2:
-            raise ValueError("p1 must be different from p2")
-
-        # Effect size (Cohen's h)
-        h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(p2)))
-
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
-
-        z_beta = stats.norm.ppf(power)
-
-        n_calculated = ((z_alpha + z_beta) / h) ** 2
-        n_calculated = int(np.ceil(n_calculated))
-
-        return {
-            "n": n_calculated,
-            "p1": p1,
-            "p2": p2,
-            "sig_level": sig_level,
-            "power": power,
-            "alternative": alternative,
-        }
-
+        return _calculate_proportion_n(p1, power, tails, base_params)
     elif p1 is None:
-        # Calculate detectable proportion difference
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
-
-        z_beta = stats.norm.ppf(power)
-
-        h = (z_alpha + z_beta) / np.sqrt(n)
-        phi1 = np.arcsin(np.sqrt(p2)) + h / 2
-        p1_calculated = np.sin(phi1) ** 2
-
-        return {
-            "n": n,
-            "p1": float(p1_calculated),
-            "p2": p2,
-            "sig_level": sig_level,
-            "power": power,
-            "alternative": alternative,
-        }
-
+        return _calculate_proportion_p1(n, power, tails, base_params)
     else:  # power is None
-        # Calculate power
-        h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(p2)))
+        return _calculate_proportion_power(n, p1, tails, base_params)
 
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
 
-        z_beta = abs(h) * np.sqrt(n) - z_alpha
-        power_calculated = stats.norm.cdf(z_beta)
+def _calculate_proportion_n(p1: float, power: float, tails: int,
+                             base_params: Dict) -> Dict[str, float]:
+    """Calculate required sample size for proportion test."""
+    if p1 is None or p1 == base_params["p2"]:
+        raise ValueError("p1 must be different from p2")
+    
+    # Cohen's h effect size
+    h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(base_params["p2"])))
+    
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = stats.norm.ppf(power)
+    
+    n_calculated = int(np.ceil(((z_alpha + z_beta) / h) ** 2))
+    
+    return {
+        "n": n_calculated,
+        "p1": p1,
+        "power": power,
+        **base_params,
+    }
 
-        return {
-            "n": n,
-            "p1": p1,
-            "p2": p2,
-            "sig_level": sig_level,
-            "power": float(power_calculated),
-            "alternative": alternative,
-        }
+
+def _calculate_proportion_p1(n: int, power: float, tails: int,
+                              base_params: Dict) -> Dict[str, float]:
+    """Calculate detectable proportion difference."""
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = stats.norm.ppf(power)
+    
+    h = (z_alpha + z_beta) / np.sqrt(n)
+    phi1 = np.arcsin(np.sqrt(base_params["p2"])) + h / 2
+    p1_calculated = np.sin(phi1) ** 2
+    
+    return {
+        "n": n,
+        "p1": float(p1_calculated),
+        "power": power,
+        **base_params,
+    }
+
+
+def _calculate_proportion_power(n: int, p1: float, tails: int,
+                                 base_params: Dict) -> Dict[str, float]:
+    """Calculate statistical power for proportion test."""
+    h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(base_params["p2"])))
+    
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = abs(h) * np.sqrt(n) - z_alpha
+    power_calculated = stats.norm.cdf(z_beta)
+    
+    return {
+        "n": n,
+        "p1": p1,
+        "power": float(power_calculated),
+        **base_params,
+    }
 
 
 def power_anova(
@@ -276,77 +324,98 @@ def power_anova(
     """
     if n_groups < 2:
         raise ValueError("n_groups must be at least 2")
-
-    none_count = sum([n_per_group is None, effect_size is None, power is None])
-
-    if none_count != 1:
-        raise ValueError("Exactly one of n_per_group, effect_size, or power must be None")
-
+    
+    _validate_none_count({
+        "n_per_group": n_per_group,
+        "effect_size": effect_size,
+        "power": power
+    })
+    
+    base_params = {
+        "n_groups": n_groups,
+        "sig_level": sig_level,
+    }
+    
+    # Dispatch to appropriate calculator
     if n_per_group is None:
-        # Calculate required sample size per group
-        if effect_size <= 0:
-            raise ValueError("effect_size must be positive")
-
-        # Use iterative approach
-        def power_func(n):
-            df1 = n_groups - 1
-            df2 = n_groups * (n - 1)
-            ncp = n * n_groups * (effect_size**2)
-            f_crit = stats.f.ppf(1 - sig_level, df1, df2)
-            return 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
-
-        # Find n that gives desired power
-        n_calculated = int(
-            optimize.brentq(lambda n: power_func(n) - power, 2, 10000)
-        )
-
-        return {
-            "n_groups": n_groups,
-            "n_per_group": n_calculated,
-            "effect_size": effect_size,
-            "sig_level": sig_level,
-            "power": power,
-        }
-
+        return _calculate_anova_n(effect_size, power, base_params)
     elif effect_size is None:
-        # Calculate detectable effect size
-        df1 = n_groups - 1
-        df2 = n_groups * (n_per_group - 1)
-        f_crit = stats.f.ppf(1 - sig_level, df1, df2)
-
-        # Use iterative approach
-        def power_func(es):
-            ncp = n_per_group * n_groups * (es**2)
-            return 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
-
-        effect_size_calculated = optimize.brentq(
-            lambda es: power_func(es) - power, 0.01, 10
-        )
-
-        return {
-            "n_groups": n_groups,
-            "n_per_group": n_per_group,
-            "effect_size": float(effect_size_calculated),
-            "sig_level": sig_level,
-            "power": power,
-        }
-
+        return _calculate_anova_effect(n_per_group, power, base_params)
     else:  # power is None
-        # Calculate power
+        return _calculate_anova_power(n_per_group, effect_size, base_params)
+
+
+def _calculate_anova_n(effect_size: float, power: float,
+                       base_params: Dict) -> Dict[str, float]:
+    """Calculate required sample size per group for ANOVA."""
+    if effect_size <= 0:
+        raise ValueError("effect_size must be positive")
+    
+    n_groups = base_params["n_groups"]
+    sig_level = base_params["sig_level"]
+    
+    def power_func(n):
         df1 = n_groups - 1
-        df2 = n_groups * (n_per_group - 1)
-        ncp = n_per_group * n_groups * (effect_size**2)
+        df2 = n_groups * (n - 1)
+        ncp = n * n_groups * (effect_size**2)
         f_crit = stats.f.ppf(1 - sig_level, df1, df2)
+        return 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
+    
+    n_calculated = int(optimize.brentq(lambda n: power_func(n) - power, 2, 10000))
+    
+    return {
+        "n_per_group": n_calculated,
+        "effect_size": effect_size,
+        "power": power,
+        **base_params,
+    }
 
-        power_calculated = 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
 
-        return {
-            "n_groups": n_groups,
-            "n_per_group": n_per_group,
-            "effect_size": effect_size,
-            "sig_level": sig_level,
-            "power": float(power_calculated),
-        }
+def _calculate_anova_effect(n_per_group: int, power: float,
+                             base_params: Dict) -> Dict[str, float]:
+    """Calculate detectable effect size for ANOVA."""
+    n_groups = base_params["n_groups"]
+    sig_level = base_params["sig_level"]
+    
+    df1 = n_groups - 1
+    df2 = n_groups * (n_per_group - 1)
+    f_crit = stats.f.ppf(1 - sig_level, df1, df2)
+    
+    def power_func(es):
+        ncp = n_per_group * n_groups * (es**2)
+        return 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
+    
+    effect_size_calculated = optimize.brentq(
+        lambda es: power_func(es) - power, 0.01, 10
+    )
+    
+    return {
+        "n_per_group": n_per_group,
+        "effect_size": float(effect_size_calculated),
+        "power": power,
+        **base_params,
+    }
+
+
+def _calculate_anova_power(n_per_group: int, effect_size: float,
+                            base_params: Dict) -> Dict[str, float]:
+    """Calculate statistical power for ANOVA."""
+    n_groups = base_params["n_groups"]
+    sig_level = base_params["sig_level"]
+    
+    df1 = n_groups - 1
+    df2 = n_groups * (n_per_group - 1)
+    ncp = n_per_group * n_groups * (effect_size**2)
+    f_crit = stats.f.ppf(1 - sig_level, df1, df2)
+    
+    power_calculated = 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
+    
+    return {
+        "n_per_group": n_per_group,
+        "effect_size": effect_size,
+        "power": float(power_calculated),
+        **base_params,
+    }
 
 
 def power_correlation(
@@ -376,84 +445,106 @@ def power_correlation(
         >>> result['n'] > 0
         True
     """
-    none_count = sum([n is None, r is None, power is None])
-
-    if none_count != 1:
-        raise ValueError("Exactly one of n, r, or power must be None")
-
-    if alternative not in ["two-sided", "greater", "less"]:
-        raise ValueError("alternative must be 'two-sided', 'greater', or 'less'")
-
-    if alternative == "two-sided":
-        tails = 2
-    else:
-        tails = 1
-
+    _validate_none_count({"n": n, "r": r, "power": power})
+    _validate_alternative(alternative)
+    
+    tails = _get_tails(alternative)
+    base_params = {
+        "sig_level": sig_level,
+        "alternative": alternative,
+    }
+    
+    # Dispatch to appropriate calculator
     if n is None:
-        # Calculate required sample size
-        if abs(r) >= 1:
-            raise ValueError("r must be between -1 and 1")
-
-        # Fisher's z transformation
-        z_r = 0.5 * np.log((1 + r) / (1 - r))
-
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
-
-        z_beta = stats.norm.ppf(power)
-
-        n_calculated = ((z_alpha + z_beta) / z_r) ** 2 + 3
-        n_calculated = int(np.ceil(n_calculated))
-
-        return {
-            "n": n_calculated,
-            "r": r,
-            "sig_level": sig_level,
-            "power": power,
-            "alternative": alternative,
-        }
-
+        return _calculate_correlation_n(r, power, tails, base_params)
     elif r is None:
-        # Calculate detectable correlation
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
-
-        z_beta = stats.norm.ppf(power)
-
-        z_r = (z_alpha + z_beta) / np.sqrt(n - 3)
-        r_calculated = (np.exp(2 * z_r) - 1) / (np.exp(2 * z_r) + 1)
-
-        return {
-            "n": n,
-            "r": float(r_calculated),
-            "sig_level": sig_level,
-            "power": power,
-            "alternative": alternative,
-        }
-
+        return _calculate_correlation_r(n, power, tails, base_params)
     else:  # power is None
-        # Calculate power
-        z_r = 0.5 * np.log((1 + r) / (1 - r))
+        return _calculate_correlation_power(n, r, tails, base_params)
 
-        if tails == 2:
-            z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        else:
-            z_alpha = stats.norm.ppf(1 - sig_level)
 
-        z_beta = z_r * np.sqrt(n - 3) - z_alpha
-        power_calculated = stats.norm.cdf(z_beta)
+def _calculate_correlation_n(r: float, power: float, tails: int,
+                              base_params: Dict) -> Dict[str, float]:
+    """Calculate required sample size for correlation test."""
+    if abs(r) >= 1:
+        raise ValueError("r must be between -1 and 1")
+    
+    z_r = 0.5 * np.log((1 + r) / (1 - r))  # Fisher's z transformation
+    
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = stats.norm.ppf(power)
+    
+    n_calculated = int(np.ceil(((z_alpha + z_beta) / z_r) ** 2 + 3))
+    
+    return {
+        "n": n_calculated,
+        "r": r,
+        "power": power,
+        **base_params,
+    }
 
-        return {
-            "n": n,
-            "r": r,
-            "sig_level": sig_level,
-            "power": float(power_calculated),
-            "alternative": alternative,
-        }
+
+def _calculate_correlation_r(n: int, power: float, tails: int,
+                              base_params: Dict) -> Dict[str, float]:
+    """Calculate detectable correlation coefficient."""
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = stats.norm.ppf(power)
+    
+    z_r = (z_alpha + z_beta) / np.sqrt(n - 3)
+    r_calculated = (np.exp(2 * z_r) - 1) / (np.exp(2 * z_r) + 1)
+    
+    return {
+        "n": n,
+        "r": float(r_calculated),
+        "power": power,
+        **base_params,
+    }
+
+
+def _calculate_correlation_power(n: int, r: float, tails: int,
+                                  base_params: Dict) -> Dict[str, float]:
+    """Calculate statistical power for correlation test."""
+    z_r = 0.5 * np.log((1 + r) / (1 - r))
+    
+    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
+    z_alpha = stats.norm.ppf(1 - alpha_adj)
+    z_beta = z_r * np.sqrt(n - 3) - z_alpha
+    power_calculated = stats.norm.cdf(z_beta)
+    
+    return {
+        "n": n,
+        "r": r,
+        "power": float(power_calculated),
+        **base_params,
+    }
+
+
+# Dispatch dictionary for minimum detectable effect calculators
+def _mde_t_test(n: int, power: float, sig_level: float) -> float:
+    """Calculate MDE for t-test."""
+    result = power_t_test(n=n, power=power, sig_level=sig_level)
+    return result["delta"]
+
+
+def _mde_proportion(n: int, power: float, sig_level: float) -> float:
+    """Calculate MDE for proportion test."""
+    result = power_proportion_test(n=n, p2=0.5, power=power, sig_level=sig_level)
+    return abs(result["p1"] - result["p2"])
+
+
+def _mde_correlation(n: int, power: float, sig_level: float) -> float:
+    """Calculate MDE for correlation test."""
+    result = power_correlation(n=n, power=power, sig_level=sig_level)
+    return abs(result["r"])
+
+
+MDE_CALCULATORS: Dict[str, Callable[[int, float, float], float]] = {
+    "t-test": _mde_t_test,
+    "proportion": _mde_proportion,
+    "correlation": _mde_correlation,
+}
 
 
 def minimum_detectable_effect(
@@ -484,21 +575,14 @@ def minimum_detectable_effect(
         raise ValueError("sig_level must be between 0 and 1")
     if not 0 < power < 1:
         raise ValueError("power must be between 0 and 1")
-
-    if test_type == "t-test":
-        result = power_t_test(n=n, power=power, sig_level=sig_level)
-        return result["delta"]
-
-    elif test_type == "proportion":
-        result = power_proportion_test(n=n, p2=0.5, power=power, sig_level=sig_level)
-        return abs(result["p1"] - result["p2"])
-
-    elif test_type == "correlation":
-        result = power_correlation(n=n, power=power, sig_level=sig_level)
-        return abs(result["r"])
-
-    else:
-        raise ValueError(f"Unknown test_type: {test_type}")
+    
+    if test_type not in MDE_CALCULATORS:
+        raise ValueError(
+            f"Unknown test_type: {test_type}. "
+            f"Valid types: {set(MDE_CALCULATORS.keys())}"
+        )
+    
+    return MDE_CALCULATORS[test_type](n, power, sig_level)
 
 
 def sample_size_summary(
@@ -520,24 +604,24 @@ def sample_size_summary(
         True
     """
     results = {}
-
+    
     # T-test
     t_result = power_t_test(delta=effect_size, power=power, sig_level=sig_level)
     results["t_test_per_group"] = t_result["n"]
-
+    
     # ANOVA (3 groups)
     anova_result = power_anova(
         n_groups=3, effect_size=effect_size, power=power, sig_level=sig_level
     )
     results["anova_3groups_per_group"] = anova_result["n_per_group"]
-
+    
     # Correlation (if effect size is reasonable for correlation)
     if abs(effect_size) < 1:
         corr_result = power_correlation(
             r=effect_size, power=power, sig_level=sig_level
         )
         results["correlation_total"] = corr_result["n"]
-
+    
     return results
 
 
