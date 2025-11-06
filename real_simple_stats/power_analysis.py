@@ -7,6 +7,7 @@ Refactored for Pythonic elegance and maintainability.
 """
 
 from typing import Optional, Dict, Callable
+from functools import lru_cache
 import numpy as np
 from scipy import stats, optimize
 
@@ -38,6 +39,48 @@ def _get_alpha_adjusted(sig_level: float, tails: int) -> float:
         Adjusted significance level
     """
     return sig_level / 2 if tails == 2 else sig_level
+
+
+@lru_cache(maxsize=256)
+def _cached_norm_ppf(alpha: float) -> float:
+    """Cache normal distribution critical values.
+    
+    Args:
+        alpha: Significance level
+        
+    Returns:
+        Critical value from standard normal distribution
+    """
+    return stats.norm.ppf(1 - alpha)
+
+
+@lru_cache(maxsize=512)
+def _cached_t_ppf(alpha: float, df: int) -> float:
+    """Cache t distribution critical values.
+    
+    Args:
+        alpha: Significance level
+        df: Degrees of freedom
+        
+    Returns:
+        Critical value from t distribution
+    """
+    return stats.t.ppf(1 - alpha, df=df)
+
+
+@lru_cache(maxsize=512)
+def _cached_f_ppf(alpha: float, dfn: int, dfd: int) -> float:
+    """Cache F distribution critical values.
+    
+    Args:
+        alpha: Significance level
+        dfn: Numerator degrees of freedom
+        dfd: Denominator degrees of freedom
+        
+    Returns:
+        Critical value from F distribution
+    """
+    return stats.f.ppf(1 - alpha, dfn, dfd)
 
 
 def _validate_alternative(alternative: str) -> None:
@@ -130,8 +173,8 @@ def _calculate_t_test_n(delta: float, power: float, tails: int,
     effect_size = abs(delta) / base_params["sd"]
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
     
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = stats.norm.ppf(power)
+    z_alpha = _cached_norm_ppf(alpha_adj)
+    z_beta = _cached_norm_ppf(1 - power)
     
     n_calculated = int(np.ceil(((z_alpha + z_beta) ** 2) / (effect_size**2)))
     
@@ -147,8 +190,8 @@ def _calculate_t_test_delta(n: int, power: float, tails: int,
                              base_params: Dict) -> Dict[str, float]:
     """Calculate detectable effect size for t-test."""
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    t_crit = stats.t.ppf(1 - alpha_adj, df=n - 1)
-    t_beta = stats.t.ppf(power, df=n - 1)
+    t_crit = _cached_t_ppf(alpha_adj, df=n - 1)
+    t_beta = _cached_t_ppf(1 - power, df=n - 1)
     
     effect_size = (t_crit + abs(t_beta)) / np.sqrt(n)
     delta_calculated = effect_size * base_params["sd"]
