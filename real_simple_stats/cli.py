@@ -80,7 +80,7 @@ def probability_command(args):
         print(f"P(A|B) = {result:.6f}")
 
 
-def test_command(args):
+def hypothesis_test_command(args):
     """Handle hypothesis testing."""
     data = parse_numbers(args.data)
 
@@ -208,7 +208,7 @@ Examples:
         elif args.command == "prob":
             probability_command(args)
         elif args.command == "test":
-            test_command(args)
+            hypothesis_test_command(args)
         elif args.command == "glossary":
             glossary_command(args)
     except Exception as e:

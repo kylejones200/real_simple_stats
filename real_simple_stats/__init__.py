@@ -22,3 +22,11 @@ from .linear_regression_utils import *  # noqa: F403, F401
 from .chi_square_utils import *  # noqa: F403, F401
 from .probability_distributions import *  # noqa: F403, F401
 from .glossary import GLOSSARY, lookup
+
+# Advanced statistical methods (new in v0.3.0)
+from .time_series import *  # noqa: F403, F401
+from .multivariate import *  # noqa: F403, F401
+from .bayesian_stats import *  # noqa: F403, F401
+from .resampling import *  # noqa: F403, F401
+from .effect_sizes import *  # noqa: F403, F401
+from .power_analysis import *  # noqa: F403, F401

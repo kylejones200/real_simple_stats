@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "real_simple_stats"
-version = "0.2.0"
+version = "0.3.0"
 description = "Educational Python statistics library covering basic through advanced statistical concepts"
 authors = [
     { name = "Kyle Jones", email = "kylejones@american.edu" }
