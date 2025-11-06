@@ -148,3 +148,26 @@ cython_debug/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Backup and temporary files
+*_backup.py
+*_refactored.py
+*_old.py
+*.bak
+
+# Personal notebooks and files in root
+/*.ipynb
+/*.html
+
+# Temporary markdown files
+/*_SUMMARY.md
+/*_REPORT.md
+/*_PLAN.md
+/*_STATUS.md
+/*_COMPLETE.md
+/*_APPLIED.md
+/*_ANALYSIS.md
+ML4Geo*.md
+PyFi*.md
+*Monte-Carlo*.md
+*Monte-Carlo*.html
