@@ -131,9 +131,22 @@ With coverage:
 pytest tests/ --cov=real_simple_stats --cov-report=html
 ```
 
+### 🔁 Match CI Locally
+
+To reproduce the GitHub Actions pipeline on your machine:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt  # if present
+mypy .
+ruff check .
+pytest -q --maxfail=1
+```
+
 ## 🎯 Use Cases
 
-- **Education**: Perfect for statistics courses and self-study
+- **Education**: Statistics courses and self-study
 - **Research**: Quick statistical calculations and hypothesis testing
 - **Data Analysis**: Exploratory data analysis and validation
 - **Reference**: Comprehensive statistical function library
@@ -155,11 +168,6 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- Inspired by educational statistics textbooks and courses
-- Built with modern Python packaging standards
-- Designed for clarity and educational value
 
 ## 📊 Project Stats
 
@@ -168,6 +176,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Test Coverage**: >95%
 - **Documentation**: Sphinx + ReadTheDocs
 
----
-
-**Made with ❤️ for statistics education**

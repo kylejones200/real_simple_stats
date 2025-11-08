@@ -21,7 +21,7 @@ from .hypothesis_testing import *  # noqa: F403, F401
 from .linear_regression_utils import *  # noqa: F403, F401
 from .chi_square_utils import *  # noqa: F403, F401
 from .probability_distributions import *  # noqa: F403, F401
-from .glossary import GLOSSARY, lookup
+from .glossary import GLOSSARY, lookup  # noqa: F401
 
 # Advanced statistical methods (new in v0.3.0)
 from .time_series import *  # noqa: F403, F401
