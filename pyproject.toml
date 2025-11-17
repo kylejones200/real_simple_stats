@@ -160,4 +160,5 @@ ignore = [
     "N802",  # Function name should be lowercase (test naming conventions)
     "UP006",  # Use dict instead of Dict (compatibility with older Python)
     "UP007",  # Use X | Y instead of Union (compatibility with older Python)
+    "UP045",  # Use X | None instead of Optional (requires Python 3.10+, we support 3.8+)
 ]
