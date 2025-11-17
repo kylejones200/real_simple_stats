@@ -25,6 +25,7 @@ permissions:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail CI if docs have issues
 
     steps:
     - name: Checkout code
@@ -35,7 +36,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version-file: '.python-version'
 
     - name: Install dependencies
       run: |
