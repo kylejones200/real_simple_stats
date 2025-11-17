@@ -15,23 +15,36 @@ test:  ## Run tests
 test-cov:  ## Run tests with coverage
 	pytest tests/ --cov=real_simple_stats --cov-report=html --cov-report=term
 
-lint:  ## Run linting
+lint:  ## Run linting with ruff (matches CI)
+	ruff check .
+
+lint-legacy:  ## Run linting with flake8 (legacy, use lint instead)
 	flake8 real_simple_stats/ tests/
 
-format:  ## Format code with black
+format:  ## Format code with ruff-format (matches CI)
+	ruff format .
+
+format-legacy:  ## Format code with black (legacy, use format instead)
 	black real_simple_stats/ tests/
 
 format-check:  ## Check code formatting
-	black --check real_simple_stats/ tests/
+	ruff format --check .
 
-type-check:  ## Run type checking
-	mypy real_simple_stats/
+type-check:  ## Run type checking (matches CI)
+	mypy .
 
-quality:  ## Run all quality checks
+quality:  ## Run all quality checks (matches CI)
 	make format-check
 	make lint
 	make type-check
 	make test
+
+ci:  ## Run all CI checks locally (matches GitHub Actions CI)
+	@echo "Running CI checks..."
+	ruff check .
+	mypy .
+	pytest -q --maxfail=1
+	@echo "All CI checks passed!"
 
 clean:  ## Clean build artifacts
 	rm -rf build/

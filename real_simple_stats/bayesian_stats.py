@@ -4,7 +4,8 @@ This module provides functions for Bayesian statistical analysis including
 prior/posterior distributions and credible intervals.
 """
 
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
 import numpy as np
 from scipy import stats
 

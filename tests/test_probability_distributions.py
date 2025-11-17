@@ -1,20 +1,21 @@
 """Comprehensive tests for probability distributions."""
 
 import pytest
+
 from real_simple_stats.probability_distributions import (
-    poisson_pmf,
-    poisson_cdf,
-    geometric_pmf,
-    geometric_cdf,
-    exponential_pdf,
-    exponential_cdf,
-    negative_binomial_pmf,
-    expected_value_poisson,
-    variance_poisson,
-    expected_value_geometric,
-    variance_geometric,
     expected_value_exponential,
+    expected_value_geometric,
+    expected_value_poisson,
+    exponential_cdf,
+    exponential_pdf,
+    geometric_cdf,
+    geometric_pmf,
+    negative_binomial_pmf,
+    poisson_cdf,
+    poisson_pmf,
     variance_exponential,
+    variance_geometric,
+    variance_poisson,
 )
 
 

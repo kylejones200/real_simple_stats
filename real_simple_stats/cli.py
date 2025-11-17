@@ -6,13 +6,14 @@ Provides quick access to statistical calculations from the terminal.
 """
 
 import argparse
+import json
 import sys
 from typing import List
-import json
 
-from . import descriptive_statistics as desc
-from . import probability_utils as prob
 from . import binomial_distributions as binom
+from . import descriptive_statistics as desc
+from . import normal_distributions as norm_dist
+from . import probability_utils as prob
 from .glossary import lookup
 
 
@@ -63,21 +64,88 @@ def descriptive_stats_command(args):
 def probability_command(args):
     """Handle probability calculations."""
     if args.type == "normal":
-        if args.cdf:
-            # Note: These functions may not exist in current implementation
-            # result = norm.normal_cdf(args.x, args.mean, args.std)
-            print(f"CDF calculation for X={args.x}, mean={args.mean}, std={args.std}")
-        else:
-            # result = norm.normal_pdf(args.x, args.mean, args.std)
-            print(f"PDF calculation for X={args.x}, mean={args.mean}, std={args.std}")
+        if args.x is None:
+            print("Error: --x is required for normal distribution calculations")
+            sys.exit(1)
+        if args.std is not None and args.std <= 0:
+            print("Error: --std must be positive")
+            sys.exit(1)
+
+        try:
+            if args.cdf:
+                result = norm_dist.normal_cdf(args.x, args.mean, args.std)
+                print(f"P(X ≤ {args.x}) = {result:.6f}")
+            else:
+                result = norm_dist.normal_pdf(args.x, args.mean, args.std)
+                print(f"PDF(X = {args.x}) = {result:.6f}")
+        except ValueError as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
     elif args.type == "binomial":
-        result = binom.binomial_probability(args.n, args.k, args.p)
-        print(f"P(X = {args.k}) = {result:.6f}")
+        if args.n is None:
+            print("Error: --n (number of trials) is required for binomial distribution")
+            sys.exit(1)
+        if args.k is None:
+            print(
+                "Error: --k (number of successes) is required for binomial distribution"
+            )
+            sys.exit(1)
+        if args.p is None:
+            print(
+                "Error: --p (probability of success) is required for binomial distribution"
+            )
+            sys.exit(1)
+
+        # Validate inputs
+        if args.n < 0:
+            print("Error: --n (number of trials) must be non-negative")
+            sys.exit(1)
+        if args.k < 0 or args.k > args.n:
+            print(f"Error: --k (number of successes) must be between 0 and {args.n}")
+            sys.exit(1)
+        if not 0 <= args.p <= 1:
+            print("Error: --p (probability of success) must be between 0 and 1")
+            sys.exit(1)
+
+        try:
+            result = binom.binomial_probability(args.n, args.k, args.p)
+            print(f"P(X = {args.k}) = {result:.6f}")
+        except ValueError as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
     elif args.type == "bayes":
-        result = prob.bayes_theorem(args.p_b_given_a, args.p_a, args.p_b)
-        print(f"P(A|B) = {result:.6f}")
+        if args.p_b_given_a is None:
+            print("Error: --p_b_given_a is required for Bayes' theorem")
+            sys.exit(1)
+        if args.p_a is None:
+            print("Error: --p_a is required for Bayes' theorem")
+            sys.exit(1)
+        if args.p_b is None:
+            print("Error: --p_b is required for Bayes' theorem")
+            sys.exit(1)
+
+        # Validate inputs
+        if not 0 <= args.p_b_given_a <= 1:
+            print("Error: --p_b_given_a must be between 0 and 1")
+            sys.exit(1)
+        if not 0 <= args.p_a <= 1:
+            print("Error: --p_a must be between 0 and 1")
+            sys.exit(1)
+        if not 0 <= args.p_b <= 1:
+            print("Error: --p_b must be between 0 and 1")
+            sys.exit(1)
+        if args.p_b == 0:
+            print("Error: --p_b cannot be zero (division by zero)")
+            sys.exit(1)
+
+        try:
+            result = prob.bayes_theorem(args.p_b_given_a, args.p_a, args.p_b)
+            print(f"P(A|B) = {result:.6f}")
+        except ValueError as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
 
 def hypothesis_test_command(args):

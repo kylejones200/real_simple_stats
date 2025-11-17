@@ -39,7 +39,9 @@ dev = [
     "pytest-cov",
     "black",
     "flake8",
-    "mypy"
+    "mypy",
+    "ruff>=0.6.9",
+    "pre-commit>=3.0.0"
 ]
 docs = [
     "sphinx",
@@ -97,7 +99,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = true
@@ -131,3 +133,31 @@ module = [
     "real_simple_stats.bayesian_stats",
 ]
 disable_error_code = ["arg-type", "no-any-return"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".eggs",
+    "*.egg",
+    "build",
+    "dist",
+    "examples",
+    "benchmarks",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = [
+    "E402",  # Module level import not at top of file (intentional in __init__.py)
+    "E501",  # Line too long (handled by formatter)
+    "N806",  # Variable in function should be lowercase (stats conventions use X, Y, etc.)
+    "N803",  # Argument name should be lowercase (stats conventions)
+    "N802",  # Function name should be lowercase (test naming conventions)
+    "UP006",  # Use dict instead of Dict (compatibility with older Python)
+    "UP007",  # Use X | Y instead of Union (compatibility with older Python)
+]

@@ -3,6 +3,7 @@ from real_simple_stats.chi_squared import (
     critical_chi_square_value,
     reject_null_chi_square,
 )
+
 from real_simple_stats.plots import plot_observed_vs_expected
 
 observed = [20, 30, 25]

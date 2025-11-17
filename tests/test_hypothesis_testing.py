@@ -1,17 +1,17 @@
 import unittest
+
 from real_simple_stats.hypothesis_testing import (
-    t_score,
-    f_test,
-    critical_value_z,
     critical_value_t,
+    critical_value_z,
+    f_test,
     p_value_method,
     reject_null,
     state_null_hypothesis,
+    t_score,
 )
 
 
 class TestHypothesisTesting(unittest.TestCase):
-
     def setUp(self):
         self.sample_data = [23, 25, 28, 30, 32, 35, 38, 40]
         self.large_sample = list(range(1, 101))  # 1 to 100

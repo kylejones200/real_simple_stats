@@ -1,17 +1,18 @@
 """Tests for Bayesian statistics module."""
 
-import pytest
 import numpy as np
+import pytest
+
 from real_simple_stats.bayesian_stats import (
-    beta_binomial_update,
-    normal_normal_update,
-    gamma_poisson_update,
-    credible_interval,
-    highest_density_interval,
     bayes_factor,
-    posterior_predictive,
-    empirical_bayes_estimate,
+    beta_binomial_update,
     conjugate_prior_summary,
+    credible_interval,
+    empirical_bayes_estimate,
+    gamma_poisson_update,
+    highest_density_interval,
+    normal_normal_update,
+    posterior_predictive,
 )
 
 

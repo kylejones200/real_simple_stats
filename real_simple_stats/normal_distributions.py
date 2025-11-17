@@ -1,6 +1,6 @@
 import math
-from scipy.stats import norm
 
+from scipy.stats import norm
 
 # --- Z-SCORE CALCULATIONS ---
 
@@ -58,6 +58,57 @@ def chebyshev_theorem(k: float) -> float:
     if k <= 1:
         raise ValueError("k must be greater than 1")
     return 1 - (1 / k**2)
+
+
+# --- PDF AND CDF FOR NORMAL DISTRIBUTION ---
+
+
+def normal_pdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
+    """Calculate the probability density function (PDF) for a normal distribution.
+
+    Args:
+        x: Value at which to evaluate the PDF
+        mean: Mean of the normal distribution (default: 0.0)
+        std_dev: Standard deviation of the normal distribution (default: 1.0)
+
+    Returns:
+        PDF value at x
+
+    Raises:
+        ValueError: If std_dev is not positive
+
+    Example:
+        >>> normal_pdf(0, mean=0, std_dev=1)
+        0.3989422804014327
+    """
+    if std_dev <= 0:
+        raise ValueError("Standard deviation must be positive")
+    return float(norm.pdf(x, loc=mean, scale=std_dev))
+
+
+def normal_cdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
+    """Calculate the cumulative distribution function (CDF) for a normal distribution.
+
+    Args:
+        x: Value at which to evaluate the CDF
+        mean: Mean of the normal distribution (default: 0.0)
+        std_dev: Standard deviation of the normal distribution (default: 1.0)
+
+    Returns:
+        CDF value at x (probability that X <= x)
+
+    Raises:
+        ValueError: If std_dev is not positive
+
+    Example:
+        >>> normal_cdf(0, mean=0, std_dev=1)
+        0.5
+        >>> normal_cdf(1.96, mean=0, std_dev=1)
+        0.9750021048517795
+    """
+    if std_dev <= 0:
+        raise ValueError("Standard deviation must be positive")
+    return float(norm.cdf(x, loc=mean, scale=std_dev))
 
 
 # Example usage

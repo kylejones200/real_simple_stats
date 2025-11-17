@@ -1,6 +1,6 @@
 import math
-from scipy.stats import norm, t, f
 
+from scipy.stats import f, norm, t
 
 # --- HYPOTHESIS TESTING BASICS ---
 

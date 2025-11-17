@@ -1,20 +1,20 @@
-import unittest
 import math
+import unittest
+
 from real_simple_stats.descriptive_statistics import (
-    median,
-    sample_variance,
-    sample_std_dev,
-    five_number_summary,
-    is_discrete,
-    is_continuous,
-    interquartile_range,
     coefficient_of_variation,
+    five_number_summary,
+    interquartile_range,
+    is_continuous,
+    is_discrete,
     mean,
+    median,
+    sample_std_dev,
+    sample_variance,
 )
 
 
 class TestDescriptiveStatistics(unittest.TestCase):
-
     def setUp(self):
         self.sample_data = [1, 2, 3, 4, 5]
         self.float_data = [1.1, 2.2, 3.3, 4.4, 5.5]
@@ -91,6 +91,36 @@ class TestDescriptiveStatistics(unittest.TestCase):
         # Sample variance requires at least 2 values
         with self.assertRaises(ValueError):
             sample_variance(single_val)
+
+    def test_five_number_summary_empty(self):
+        """Test five number summary with empty list."""
+        with self.assertRaises(ValueError):
+            five_number_summary([])
+
+    def test_five_number_summary_single_value(self):
+        """Test five number summary with single value."""
+        result = five_number_summary([5])
+        expected = {"min": 5, "Q1": 5, "median": 5, "Q3": 5, "max": 5}
+        self.assertEqual(result, expected)
+
+    def test_five_number_summary_two_values(self):
+        """Test five number summary with two values."""
+        result = five_number_summary([1, 2])
+        expected = {"min": 1, "Q1": 1, "median": 1.5, "Q3": 2, "max": 2}
+        self.assertEqual(result, expected)
+
+    def test_five_number_summary_three_values(self):
+        """Test five number summary with three values."""
+        result = five_number_summary([1, 2, 3])
+        expected = {"min": 1, "Q1": 1, "median": 2, "Q3": 3, "max": 3}
+        self.assertEqual(result, expected)
+
+    def test_five_number_summary_four_values(self):
+        """Test five number summary with four values."""
+        result = five_number_summary([1, 2, 3, 4])
+        # For [1,2,3,4]: median=2.5, lower_half=[1,2] Q1=1.5, upper_half=[3,4] Q3=3.5
+        expected = {"min": 1, "Q1": 1.5, "median": 2.5, "Q3": 3.5, "max": 4}
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":

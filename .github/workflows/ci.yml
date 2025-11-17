@@ -61,8 +61,7 @@ jobs:
         if: matrix.language == 'python'
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+          pip install -e ".[dev]"
 
       - name: Type check (Py)
         if: matrix.language == 'python'

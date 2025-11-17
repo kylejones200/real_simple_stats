@@ -6,10 +6,11 @@ required sample sizes for various statistical tests.
 Refactored for Pythonic elegance and maintainability.
 """
 
-from typing import Optional, Dict, Callable
 from functools import lru_cache
+from typing import Callable, Dict, Optional
+
 import numpy as np
-from scipy import stats, optimize
+from scipy import optimize, stats
 
 # Module-level constants
 VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
@@ -198,9 +199,11 @@ def _calculate_t_test_delta(
     effect_size = (t_crit + abs(t_beta)) / np.sqrt(n)
     delta_calculated = effect_size * base_params["sd"]
 
+    sign = -1.0 if base_params["alternative"] == "less" else 1.0
+
     return {
         "n": n,
-        "delta": delta_calculated,
+        "delta": float(sign * delta_calculated),
         "power": power,
         **base_params,
     }
@@ -210,16 +213,23 @@ def _calculate_t_test_power(
     n: int, delta: float, tails: int, base_params: Dict
 ) -> Dict[str, float]:
     """Calculate statistical power for t-test."""
-    effect_size = abs(delta) / base_params["sd"]
+    effect_size = delta / base_params["sd"]
     ncp = effect_size * np.sqrt(n)
+    df = n - 1
+    sig_level = base_params["sig_level"]
+    alternative = base_params["alternative"]
 
-    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    t_crit = stats.t.ppf(1 - alpha_adj, df=n - 1)
-
-    power_calculated = 1 - stats.nct.cdf(t_crit, df=n - 1, nc=ncp)
-
-    if tails == 2:
-        power_calculated += stats.nct.cdf(-t_crit, df=n - 1, nc=ncp)
+    if alternative == "greater":
+        t_crit = stats.t.ppf(1 - sig_level, df=df)
+        power_calculated = 1 - stats.nct.cdf(t_crit, df=df, nc=ncp)
+    elif alternative == "less":
+        t_crit = stats.t.ppf(sig_level, df=df)
+        power_calculated = stats.nct.cdf(t_crit, df=df, nc=ncp)
+    else:
+        t_crit = stats.t.ppf(1 - sig_level / 2, df=df)
+        power_calculated = (1 - stats.nct.cdf(t_crit, df=df, nc=ncp)) + stats.nct.cdf(
+            -t_crit, df=df, nc=ncp
+        )
 
     return {
         "n": n,
@@ -314,6 +324,8 @@ def _calculate_proportion_p1(
     z_beta = stats.norm.ppf(power)
 
     h = (z_alpha + z_beta) / np.sqrt(n)
+    if base_params["alternative"] == "less":
+        h *= -1
     phi1 = np.arcsin(np.sqrt(base_params["p2"])) + h / 2
     p1_calculated = np.sin(phi1) ** 2
 
@@ -330,11 +342,21 @@ def _calculate_proportion_power(
 ) -> Dict[str, float]:
     """Calculate statistical power for proportion test."""
     h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(base_params["p2"])))
+    mean_shift = h * np.sqrt(n)
+    sig_level = base_params["sig_level"]
+    alternative = base_params["alternative"]
 
-    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = abs(h) * np.sqrt(n) - z_alpha
-    power_calculated = stats.norm.cdf(z_beta)
+    if alternative == "greater":
+        z_alpha = stats.norm.ppf(1 - sig_level)
+        power_calculated = stats.norm.sf(z_alpha - mean_shift)
+    elif alternative == "less":
+        z_alpha = stats.norm.ppf(sig_level)
+        power_calculated = stats.norm.cdf(z_alpha - mean_shift)
+    else:
+        z_alpha = stats.norm.ppf(1 - sig_level / 2)
+        power_calculated = stats.norm.sf(z_alpha - mean_shift) + stats.norm.cdf(
+            -z_alpha - mean_shift
+        )
 
     return {
         "n": n,
@@ -547,9 +569,11 @@ def _calculate_correlation_r(
     z_r = (z_alpha + z_beta) / np.sqrt(n - 3)
     r_calculated = (np.exp(2 * z_r) - 1) / (np.exp(2 * z_r) + 1)
 
+    sign = -1.0 if base_params["alternative"] == "less" else 1.0
+
     return {
         "n": n,
-        "r": float(r_calculated),
+        "r": float(sign * r_calculated),
         "power": power,
         **base_params,
     }
@@ -560,11 +584,21 @@ def _calculate_correlation_power(
 ) -> Dict[str, float]:
     """Calculate statistical power for correlation test."""
     z_r = 0.5 * np.log((1 + r) / (1 - r))
+    sig_level = base_params["sig_level"]
+    alternative = base_params["alternative"]
 
-    alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = z_r * np.sqrt(n - 3) - z_alpha
-    power_calculated = stats.norm.cdf(z_beta)
+    if alternative == "greater":
+        z_alpha = stats.norm.ppf(1 - sig_level)
+        power_calculated = stats.norm.sf(z_alpha - z_r * np.sqrt(n - 3))
+    elif alternative == "less":
+        z_alpha = stats.norm.ppf(sig_level)
+        power_calculated = stats.norm.cdf(z_alpha - z_r * np.sqrt(n - 3))
+    else:
+        z_alpha = stats.norm.ppf(1 - sig_level / 2)
+        mean_shift = z_r * np.sqrt(n - 3)
+        power_calculated = stats.norm.sf(z_alpha - mean_shift) + stats.norm.cdf(
+            -z_alpha - mean_shift
+        )
 
     return {
         "n": n,

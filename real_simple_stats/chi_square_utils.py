@@ -1,4 +1,5 @@
 from typing import Sequence
+
 from scipy.stats import chi2
 
 # --- CHI-SQUARE CORE UTILITIES ---

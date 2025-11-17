@@ -1,19 +1,21 @@
 import unittest
+
 from real_simple_stats.probability_utils import (
-    probability_not,
-    joint_probability,
-    conditional_probability,
     bayes_theorem,
     combinations,
-    permutations,
-    mutually_exclusive,
-    general_addition_rule,
+    conditional_probability,
+    expected_value,
     fundamental_counting,
+    general_addition_rule,
+    joint_probability,
+    mutually_exclusive,
+    permutations,
+    probability_not,
+    probability_tree,
 )
 
 
 class TestProbabilityUtils(unittest.TestCase):
-
     def test_probability_not(self):
         """Test probability of NOT event."""
         result = probability_not(0.3)
@@ -96,6 +98,68 @@ class TestProbabilityUtils(unittest.TestCase):
         """Test zero division scenarios."""
         with self.assertRaises(ValueError):
             bayes_theorem(0.8, 0.3, 0)  # P(B) = 0
+
+    def test_joint_probability_validation(self):
+        """Test validation in joint_probability."""
+        with self.assertRaises(ValueError):
+            joint_probability(-0.1, 0.5)
+        with self.assertRaises(ValueError):
+            joint_probability(0.5, 1.5)
+
+    def test_conditional_probability_validation(self):
+        """Test validation in conditional_probability."""
+        with self.assertRaises(ValueError):
+            conditional_probability(1.5, 0.3)
+        with self.assertRaises(ValueError):
+            conditional_probability(0.5, 0.3)  # p_a_and_b > p_b
+
+    def test_mutually_exclusive_validation(self):
+        """Test validation in mutually_exclusive."""
+        with self.assertRaises(ValueError):
+            mutually_exclusive(-0.1, 0.5)
+        with self.assertRaises(ValueError):
+            mutually_exclusive(0.6, 0.5)  # Sum > 1
+
+    def test_general_addition_rule_validation(self):
+        """Test validation in general_addition_rule."""
+        with self.assertRaises(ValueError):
+            general_addition_rule(1.5, 0.4, 0.2)
+        with self.assertRaises(ValueError):
+            general_addition_rule(0.3, 0.4, 0.5)  # p_a_and_b > min(p_a, p_b)
+
+    def test_fundamental_counting_validation(self):
+        """Test validation in fundamental_counting."""
+        with self.assertRaises(ValueError):
+            fundamental_counting([])
+        with self.assertRaises(ValueError):
+            fundamental_counting([4, 0, 2])
+
+    def test_bayes_theorem_validation(self):
+        """Test validation in bayes_theorem."""
+        with self.assertRaises(ValueError):
+            bayes_theorem(1.5, 0.3, 0.4)
+        with self.assertRaises(ValueError):
+            bayes_theorem(0.8, -0.1, 0.4)
+
+    def test_probability_tree_validation(self):
+        """Test validation in probability_tree."""
+        with self.assertRaises(ValueError):
+            probability_tree([])
+        with self.assertRaises(ValueError):
+            probability_tree([(1.5, 0.7)])
+        with self.assertRaises(ValueError):
+            probability_tree([(1.0, 1.0), (0.1, 1.0)])  # 1.0 + 0.1 = 1.1 > 1
+
+    def test_expected_value_validation(self):
+        """Test validation in expected_value."""
+        with self.assertRaises(ValueError):
+            expected_value([1, 2], [0.3])  # Length mismatch
+        with self.assertRaises(ValueError):
+            expected_value([], [])
+        with self.assertRaises(ValueError):
+            expected_value([1, 2], [0.3, 0.5])  # Sum != 1
+        with self.assertRaises(ValueError):
+            expected_value([1, 2], [1.5, -0.5])  # Invalid probabilities
 
 
 if __name__ == "__main__":

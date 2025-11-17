@@ -1,12 +1,13 @@
 """Tests for resampling methods module."""
 
 import numpy as np
+
 from real_simple_stats.resampling import (
     bootstrap,
     bootstrap_hypothesis_test,
-    permutation_test,
-    jackknife,
     cross_validate,
+    jackknife,
+    permutation_test,
     stratified_split,
 )
 
@@ -182,3 +183,30 @@ class TestStratifiedSplit:
         result2 = stratified_split(X, y, test_size=0.2, random_seed=42)
 
         assert len(result1[0]) == len(result2[0])
+
+    def test_stratified_split_minority_classes(self):
+        """Test that minority classes get at least 1 test sample."""
+        # Create dataset with one large class and one small class
+        X = [[i] for i in range(15)]
+        y = [0] * 12 + [1] * 3  # Class 1 has only 3 samples
+
+        X_train, X_test, y_train, y_test = stratified_split(X, y, test_size=0.2)
+
+        # Check that both classes appear in test set
+        unique_test_classes = set(y_test)
+        assert len(unique_test_classes) == 2, "Both classes should appear in test set"
+        assert 0 in unique_test_classes
+        assert 1 in unique_test_classes
+
+    def test_stratified_split_very_small_class(self):
+        """Test handling of very small classes."""
+        # Class with only 2 samples
+        X = [[i] for i in range(12)]
+        y = [0] * 10 + [1] * 2
+
+        X_train, X_test, y_train, y_test = stratified_split(X, y, test_size=0.2)
+
+        # Both classes should be represented
+        assert len(set(y_test)) == 2
+        # Class 1 should have at least 1 sample in test
+        assert sum(1 for label in y_test if label == 1) >= 1

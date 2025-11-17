@@ -1,15 +1,16 @@
 """Comprehensive tests for sampling and confidence intervals."""
 
 import pytest
+
 from real_simple_stats.sampling_and_intervals import (
-    sampling_distribution_mean,
-    sampling_distribution_variance,
+    clt_probability_between,
     clt_probability_greater_than,
     clt_probability_less_than,
-    clt_probability_between,
     confidence_interval_known_std,
     confidence_interval_unknown_std,
     required_sample_size,
+    sampling_distribution_mean,
+    sampling_distribution_variance,
     slovins_formula,
 )
 

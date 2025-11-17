@@ -1,13 +1,14 @@
 import math
+
 from real_simple_stats.normal_distributions import (
-    z_score,
-    z_score_standard_error,
     area_between_0_and_z,
     area_between_z_scores,
     area_left_of_z,
-    area_right_of_z,
     area_outside_range,
+    area_right_of_z,
     chebyshev_theorem,
+    z_score,
+    z_score_standard_error,
 )
 
 

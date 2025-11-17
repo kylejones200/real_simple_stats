@@ -5,6 +5,7 @@ moving averages, autocorrelation, and trend analysis.
 """
 
 from typing import List, Tuple
+
 import numpy as np
 from scipy import stats
 

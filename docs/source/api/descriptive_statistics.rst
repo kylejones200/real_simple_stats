@@ -107,6 +107,13 @@ The functions include comprehensive error handling:
     except ValueError as e:
         print(f"Error: {e}")
 
+    # Five-number summary works with small datasets too
+    summary_single = desc.five_number_summary([5])
+    # For a single value, all stats equal that value
+    
+    summary_two = desc.five_number_summary([1, 2])
+    # With two values, Q1=min and Q3=max
+
     # Non-numeric data
     try:
         result = desc.mean([1, 2, "three", 4])

@@ -1,17 +1,19 @@
 """Comprehensive tests for pre-statistics utilities."""
 
-import pytest
 import math
+
+import pytest
+
 from real_simple_stats.pre_statistics import (
-    percent_to_decimal,
     decimal_to_percent,
-    round_to_decimal_places,
-    order_of_operations_example,
-    mean,
-    mode,
-    median,
-    weighted_mean,
     factorial,
+    mean,
+    median,
+    mode,
+    order_of_operations_example,
+    percent_to_decimal,
+    round_to_decimal_places,
+    weighted_mean,
 )
 
 

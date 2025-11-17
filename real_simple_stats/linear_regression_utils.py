@@ -1,4 +1,5 @@
 from typing import Sequence, Tuple
+
 import numpy as np
 from scipy.stats import linregress
 

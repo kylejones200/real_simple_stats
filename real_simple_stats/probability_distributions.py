@@ -1,4 +1,4 @@
-from scipy.stats import poisson, geom, expon, nbinom
+from scipy.stats import expon, geom, nbinom, poisson
 
 # --- POISSON DISTRIBUTION ---
 

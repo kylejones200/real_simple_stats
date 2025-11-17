@@ -1,11 +1,11 @@
 """Tests for multivariate analysis module."""
 
 from real_simple_stats.multivariate import (
+    canonical_correlation,
+    factor_analysis,
+    mahalanobis_distance,
     multiple_regression,
     pca,
-    factor_analysis,
-    canonical_correlation,
-    mahalanobis_distance,
 )
 
 

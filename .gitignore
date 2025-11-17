@@ -70,6 +70,9 @@ instance/
 docs/_build/
 docs/build/
 
+# Benchmark results (generated)
+benchmarks/BENCHMARK_RESULTS.txt
+
 # PyBuilder
 .pybuilder/
 target/
@@ -82,7 +85,7 @@ profile_default/
 ipython_config.py
 
 # pyenv
-.python-version
+# .python-version  # Keep this file for CI/CD compatibility
 
 # pipenv
 Pipfile.lock

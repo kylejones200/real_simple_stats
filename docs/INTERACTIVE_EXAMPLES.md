@@ -6,22 +6,10 @@ Run Real Simple Stats directly in your browser without any installation!
 
 ## 🚀 Quick Start Options
 
-### Option 1: Google Colab (Recommended)
+### Google Colab (Recommended)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kylejones200/real_simple_stats/blob/main/examples/interactive_tutorial.ipynb)
 
-**Advantages:**
-- ✅ No setup required
-- ✅ Free GPU access
-- ✅ Save to Google Drive
-- ✅ Share with collaborators
 
-### Option 2: Binder
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kylejones200/real_simple_stats/main?filepath=examples/interactive_tutorial.ipynb)
-
-**Advantages:**
-- ✅ No account needed
-- ✅ Runs in browser
-- ✅ Pre-configured environment
 
 ### Option 3: Local Jupyter
 ```bash
