@@ -24,7 +24,7 @@ jobs:
 
       - name: Type check
         run: |
-          mypy real_simple_stats tests --exclude '(site-packages|\.venv|venv)'
+          python -m mypy real_simple_stats tests --config-file mypy.ini --namespace-packages --explicit-package-bases
 
       - name: Lint
         run: |
