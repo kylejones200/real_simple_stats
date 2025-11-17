@@ -1,6 +1,7 @@
 """Comprehensive tests for chi-square utilities."""
 
 import pytest
+
 from real_simple_stats.chi_square_utils import (
     chi_square_statistic,
     critical_chi_square_value,

@@ -8,7 +8,6 @@ This recipe demonstrates the full workflow for hypothesis testing:
 5. Interpret results
 """
 
-import real_simple_stats as rss
 from real_simple_stats import hypothesis_testing as ht
 
 # Example: Testing if a new drug lowers blood pressure
@@ -83,7 +82,7 @@ print(f"Conclusion: {conclusion}")
 print("\n6. Confidence Interval")
 print("-" * 60)
 std_bp = desc.sample_std_dev(blood_pressure)
-se = std_bp / (n ** 0.5)
+se = std_bp / (n**0.5)
 df = n - 1
 t_critical = ht.critical_value_t(alpha, df, test_type="one-tailed")
 margin = t_critical * se
@@ -91,7 +90,7 @@ ci_lower = mean_bp - margin
 ci_upper = mean_bp + margin
 
 print(f"95% Confidence Interval: [{ci_lower:.2f}, {ci_upper:.2f}] mmHg")
-print(f"Interpretation: We're 95% confident the true mean blood pressure")
+print("Interpretation: We're 95% confident the true mean blood pressure")
 print(f"after treatment is between {ci_lower:.2f} and {ci_upper:.2f} mmHg")
 
 # Step 7: Effect size
@@ -110,15 +109,16 @@ else:
     effect = "large"
 
 print(f"Effect size: {effect}")
-print(f"Practical significance: The drug {'does' if abs(effect_size) >= 0.2 else 'may not'} "
-      f"have a {'clinically' if abs(effect_size) >= 0.5 else 'practically'} significant effect")
+print(
+    f"Practical significance: The drug {'does' if abs(effect_size) >= 0.2 else 'may not'} "
+    f"have a {'clinically' if abs(effect_size) >= 0.5 else 'practically'} significant effect"
+)
 
 # Step 8: Final summary
 print("\n8. Summary")
 print("-" * 60)
-print(f"• Statistical test: One-sample t-test (left-tailed)")
+print("• Statistical test: One-sample t-test (left-tailed)")
 print(f"• Sample mean: {mean_bp:.2f} mmHg (vs. null: {mu_null} mmHg)")
 print(f"• Test result: {decision} (p = {p_value:.4f})")
 print(f"• Effect size: {effect} (d = {effect_size:.4f})")
 print(f"• Conclusion: {conclusion}")
-

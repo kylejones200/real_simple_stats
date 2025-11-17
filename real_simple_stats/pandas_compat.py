@@ -4,8 +4,7 @@ This module provides seamless integration with pandas DataFrames and Series,
 allowing you to use Real Simple Stats functions directly on pandas objects.
 """
 
-from typing import Union, Any, Sequence
-import numpy as np
+from typing import Any, Sequence, Union
 
 try:
     import pandas as pd
@@ -115,13 +114,14 @@ def five_number_summary(data: Union[Sequence[float], "pd.Series"]) -> dict:
 
 def one_sample_t_test(data: Union[Sequence[float], "pd.Series"], mu: float) -> tuple:
     """Perform one-sample t-test, accepting pandas Series.
-    
+
     Note: This is a placeholder. real_simple_stats doesn't have a direct
     one_sample_t_test function. Use t_score and calculate p-value manually.
     """
+    from scipy.stats import t as t_dist
+
     from real_simple_stats import descriptive_statistics as desc
     from real_simple_stats import hypothesis_testing as ht
-    from scipy.stats import t as t_dist
 
     values = _extract_values(data)
     n = len(values)
@@ -138,7 +138,7 @@ def two_sample_t_test(
     data2: Union[Sequence[float], "pd.Series"],
 ) -> tuple:
     """Perform two-sample t-test, accepting pandas Series.
-    
+
     Note: This is a placeholder. real_simple_stats doesn't have a direct
     two_sample_t_test function. Use scipy.stats.ttest_ind for now.
     """

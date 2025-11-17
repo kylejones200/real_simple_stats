@@ -1,20 +1,20 @@
-import unittest
 import math
+import unittest
+
 from real_simple_stats.descriptive_statistics import (
-    median,
-    sample_variance,
-    sample_std_dev,
-    five_number_summary,
-    is_discrete,
-    is_continuous,
-    interquartile_range,
     coefficient_of_variation,
+    five_number_summary,
+    interquartile_range,
+    is_continuous,
+    is_discrete,
     mean,
+    median,
+    sample_std_dev,
+    sample_variance,
 )
 
 
 class TestDescriptiveStatistics(unittest.TestCase):
-
     def setUp(self):
         self.sample_data = [1, 2, 3, 4, 5]
         self.float_data = [1.1, 2.2, 3.3, 4.4, 5.5]

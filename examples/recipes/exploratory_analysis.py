@@ -4,12 +4,31 @@ This recipe demonstrates a complete exploratory data analysis workflow
 using Real Simple Stats functions.
 """
 
-import real_simple_stats as rss
 from real_simple_stats import descriptive_statistics as desc
 
 # Example dataset: Daily sales data
-sales_data = [120, 135, 142, 118, 145, 132, 128, 140, 138, 125,
-              150, 148, 155, 142, 160, 145, 152, 158, 162, 150]
+sales_data = [
+    120,
+    135,
+    142,
+    118,
+    145,
+    132,
+    128,
+    140,
+    138,
+    125,
+    150,
+    148,
+    155,
+    142,
+    160,
+    145,
+    152,
+    158,
+    162,
+    150,
+]
 
 print("=" * 60)
 print("Exploratory Data Analysis: Daily Sales Data")
@@ -42,14 +61,14 @@ print(f"Q3 (75th percentile): {summary['Q3']:.2f}")
 print(f"Maximum: {summary['max']:.2f}")
 
 # Calculate IQR
-iqr = summary['Q3'] - summary['Q1']
+iqr = summary["Q3"] - summary["Q1"]
 print(f"Interquartile Range (IQR): {iqr:.2f}")
 
 # Step 3: Outlier detection using IQR method
 print("\n3. Outlier Detection")
 print("-" * 60)
-lower_bound = summary['Q1'] - 1.5 * iqr
-upper_bound = summary['Q3'] + 1.5 * iqr
+lower_bound = summary["Q1"] - 1.5 * iqr
+upper_bound = summary["Q3"] + 1.5 * iqr
 
 outliers = [x for x in sales_data if x < lower_bound or x > upper_bound]
 print(f"Outlier bounds: [{lower_bound:.2f}, {upper_bound:.2f}]")
@@ -75,7 +94,7 @@ print(f"Difference: {abs(mean_sales - median_sales):.2f}")
 # Step 5: Range and spread
 print("\n5. Range and Spread")
 print("-" * 60)
-data_range = summary['max'] - summary['min']
+data_range = summary["max"] - summary["min"]
 print(f"Range: {data_range:.2f}")
 print(f"Standard deviation: {std_sales:.2f}")
 print(f"IQR: {iqr:.2f}")
@@ -85,10 +104,11 @@ print("\n6. Key Insights")
 print("-" * 60)
 print(f"• Average daily sales: ${mean_sales:.2f}")
 print(f"• Sales vary by ${std_sales:.2f} on average (SD)")
-print(f"• Middle 50% of sales fall between ${summary['Q1']:.2f} and ${summary['Q3']:.2f}")
+print(
+    f"• Middle 50% of sales fall between ${summary['Q1']:.2f} and ${summary['Q3']:.2f}"
+)
 print(f"• The distribution appears to be {shape}")
 if outliers:
     print(f"• {len(outliers)} outlier(s) detected that may need investigation")
 else:
     print("• No outliers detected - data appears consistent")
-

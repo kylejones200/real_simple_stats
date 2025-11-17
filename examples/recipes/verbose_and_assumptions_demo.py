@@ -5,8 +5,8 @@ This recipe demonstrates the new educational features:
 2. Statistical assumptions checking
 """
 
-from real_simple_stats import verbose_stats as vs
 from real_simple_stats import assumptions as assump
+from real_simple_stats import verbose_stats as vs
 
 print("=" * 70)
 print("Educational Features: Verbose Mode & Assumptions Checking")
@@ -23,11 +23,7 @@ blood_pressure = [118, 115, 122, 119, 117, 121, 116, 120, 118, 119]
 mu_null = 120
 
 t_stat, p_value, t_critical, reject = vs.t_test_verbose(
-    blood_pressure,
-    mu_null=mu_null,
-    alpha=0.05,
-    test_type="less",
-    verbose=True
+    blood_pressure, mu_null=mu_null, alpha=0.05, test_type="less", verbose=True
 )
 
 # ============================================================================
@@ -41,9 +37,7 @@ study_hours = [5, 10, 15, 20, 25]
 test_scores = [60, 65, 70, 75, 80]
 
 slope, intercept, r, p, se = vs.regression_verbose(
-    study_hours,
-    test_scores,
-    verbose=True
+    study_hours, test_scores, verbose=True
 )
 
 # ============================================================================
@@ -63,10 +57,7 @@ print("\n" + "=" * 70)
 print("Example 4: Checking T-Test Assumptions")
 print("=" * 70)
 
-results = assump.check_t_test_assumptions(
-    blood_pressure,
-    verbose=True
-)
+results = assump.check_t_test_assumptions(blood_pressure, verbose=True)
 
 # ============================================================================
 # Example 5: Check Regression Assumptions
@@ -76,9 +67,7 @@ print("Example 5: Checking Regression Assumptions")
 print("=" * 70)
 
 regression_results = assump.check_regression_assumptions(
-    study_hours,
-    test_scores,
-    verbose=True
+    study_hours, test_scores, verbose=True
 )
 
 # ============================================================================
@@ -92,9 +81,7 @@ group_a = [78, 82, 85, 79, 83]
 group_b = [72, 75, 78, 74, 76]
 
 two_sample_results = assump.check_t_test_assumptions(
-    group_a,
-    group2=group_b,
-    verbose=True
+    group_a, group2=group_b, verbose=True
 )
 
 print("\n" + "=" * 70)
@@ -109,4 +96,3 @@ These educational features help you:
 Use verbose=True to see step-by-step calculations.
 Use assumptions checking before running tests to ensure validity.
 """)
-

@@ -4,9 +4,8 @@ This recipe shows how to compare two groups using a t-test,
 calculate effect size, and interpret the results.
 """
 
-import real_simple_stats as rss
-from real_simple_stats import hypothesis_testing as ht
 from real_simple_stats import effect_sizes as es
+from real_simple_stats import hypothesis_testing as ht
 
 # Example: Comparing test scores between two teaching methods
 method_a_scores = [78, 82, 85, 79, 83, 88, 81, 84, 87, 80]
@@ -35,8 +34,8 @@ print("\n2. Hypothesis Test")
 print("-" * 60)
 # Note: For two-sample t-test, use scipy.stats or calculate manually
 # This is a simplified example - in practice you'd use scipy.stats.ttest_ind
-import numpy as np
 from scipy import stats
+
 t_stat, p_value = stats.ttest_ind(method_a_scores, method_b_scores)
 print(f"t-statistic: {t_stat:.4f}")
 print(f"p-value: {p_value:.6f}")
@@ -78,15 +77,20 @@ ci_lower = (mean_a - mean_b) - margin
 ci_upper = (mean_a - mean_b) + margin
 
 print(f"95% CI for difference: [{ci_lower:.2f}, {ci_upper:.2f}]")
-print(f"Interpretation: We're 95% confident the true difference is between "
-      f"{ci_lower:.2f} and {ci_upper:.2f} points")
+print(
+    f"Interpretation: We're 95% confident the true difference is between "
+    f"{ci_lower:.2f} and {ci_upper:.2f} points"
+)
 
 # Step 5: Summary
 print("\n5. Summary")
 print("-" * 60)
-print(f"Method A appears to be {'better' if mean_a > mean_b else 'worse'} "
-      f"than Method B by {abs(mean_a - mean_b):.2f} points on average.")
-print(f"This difference is {'statistically significant' if p_value < 0.05 else 'not statistically significant'} "
-      f"(p = {p_value:.4f})")
+print(
+    f"Method A appears to be {'better' if mean_a > mean_b else 'worse'} "
+    f"than Method B by {abs(mean_a - mean_b):.2f} points on average."
+)
+print(
+    f"This difference is {'statistically significant' if p_value < 0.05 else 'not statistically significant'} "
+    f"(p = {p_value:.4f})"
+)
 print(f"The effect size is {size} (d = {cohens_d:.4f})")
-

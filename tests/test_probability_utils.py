@@ -1,21 +1,21 @@
 import unittest
+
 from real_simple_stats.probability_utils import (
-    probability_not,
-    joint_probability,
-    conditional_probability,
     bayes_theorem,
     combinations,
-    permutations,
-    mutually_exclusive,
-    general_addition_rule,
-    fundamental_counting,
-    probability_tree,
+    conditional_probability,
     expected_value,
+    fundamental_counting,
+    general_addition_rule,
+    joint_probability,
+    mutually_exclusive,
+    permutations,
+    probability_not,
+    probability_tree,
 )
 
 
 class TestProbabilityUtils(unittest.TestCase):
-
     def test_probability_not(self):
         """Test probability of NOT event."""
         result = probability_not(0.3)

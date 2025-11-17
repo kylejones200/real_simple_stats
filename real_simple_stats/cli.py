@@ -6,14 +6,14 @@ Provides quick access to statistical calculations from the terminal.
 """
 
 import argparse
+import json
 import sys
 from typing import List
-import json
 
-from . import descriptive_statistics as desc
-from . import probability_utils as prob
 from . import binomial_distributions as binom
+from . import descriptive_statistics as desc
 from . import normal_distributions as norm_dist
+from . import probability_utils as prob
 from .glossary import lookup
 
 
@@ -70,7 +70,7 @@ def probability_command(args):
         if args.std is not None and args.std <= 0:
             print("Error: --std must be positive")
             sys.exit(1)
-        
+
         try:
             if args.cdf:
                 result = norm_dist.normal_cdf(args.x, args.mean, args.std)
@@ -87,12 +87,16 @@ def probability_command(args):
             print("Error: --n (number of trials) is required for binomial distribution")
             sys.exit(1)
         if args.k is None:
-            print("Error: --k (number of successes) is required for binomial distribution")
+            print(
+                "Error: --k (number of successes) is required for binomial distribution"
+            )
             sys.exit(1)
         if args.p is None:
-            print("Error: --p (probability of success) is required for binomial distribution")
+            print(
+                "Error: --p (probability of success) is required for binomial distribution"
+            )
             sys.exit(1)
-        
+
         # Validate inputs
         if args.n < 0:
             print("Error: --n (number of trials) must be non-negative")
@@ -103,7 +107,7 @@ def probability_command(args):
         if not 0 <= args.p <= 1:
             print("Error: --p (probability of success) must be between 0 and 1")
             sys.exit(1)
-        
+
         try:
             result = binom.binomial_probability(args.n, args.k, args.p)
             print(f"P(X = {args.k}) = {result:.6f}")
@@ -121,7 +125,7 @@ def probability_command(args):
         if args.p_b is None:
             print("Error: --p_b is required for Bayes' theorem")
             sys.exit(1)
-        
+
         # Validate inputs
         if not 0 <= args.p_b_given_a <= 1:
             print("Error: --p_b_given_a must be between 0 and 1")
@@ -135,7 +139,7 @@ def probability_command(args):
         if args.p_b == 0:
             print("Error: --p_b cannot be zero (division by zero)")
             sys.exit(1)
-        
+
         try:
             result = prob.bayes_theorem(args.p_b_given_a, args.p_a, args.p_b)
             print(f"P(A|B) = {result:.6f}")

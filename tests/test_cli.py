@@ -1,15 +1,17 @@
 """Tests for CLI module."""
 
-import pytest
 from io import StringIO
 from unittest.mock import patch
+
+import pytest
+
 from real_simple_stats.cli import (
-    parse_numbers,
     descriptive_stats_command,
-    probability_command,
-    hypothesis_test_command,
     glossary_command,
+    hypothesis_test_command,
     main,
+    parse_numbers,
+    probability_command,
 )
 
 

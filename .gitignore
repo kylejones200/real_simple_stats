@@ -85,7 +85,7 @@ profile_default/
 ipython_config.py
 
 # pyenv
-.python-version
+# .python-version  # Keep this file for CI/CD compatibility
 
 # pipenv
 Pipfile.lock

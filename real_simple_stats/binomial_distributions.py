@@ -24,18 +24,18 @@ def is_binomial_experiment(
 
 def binomial_probability(n: int, k: int, p: float) -> float:
     """Computes probability of k successes in n binomial trials.
-    
+
     Args:
         n: Number of trials (must be non-negative)
         k: Number of successes (must be between 0 and n)
         p: Probability of success on each trial (must be between 0 and 1)
-        
+
     Returns:
         Probability of exactly k successes
-        
+
     Raises:
         ValueError: If parameters are invalid
-        
+
     Example:
         >>> binomial_probability(10, 3, 0.5)
         0.1171875
@@ -46,7 +46,7 @@ def binomial_probability(n: int, k: int, p: float) -> float:
         raise ValueError(f"Number of successes (k) must be between 0 and {n}")
     if not 0 <= p <= 1:
         raise ValueError("Probability (p) must be between 0 and 1")
-    
+
     comb = math.comb(n, k)
     return comb * (p**k) * ((1 - p) ** (n - k))
 

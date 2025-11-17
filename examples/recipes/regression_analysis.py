@@ -9,9 +9,8 @@ This recipe demonstrates a full linear regression workflow:
 6. Make predictions
 """
 
-import real_simple_stats as rss
-from real_simple_stats import linear_regression_utils as lr
 from real_simple_stats import descriptive_statistics as desc
+from real_simple_stats import linear_regression_utils as lr
 
 print("=" * 70)
 print("Linear Regression Analysis: Study Hours vs Test Scores")
@@ -39,11 +38,11 @@ mean_scores = desc.mean(test_scores)
 std_hours = desc.sample_std_dev(study_hours)
 std_scores = desc.sample_std_dev(test_scores)
 
-print(f"\nStudy Hours:")
+print("\nStudy Hours:")
 print(f"  Mean: {mean_hours:.1f} hours")
 print(f"  Std Dev: {std_hours:.2f} hours")
 
-print(f"\nTest Scores:")
+print("\nTest Scores:")
 print(f"  Mean: {mean_scores:.1f} points")
 print(f"  Std Dev: {std_scores:.2f} points")
 
@@ -72,7 +71,7 @@ print(f"Interpretation: {strength} {direction} linear relationship")
 
 print(f"\nCoefficient of Determination (R²): {r_squared:.4f}")
 print(f"Interpretation: {r_squared:.1%} of the variance in test scores")
-print(f"                is explained by study hours")
+print("                is explained by study hours")
 
 # ============================================================================
 # Step 3: Fit the Regression Model
@@ -86,11 +85,11 @@ slope, intercept, r_value, p_value, std_err = lr.linear_regression(
 )
 
 print(f"\nRegression Equation: y = {intercept:.2f} + {slope:.2f}x")
-print(f"\nCoefficients:")
+print("\nCoefficients:")
 print(f"  Intercept (a): {intercept:.2f}")
-print(f"    Interpretation: Predicted test score when study hours = 0")
+print("    Interpretation: Predicted test score when study hours = 0")
 print(f"  Slope (b): {slope:.2f}")
-print(f"    Interpretation: For each additional hour of study,")
+print("    Interpretation: For each additional hour of study,")
 print(f"                    test score increases by {slope:.2f} points")
 
 # ============================================================================
@@ -101,22 +100,22 @@ print("Step 4: Statistical Significance")
 print("=" * 70)
 
 alpha = 0.05
-print(f"\nHypothesis Test:")
-print(f"  H₀: β = 0 (no linear relationship)")
-print(f"  H₁: β ≠ 0 (linear relationship exists)")
+print("\nHypothesis Test:")
+print("  H₀: β = 0 (no linear relationship)")
+print("  H₁: β ≠ 0 (linear relationship exists)")
 print(f"  Significance level: α = {alpha}")
 
-print(f"\nResults:")
+print("\nResults:")
 print(f"  p-value: {p_value:.6f}")
 print(f"  Standard error: {std_err:.4f}")
 
 if p_value < alpha:
     print(f"\n✓ Decision: Reject H₀ (p = {p_value:.4f} < α = {alpha})")
-    print(f"  Conclusion: There is a statistically significant")
-    print(f"              linear relationship between study hours and test scores")
+    print("  Conclusion: There is a statistically significant")
+    print("              linear relationship between study hours and test scores")
 else:
     print(f"\n✗ Decision: Fail to reject H₀ (p = {p_value:.4f} ≥ α = {alpha})")
-    print(f"  Conclusion: No significant linear relationship detected")
+    print("  Conclusion: No significant linear relationship detected")
 
 # ============================================================================
 # Step 5: Model Fit Assessment
@@ -135,15 +134,15 @@ else:
     fit_quality = "good"
 
 print(f"Model fit: {fit_quality}")
-print(f"\nInterpretation:")
+print("\nInterpretation:")
 if r_squared > 0.7:
-    print(f"  ✓ The model explains most of the variation in test scores")
+    print("  ✓ The model explains most of the variation in test scores")
 elif r_squared > 0.3:
-    print(f"  ⚠️  The model explains some variation, but other factors")
-    print(f"      may also be important")
+    print("  ⚠️  The model explains some variation, but other factors")
+    print("      may also be important")
 else:
-    print(f"  ✗ The model explains little variation - consider other")
-    print(f"    predictors or check for non-linear relationships")
+    print("  ✗ The model explains little variation - consider other")
+    print("    predictors or check for non-linear relationships")
 
 # ============================================================================
 # Step 6: Predictions
@@ -154,7 +153,7 @@ print("=" * 70)
 
 # Predict for new values
 new_hours = [12, 28, 55]
-print(f"\nPredictions for new study hours:")
+print("\nPredictions for new study hours:")
 
 for hours in new_hours:
     predicted_score = lr.regression_equation(hours, slope, intercept)
@@ -169,18 +168,18 @@ print("=" * 70)
 
 manual_slope, manual_intercept = lr.manual_slope_intercept(study_hours, test_scores)
 
-print(f"\nManual Calculation:")
-print(f"  Slope (b) = Σ(x - x̄)(y - ȳ) / Σ(x - x̄)²")
-print(f"  Intercept (a) = ȳ - b·x̄")
+print("\nManual Calculation:")
+print("  Slope (b) = Σ(x - x̄)(y - ȳ) / Σ(x - x̄)²")
+print("  Intercept (a) = ȳ - b·x̄")
 
-print(f"\nResults:")
+print("\nResults:")
 print(f"  Manual slope: {manual_slope:.4f}")
 print(f"  Manual intercept: {manual_intercept:.4f}")
-print(f"  (Should match regression results above)")
+print("  (Should match regression results above)")
 
 # Verify they match
 if abs(manual_slope - slope) < 0.01 and abs(manual_intercept - intercept) < 0.01:
-    print(f"\n✓ Manual calculation matches regression function!")
+    print("\n✓ Manual calculation matches regression function!")
 
 # ============================================================================
 # Summary and Interpretation
@@ -194,14 +193,14 @@ Key Findings:
 1. Correlation: r = {r:.3f} ({strength} {direction} relationship)
 2. Model: y = {intercept:.2f} + {slope:.2f}x
 3. Fit: R² = {r_squared:.1%} ({fit_quality} fit)
-4. Significance: {'Significant' if p_value < alpha else 'Not significant'} 
+4. Significance: {"Significant" if p_value < alpha else "Not significant"} 
    (p = {p_value:.4f})
 
 Practical Interpretation:
 - Each additional hour of study is associated with a {slope:.2f} point
   increase in test score, on average
 - Study hours explain {r_squared:.1%} of the variation in test scores
-- The relationship is {'statistically significant' if p_value < alpha else 'not statistically significant'}
+- The relationship is {"statistically significant" if p_value < alpha else "not statistically significant"}
 
 Limitations:
 - Correlation does not imply causation
@@ -210,4 +209,3 @@ Limitations:
 """)
 
 print("=" * 70)
-

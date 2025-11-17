@@ -4,7 +4,8 @@ This module provides functions for multivariate analysis including
 multiple regression, PCA, and factor analysis.
 """
 
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 import numpy as np
 from scipy import linalg, stats
 

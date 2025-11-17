@@ -1,5 +1,5 @@
 import math
-from typing import Sequence, Tuple, Dict
+from typing import Dict, Sequence, Tuple
 
 # --- BASIC PROBABILITY FUNCTIONS ---
 
@@ -79,17 +79,17 @@ def conditional_probability(p_a_and_b: float, p_b: float) -> float:
 
 def mutually_exclusive(p_a: float, p_b: float) -> float:
     """Returns P(A or B) for mutually exclusive events.
-    
+
     Args:
         p_a: Probability of event A
         p_b: Probability of event B
-        
+
     Returns:
         P(A or B) = P(A) + P(B)
-        
+
     Raises:
         ValueError: If probabilities are not between 0 and 1, or sum exceeds 1
-        
+
     Example:
         >>> mutually_exclusive(0.3, 0.4)
         0.7
@@ -106,18 +106,18 @@ def mutually_exclusive(p_a: float, p_b: float) -> float:
 
 def general_addition_rule(p_a: float, p_b: float, p_a_and_b: float) -> float:
     """Returns P(A or B) = P(A) + P(B) - P(A and B)
-    
+
     Args:
         p_a: Probability of event A
         p_b: Probability of event B
         p_a_and_b: Joint probability P(A and B)
-        
+
     Returns:
         P(A or B)
-        
+
     Raises:
         ValueError: If probabilities are not between 0 and 1, or relationships are invalid
-        
+
     Example:
         >>> general_addition_rule(0.3, 0.4, 0.1)
         0.6
@@ -141,16 +141,16 @@ def general_addition_rule(p_a: float, p_b: float, p_a_and_b: float) -> float:
 
 def fundamental_counting(outcomes: Sequence[int]) -> int:
     """Multiplies choices across stages to get total outcomes.
-    
+
     Args:
         outcomes: Sequence of number of choices at each stage
-        
+
     Returns:
         Total number of possible outcomes
-        
+
     Raises:
         ValueError: If any outcome count is not positive
-        
+
     Example:
         >>> fundamental_counting([4, 3, 2, 5])
         120
@@ -218,18 +218,18 @@ def permutations(n: int, k: int) -> int:
 
 def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
     """Computes P(A|B) using Bayes' Theorem.
-    
+
     Args:
         p_b_given_a: Conditional probability P(B|A)
         p_a: Prior probability P(A)
         p_b: Prior probability P(B)
-        
+
     Returns:
         Posterior probability P(A|B)
-        
+
     Raises:
         ValueError: If probabilities are not between 0 and 1, or P(B) is zero
-        
+
     Example:
         >>> bayes_theorem(0.9, 0.01, 0.05)
         0.18
@@ -256,10 +256,10 @@ def probability_tree(branches: Sequence[Tuple[float, float]]) -> float:
 
     Returns:
         Total probability of reaching desired outcome.
-        
+
     Raises:
         ValueError: If probabilities are not between 0 and 1, or result exceeds 1
-        
+
     Example:
         >>> probability_tree([(0.5, 0.7), (0.25, 0.25), (0.25, 0.25)])
         0.5
@@ -291,17 +291,17 @@ def probability_distribution_table(
 
 def expected_value(values: Sequence[float], probabilities: Sequence[float]) -> float:
     """Calculate the expected value of a discrete random variable.
-    
+
     Args:
         values: Possible values of the random variable
         probabilities: Corresponding probabilities for each value
-        
+
     Returns:
         Expected value E[X] = Σ(x * P(x))
-        
+
     Raises:
         ValueError: If lengths don't match, probabilities are invalid, or don't sum to 1
-        
+
     Example:
         >>> expected_value([0, 1, 2], [0.1, 0.3, 0.6])
         1.5
@@ -310,15 +310,15 @@ def expected_value(values: Sequence[float], probabilities: Sequence[float]) -> f
         raise ValueError("values and probabilities must have the same length")
     if not values:
         raise ValueError("values sequence cannot be empty")
-    
+
     prob_sum = sum(probabilities)
     if abs(prob_sum - 1.0) > 1e-6:
         raise ValueError(f"Probabilities must sum to 1, got {prob_sum}")
-    
+
     for p in probabilities:
         if not 0 <= p <= 1:
             raise ValueError(f"All probabilities must be between 0 and 1, got {p}")
-    
+
     return sum(v * p for v, p in zip(values, probabilities))
 
 

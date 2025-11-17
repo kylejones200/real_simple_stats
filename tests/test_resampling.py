@@ -1,12 +1,13 @@
 """Tests for resampling methods module."""
 
 import numpy as np
+
 from real_simple_stats.resampling import (
     bootstrap,
     bootstrap_hypothesis_test,
-    permutation_test,
-    jackknife,
     cross_validate,
+    jackknife,
+    permutation_test,
     stratified_split,
 )
 

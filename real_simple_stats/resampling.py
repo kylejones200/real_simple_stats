@@ -4,7 +4,8 @@ This module provides functions for bootstrap, permutation tests,
 and cross-validation techniques.
 """
 
-from typing import List, Tuple, Callable, Dict, Optional
+from typing import Callable, Dict, List, Optional, Tuple
+
 import numpy as np
 
 try:
@@ -617,6 +618,14 @@ def stratified_split(
         n_cls = len(cls_indices)
         n_test = int(n_cls * test_size)
         
+        # Ensure minority classes get at least 1 test sample if class has > 1 sample
+        # and we have multiple classes (to maintain stratification)
+        if n_test == 0 and n_cls > 1 and len(classes) > 1:
+            n_test = 1
+        # But don't take all samples if class is very small
+        if n_test >= n_cls and n_cls > 1:
+            n_test = max(1, n_cls - 1)
+
         # Ensure minority classes get at least 1 test sample if class has > 1 sample
         # and we have multiple classes (to maintain stratification)
         if n_test == 0 and n_cls > 1 and len(classes) > 1:

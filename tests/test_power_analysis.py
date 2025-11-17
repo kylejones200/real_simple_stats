@@ -1,12 +1,13 @@
 """Tests for power analysis and sample size calculations."""
 
 import pytest
+
 from real_simple_stats.power_analysis import (
-    power_t_test,
-    power_proportion_test,
+    minimum_detectable_effect,
     power_anova,
     power_correlation,
-    minimum_detectable_effect,
+    power_proportion_test,
+    power_t_test,
     sample_size_summary,
 )
 
@@ -66,9 +67,7 @@ class TestPowerProportionTest:
         opposite_power = power_proportion_test(
             n=120, p1=0.4, p2=0.5, alternative="greater"
         )
-        less_power = power_proportion_test(
-            n=120, p1=0.4, p2=0.5, alternative="less"
-        )
+        less_power = power_proportion_test(n=120, p1=0.4, p2=0.5, alternative="less")
 
         assert 0 < opposite_power["power"] < 0.25
         assert greater_power["power"] > opposite_power["power"]

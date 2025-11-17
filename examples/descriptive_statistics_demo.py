@@ -1,12 +1,12 @@
 from real_simple_stats.descriptives import (
+    coefficient_of_variation,
+    detect_fake_statistics,
+    draw_cumulative_frequency_table,
+    draw_frequency_table,
     five_number_summary,
     interquartile_range,
-    sample_variance,
     sample_std_dev,
-    coefficient_of_variation,
-    draw_frequency_table,
-    draw_cumulative_frequency_table,
-    detect_fake_statistics,
+    sample_variance,
 )
 
 x = [1, 2, 5, 6, 7, 9, 12, 15, 18, 19, 27]

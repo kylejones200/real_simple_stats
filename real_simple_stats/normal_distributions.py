@@ -1,6 +1,6 @@
 import math
-from scipy.stats import norm
 
+from scipy.stats import norm
 
 # --- Z-SCORE CALCULATIONS ---
 
@@ -65,18 +65,18 @@ def chebyshev_theorem(k: float) -> float:
 
 def normal_pdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
     """Calculate the probability density function (PDF) for a normal distribution.
-    
+
     Args:
         x: Value at which to evaluate the PDF
         mean: Mean of the normal distribution (default: 0.0)
         std_dev: Standard deviation of the normal distribution (default: 1.0)
-        
+
     Returns:
         PDF value at x
-        
+
     Raises:
         ValueError: If std_dev is not positive
-        
+
     Example:
         >>> normal_pdf(0, mean=0, std_dev=1)
         0.3989422804014327
@@ -88,18 +88,18 @@ def normal_pdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
 
 def normal_cdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
     """Calculate the cumulative distribution function (CDF) for a normal distribution.
-    
+
     Args:
         x: Value at which to evaluate the CDF
         mean: Mean of the normal distribution (default: 0.0)
         std_dev: Standard deviation of the normal distribution (default: 1.0)
-        
+
     Returns:
         CDF value at x (probability that X <= x)
-        
+
     Raises:
         ValueError: If std_dev is not positive
-        
+
     Example:
         >>> normal_cdf(0, mean=0, std_dev=1)
         0.5

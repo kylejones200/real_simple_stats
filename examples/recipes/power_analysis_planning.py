@@ -7,7 +7,6 @@ This recipe demonstrates how to use power analysis to plan a study:
 4. Make informed decisions about study design
 """
 
-import real_simple_stats as rss
 from real_simple_stats import power_analysis as pa
 
 print("=" * 70)
@@ -30,14 +29,14 @@ print("Test type: Two-sided (we want to detect improvement or decline)")
 
 # Calculate required sample size
 result = pa.power_t_test(
-    delta=5.0,      # Expected difference in means
-    sd=10.0,        # Standard deviation
-    power=0.80,     # Desired power
-    sig_level=0.05, # Significance level
-    alternative="two-sided"
+    delta=5.0,  # Expected difference in means
+    sd=10.0,  # Standard deviation
+    power=0.80,  # Desired power
+    sig_level=0.05,  # Significance level
+    alternative="two-sided",
 )
 
-n_required = int(result['n'])
+n_required = int(result["n"])
 print(f"\n✓ Required sample size: n = {n_required} per group")
 print(f"  (Total participants needed: {n_required * 2} for two groups)")
 
@@ -52,20 +51,20 @@ print("\nWe can only recruit 30 participants per group.")
 print("What's our power to detect a 5-point improvement?")
 
 result2 = pa.power_t_test(
-    n=30,           # Available sample size
-    delta=5.0,      # Expected difference
-    sd=10.0,        # Standard deviation
+    n=30,  # Available sample size
+    delta=5.0,  # Expected difference
+    sd=10.0,  # Standard deviation
     sig_level=0.05,
-    alternative="two-sided"
+    alternative="two-sided",
 )
 
-power = result2['power']
+power = result2["power"]
 print(f"\n✓ Statistical power: {power:.1%}")
 if power < 0.80:
-    print(f"  ⚠️  Power is below the recommended 0.80 threshold")
-    print(f"  Consider: Increasing sample size, larger effect size, or higher alpha")
+    print("  ⚠️  Power is below the recommended 0.80 threshold")
+    print("  Consider: Increasing sample size, larger effect size, or higher alpha")
 else:
-    print(f"  ✓ Power is adequate (≥ 0.80)")
+    print("  ✓ Power is adequate (≥ 0.80)")
 
 # ============================================================================
 # Scenario 3: Power Analysis for Proportion Test
@@ -81,14 +80,14 @@ print("Desired power: 0.80")
 print("Significance level: 0.05")
 
 result3 = pa.power_proportion_test(
-    p1=0.15,        # Expected proportion
-    p0=0.10,       # Null hypothesis proportion
+    p1=0.15,  # Expected proportion
+    p0=0.10,  # Null hypothesis proportion
     power=0.80,
     sig_level=0.05,
-    alternative="two-sided"
+    alternative="two-sided",
 )
 
-n_prop = int(result3['n'])
+n_prop = int(result3["n"])
 print(f"\n✓ Required sample size: n = {n_prop} per group")
 
 # ============================================================================
@@ -113,7 +112,7 @@ result_one = pa.power_t_test(
 
 print(f"\nTwo-sided test power: {result_two['power']:.1%}")
 print(f"One-sided test power:  {result_one['power']:.1%}")
-print(f"\nNote: One-sided tests have higher power when you have a")
+print("\nNote: One-sided tests have higher power when you have a")
 print("      directional hypothesis, but require stronger justification.")
 
 # ============================================================================
@@ -134,8 +133,8 @@ for delta in effect_sizes:
     result = pa.power_t_test(
         delta=delta, sd=10.0, power=0.80, sig_level=0.05, alternative="two-sided"
     )
-    n = int(result['n'])
-    
+    n = int(result["n"])
+
     # Cohen's d interpretation
     cohens_d = delta / 10.0
     if cohens_d < 0.2:
@@ -146,7 +145,7 @@ for delta in effect_sizes:
         interp = "medium"
     else:
         interp = "large"
-    
+
     print(f"  {delta:4.1f}     |    {n:4d}    | {interp} effect")
 
 print("\nKey Insight: Larger effects require smaller samples to detect.")
@@ -174,4 +173,3 @@ Common Mistakes to Avoid:
 """)
 
 print("=" * 70)
-

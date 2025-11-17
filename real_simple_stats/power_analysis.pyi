@@ -1,6 +1,6 @@
 """Type stubs for power_analysis module."""
 
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 def power_t_test(
     n: Optional[int] = None,
@@ -25,4 +25,3 @@ def power_correlation_test(
     power: Optional[float] = None,
     alternative: str = "two-sided",
 ) -> Dict[str, float]: ...
-

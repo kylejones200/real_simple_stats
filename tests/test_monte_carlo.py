@@ -1,7 +1,8 @@
 """Tests for Monte Carlo simulation methods."""
 
-import pytest
 import numpy as np
+import pytest
+
 from real_simple_stats.monte_carlo import (
     geometric_brownian_motion,
     monte_carlo_from_data,

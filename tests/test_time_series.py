@@ -1,15 +1,16 @@
 """Tests for time series analysis functions."""
 
-import pytest
 import numpy as np
+import pytest
+
 from real_simple_stats.time_series import (
-    moving_average,
     autocorrelation,
-    partial_autocorrelation,
-    linear_trend,
     detrend,
-    seasonal_decompose,
     difference,
+    linear_trend,
+    moving_average,
+    partial_autocorrelation,
+    seasonal_decompose,
 )
 
 

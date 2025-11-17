@@ -1,14 +1,15 @@
 """Comprehensive tests for linear regression utilities."""
 
-import pytest
 import numpy as np
+import pytest
+
 from real_simple_stats.linear_regression_utils import (
-    prepare_scatter_data,
-    pearson_correlation,
     coefficient_of_determination,
     linear_regression,
-    regression_equation,
     manual_slope_intercept,
+    pearson_correlation,
+    prepare_scatter_data,
+    regression_equation,
 )
 
 

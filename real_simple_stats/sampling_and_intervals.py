@@ -1,6 +1,7 @@
 import math
-from scipy.stats import norm, t
 from typing import Tuple
+
+from scipy.stats import norm, t
 
 # --- CENTRAL LIMIT THEOREM UTILITIES ---
 

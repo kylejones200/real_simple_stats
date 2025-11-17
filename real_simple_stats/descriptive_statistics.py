@@ -1,6 +1,6 @@
 import math
-from typing import Sequence, Dict, Union, List
 from collections import Counter
+from typing import Dict, List, Sequence, Union
 
 # --- Basic Descriptive Functions ---
 
@@ -43,16 +43,16 @@ def is_continuous(values: Sequence[float]) -> bool:
 
 def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
     """Return the five-number summary: min, Q1, median, Q3, max.
-    
+
     Args:
         values: List of numerical values
-        
+
     Returns:
         Dictionary with keys: min, Q1, median, Q3, max
-        
+
     Raises:
         ValueError: If the input list is empty
-        
+
     Example:
         >>> five_number_summary([1, 2, 3, 4, 5])
         {'min': 1, 'Q1': 1.5, 'median': 3, 'Q3': 4.5, 'max': 5}
@@ -61,10 +61,10 @@ def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
     """
     if not values:
         raise ValueError("Cannot calculate five-number summary of empty list")
-    
+
     sorted_vals = sorted(values)
     n = len(sorted_vals)
-    
+
     # Handle edge cases for small samples
     if n == 1:
         # Single value: all statistics equal the value
@@ -76,13 +76,13 @@ def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
             "Q3": val,
             "max": val,
         }
-    
+
     # Calculate median
     mid = n // 2
     median_val = (
         sorted_vals[mid] if n % 2 else (sorted_vals[mid - 1] + sorted_vals[mid]) / 2
     )
-    
+
     # For n=2, Q1 and Q3 are the two values
     if n == 2:
         return {
@@ -92,7 +92,7 @@ def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
             "Q3": sorted_vals[1],
             "max": sorted_vals[1],
         }
-    
+
     # For n=3, Q1 is min and Q3 is max
     if n == 3:
         return {
@@ -102,13 +102,13 @@ def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
             "Q3": sorted_vals[2],
             "max": sorted_vals[2],
         }
-    
+
     # Standard calculation for n >= 4
     lower_half = sorted_vals[:mid]
     upper_half = sorted_vals[mid + 1 :] if n % 2 else sorted_vals[mid:]
     Q1 = median(lower_half)
     Q3 = median(upper_half)
-    
+
     return {
         "min": sorted_vals[0],
         "Q1": Q1,

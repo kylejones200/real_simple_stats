@@ -1,11 +1,11 @@
 from real_simple_stats.binomial_distributions import (
-    is_binomial_experiment,
-    binomial_probability,
     binomial_mean,
-    binomial_variance,
+    binomial_probability,
     binomial_std_dev,
-    expected_value_single,
+    binomial_variance,
     expected_value_multiple,
+    expected_value_single,
+    is_binomial_experiment,
     normal_approximation,
 )
 

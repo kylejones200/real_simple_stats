@@ -14,11 +14,12 @@ Key Finding: Professional frogs jump significantly farther than other frogs!
 
 import csv
 from pathlib import Path
-from real_simple_stats import descriptive_statistics as desc
-from real_simple_stats import hypothesis_testing as ht
-from real_simple_stats import effect_sizes as es
-from scipy.stats import t as t_dist
+
 import numpy as np
+from scipy.stats import t as t_dist
+
+from real_simple_stats import descriptive_statistics as desc
+from real_simple_stats import effect_sizes as es
 
 # Load the frog jump data
 data_file = Path(__file__).parent.parent / "data" / "froggy.csv"
@@ -31,23 +32,23 @@ print("=" * 70)
 pro_jumps = []
 other_jumps = []
 
-with open(data_file, 'r') as f:
+with open(data_file) as f:
     reader = csv.DictReader(f)
     for row in reader:
         try:
-            distance = float(row['distance'])
-            frog_type = row.get('frog_type', '').strip().lower()
-            
+            distance = float(row["distance"])
+            frog_type = row.get("frog_type", "").strip().lower()
+
             # Only include successful jumps (distance > 0)
             if distance > 0:
-                if frog_type == 'pro':
+                if frog_type == "pro":
                     pro_jumps.append(distance)
                 else:
                     other_jumps.append(distance)
         except (ValueError, KeyError):
             continue
 
-print(f"\nDataset Summary:")
+print("\nDataset Summary:")
 print(f"  Professional frogs: {len(pro_jumps)} successful jumps")
 print(f"  Other frogs: {len(other_jumps)} successful jumps")
 print(f"  Total: {len(pro_jumps) + len(other_jumps)} successful jumps")
@@ -91,10 +92,10 @@ print(f"  IQR: {other_summary['Q3'] - other_summary['Q1']:.2f} cm")
 
 # Difference
 mean_difference = pro_mean - other_mean
-print(f"\nDifference:")
+print("\nDifference:")
 print(f"  Mean difference: {mean_difference:.2f} cm")
 print(f"  Professional frogs jump {mean_difference:.2f} cm farther on average")
-print(f"  That's {mean_difference/other_mean*100:.1f}% farther than other frogs!")
+print(f"  That's {mean_difference / other_mean * 100:.1f}% farther than other frogs!")
 
 # Step 2: Hypothesis Test
 print("\n" + "=" * 70)
@@ -104,21 +105,22 @@ print("=" * 70)
 print("\nResearch Question: Is there a significant difference in jump distance")
 print("                  between professional and other frogs?")
 
-print(f"\nHypotheses:")
-print(f"  H₀: μ_pro = μ_other (no difference in mean jump distance)")
-print(f"  H₁: μ_pro > μ_other (professional frogs jump farther)")
-print(f"  This is a one-tailed (right-tailed) test")
+print("\nHypotheses:")
+print("  H₀: μ_pro = μ_other (no difference in mean jump distance)")
+print("  H₁: μ_pro > μ_other (professional frogs jump farther)")
+print("  This is a one-tailed (right-tailed) test")
 
 alpha = 0.05
 print(f"  Significance level: α = {alpha}")
 
 # Perform two-sample t-test using scipy (since real_simple_stats doesn't have it)
 from scipy.stats import ttest_ind
+
 t_stat, p_value_two_tailed = ttest_ind(pro_jumps, other_jumps, equal_var=False)
 # For one-tailed test, divide p-value by 2 (since we expect pro > other)
 p_value = p_value_two_tailed / 2
 
-print(f"\nTest Results:")
+print("\nTest Results:")
 print(f"  Professional mean: {pro_mean:.2f} cm")
 print(f"  Other mean: {other_mean:.2f} cm")
 print(f"  Mean difference: {mean_difference:.2f} cm")
@@ -135,7 +137,9 @@ else:
     conclusion = "There is insufficient evidence that professional frogs jump farther"
     significance = "not statistically significant"
 
-print(f"\nDecision: {decision} (p = {p_value:.4f} {'<' if p_value < alpha else '≥'} α = {alpha})")
+print(
+    f"\nDecision: {decision} (p = {p_value:.4f} {'<' if p_value < alpha else '≥'} α = {alpha})"
+)
 print(f"Conclusion: {conclusion}")
 print(f"The difference is {significance}!")
 
@@ -158,7 +162,7 @@ else:
     effect_size = "large"
 
 print(f"\nEffect Size Interpretation: {effect_size}")
-print(f"\nThis means:")
+print("\nThis means:")
 if abs(cohens_d) < 0.2:
     print("  The difference, while statistically significant, is very small.")
     print("  Professional frogs jump farther, but the practical difference is minimal.")
@@ -185,7 +189,9 @@ s1, s2 = pro_std, other_std
 se_diff = np.sqrt((s1**2 / n1) + (s2**2 / n2))
 
 # Degrees of freedom (Welch-Satterthwaite)
-df_welch = ((s1**2/n1 + s2**2/n2)**2) / ((s1**2/n1)**2/(n1-1) + (s2**2/n2)**2/(n2-1))
+df_welch = ((s1**2 / n1 + s2**2 / n2) ** 2) / (
+    (s1**2 / n1) ** 2 / (n1 - 1) + (s2**2 / n2) ** 2 / (n2 - 1)
+)
 
 # Critical t-value
 t_critical = t_dist.ppf(0.975, df_welch)  # 95% CI, two-tailed
@@ -196,15 +202,15 @@ ci_lower = mean_difference - margin
 ci_upper = mean_difference + margin
 
 print(f"\n95% Confidence Interval for difference: [{ci_lower:.2f}, {ci_upper:.2f}] cm")
-print(f"\nInterpretation:")
-print(f"  We're 95% confident that professional frogs jump between")
+print("\nInterpretation:")
+print("  We're 95% confident that professional frogs jump between")
 print(f"  {ci_lower:.2f} and {ci_upper:.2f} cm farther than other frogs, on average.")
 if ci_lower > 0:
-    print(f"  This interval does NOT include zero,")
-    print(f"  which confirms the difference is statistically significant.")
+    print("  This interval does NOT include zero,")
+    print("  which confirms the difference is statistically significant.")
 else:
-    print(f"  This interval includes zero,")
-    print(f"  which suggests the difference may not be significant.")
+    print("  This interval includes zero,")
+    print("  which suggests the difference may not be significant.")
 
 # Step 5: Visual Summary
 print("\n" + "=" * 70)
@@ -214,40 +220,49 @@ print("=" * 70)
 print(f"\n{'Metric':<30} {'Professional':<15} {'Other':<15} {'Difference':<15}")
 print("-" * 75)
 print(f"{'Sample size (n)':<30} {len(pro_jumps):<15} {len(other_jumps):<15} {'':<15}")
-print(f"{'Mean (cm)':<30} {pro_mean:<15.2f} {other_mean:<15.2f} {mean_difference:>+14.2f}")
-print(f"{'Median (cm)':<30} {pro_median:<15.2f} {other_median:<15.2f} {pro_median-other_median:>+14.2f}")
+print(
+    f"{'Mean (cm)':<30} {pro_mean:<15.2f} {other_mean:<15.2f} {mean_difference:>+14.2f}"
+)
+print(
+    f"{'Median (cm)':<30} {pro_median:<15.2f} {other_median:<15.2f} {pro_median - other_median:>+14.2f}"
+)
 print(f"{'Std Dev (cm)':<30} {pro_std:<15.2f} {other_std:<15.2f} {'':<15}")
-print(f"{'Coefficient of Variation (%)':<30} {pro_cv:<15.1f} {other_cv:<15.1f} {'':<15}")
+print(
+    f"{'Coefficient of Variation (%)':<30} {pro_cv:<15.1f} {other_cv:<15.1f} {'':<15}"
+)
 
 # Step 6: Final Interpretation
 print("\n" + "=" * 70)
 print("6. Final Interpretation")
 print("=" * 70)
 
-print(f"\nKey Findings:")
+print("\nKey Findings:")
 print(f"  ✓ Professional frogs jump {mean_difference:.2f} cm farther on average")
 print(f"  ✓ This difference is {significance} (p = {p_value:.4f})")
 print(f"  ✓ Effect size is {effect_size} (Cohen's d = {cohens_d:.4f})")
 print(f"  ✓ 95% CI: [{ci_lower:.2f}, {ci_upper:.2f}] cm")
 
-print(f"\nPractical Implications:")
+print("\nPractical Implications:")
 if abs(cohens_d) >= 0.8:
-    print(f"  • The difference is large enough to be practically important")
-    print(f"  • Professional frogs show substantially better performance")
+    print("  • The difference is large enough to be practically important")
+    print("  • Professional frogs show substantially better performance")
 elif abs(cohens_d) >= 0.5:
-    print(f"  • The difference is meaningful in practice")
-    print(f"  • Professional frogs consistently outperform other frogs")
+    print("  • The difference is meaningful in practice")
+    print("  • Professional frogs consistently outperform other frogs")
 else:
-    print(f"  • While statistically significant, the practical difference is smaller")
-    print(f"  • Both groups show similar jumping ability overall")
+    print("  • While statistically significant, the practical difference is smaller")
+    print("  • Both groups show similar jumping ability overall")
 
-print(f"\nStatistical Conclusion:")
-print(f"  We have {'strong' if p_value < 0.01 else 'moderate' if p_value < 0.05 else 'weak'} evidence")
-print(f"  that professional frogs jump farther than other frogs.")
-print(f"  The mean difference of {mean_difference:.2f} cm is {'large' if abs(cohens_d) >= 0.8 else 'moderate' if abs(cohens_d) >= 0.5 else 'small but'} meaningful.")
+print("\nStatistical Conclusion:")
+print(
+    f"  We have {'strong' if p_value < 0.01 else 'moderate' if p_value < 0.05 else 'weak'} evidence"
+)
+print("  that professional frogs jump farther than other frogs.")
+print(
+    f"  The mean difference of {mean_difference:.2f} cm is {'large' if abs(cohens_d) >= 0.8 else 'moderate' if abs(cohens_d) >= 0.5 else 'small but'} meaningful."
+)
 
 print("\n" + "=" * 70)
 print("This analysis demonstrates how to compare two groups using")
 print("Real Simple Stats with real-world data from the BANA statistics book.")
 print("=" * 70)
-

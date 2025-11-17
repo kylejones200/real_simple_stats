@@ -6,10 +6,11 @@ required sample sizes for various statistical tests.
 Refactored for Pythonic elegance and maintainability.
 """
 
-from typing import Optional, Dict, Callable
 from functools import lru_cache
+from typing import Callable, Dict, Optional
+
 import numpy as np
-from scipy import stats, optimize
+from scipy import optimize, stats
 
 # Module-level constants
 VALID_ALTERNATIVES = {"two-sided", "greater", "less"}

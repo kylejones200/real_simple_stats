@@ -1,16 +1,17 @@
 """Tests for effect size calculations."""
 
 import pytest
+
 from real_simple_stats.effect_sizes import (
     cohens_d,
-    hedges_g,
-    eta_squared,
-    cramers_v,
-    phi_coefficient,
-    odds_ratio,
-    relative_risk,
     cohens_h,
+    cramers_v,
+    eta_squared,
+    hedges_g,
     interpret_effect_size,
+    odds_ratio,
+    phi_coefficient,
+    relative_risk,
 )
 
 
