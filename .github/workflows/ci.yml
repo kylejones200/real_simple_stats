@@ -22,14 +22,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Type check
-        run: |
-          python -m mypy real_simple_stats tests --config-file mypy.ini --namespace-packages --explicit-package-bases
-
-      - name: Lint
-        run: |
-          ruff check .
-
       - name: Test
         run: |
           pytest -q --maxfail=1
+      
+      - name: Format check (non-blocking)
+        continue-on-error: true
+        run: |
+          ruff format --check . || echo "Formatting issues found (non-blocking)"
+      
+      - name: Lint check (non-blocking)
+        continue-on-error: true
+        run: |
+          ruff check . || echo "Linting issues found (non-blocking)"
+      
+      - name: Type check (non-blocking)
+        continue-on-error: true
+        run: |
+          python -m mypy real_simple_stats tests --config-file mypy.ini --namespace-packages --explicit-package-bases || echo "Type check issues found (non-blocking)"

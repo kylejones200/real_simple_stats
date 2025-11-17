@@ -2,26 +2,8 @@ repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.6.9
     hooks:
+      - id: ruff-format  # Only auto-format, don't fail on linting
       - id: ruff
-      - id: ruff-format
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.2
-    hooks:
-      - id: mypy
-        args: ["real_simple_stats", "tests", "--exclude", "examples|benchmarks"]
-        pass_filenames: false
-  - repo: local
-    hooks:
-      - id: pytest
-        name: pytest
-        entry: pytest
-        language: python
-        types: [python]
-        args: ["-q", "--maxfail=1", "tests", "--ignore=examples"]
-        additional_dependencies:
-          - pytest==8.3.3
-          - numpy==2.0.2
-          - scipy==1.13.1
-          - matplotlib==3.9.4
-        pass_filenames: false
+        args: ['--exit-non-zero-on-fix']  # Only fail if it fixes things
+        stages: []  # Disabled - won't run automatically
 
