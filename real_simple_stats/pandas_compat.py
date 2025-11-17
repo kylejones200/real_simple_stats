@@ -4,7 +4,8 @@ This module provides seamless integration with pandas DataFrames and Series,
 allowing you to use Real Simple Stats functions directly on pandas objects.
 """
 
-from typing import Any, Sequence, Union
+from collections.abc import Sequence
+from typing import Any, Union
 
 try:
     import pandas as pd
@@ -57,7 +58,7 @@ def _maybe_return_series(result: Any, original: Any) -> Any:
     if (
         PANDAS_AVAILABLE
         and isinstance(original, pd.Series)
-        and isinstance(result, (list, tuple))
+        and isinstance(result, list | tuple)
     ):
         return pd.Series(result, index=original.index[: len(result)])
     return result

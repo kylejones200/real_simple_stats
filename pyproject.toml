@@ -10,7 +10,7 @@ authors = [
     { name = "Kyle Jones", email = "kylejones@american.edu" }
 ]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 license = {text = "MIT"}
 keywords = ["statistics", "education", "probability", "hypothesis-testing", "regression", "data-analysis"]
 classifiers = [
@@ -19,10 +19,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Mathematics",
     "Topic :: Education"
@@ -61,7 +57,7 @@ rss-calc = "real_simple_stats.cli:main"
 
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py312']
 include = '\.pyi?$'
 extend-exclude = '''
 # A regex preceded by ^/ will apply only to files and directories
@@ -99,7 +95,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
 ignore_missing_imports = true
 warn_return_any = false
 warn_unused_configs = true
@@ -136,7 +132,7 @@ disable_error_code = ["arg-type", "no-any-return"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py38"
+target-version = "py312"
 exclude = [
     ".git",
     "__pycache__",
@@ -158,7 +154,4 @@ ignore = [
     "N806",  # Variable in function should be lowercase (stats conventions use X, Y, etc.)
     "N803",  # Argument name should be lowercase (stats conventions)
     "N802",  # Function name should be lowercase (test naming conventions)
-    "UP006",  # Use dict instead of Dict (compatibility with older Python)
-    "UP007",  # Use X | Y instead of Union (compatibility with older Python)
-    "UP045",  # Use X | None instead of Optional (requires Python 3.10+, we support 3.8+)
 ]

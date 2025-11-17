@@ -6,8 +6,8 @@ required sample sizes for various statistical tests.
 Refactored for Pythonic elegance and maintainability.
 """
 
+from collections.abc import Callable
 from functools import lru_cache
-from typing import Callable, Dict, Optional
 
 import numpy as np
 from scipy import optimize, stats
@@ -97,7 +97,7 @@ def _validate_alternative(alternative: str) -> None:
         raise ValueError(f"alternative must be one of {VALID_ALTERNATIVES}")
 
 
-def _validate_none_count(params: Dict[str, Optional[float]], expected: int = 1) -> None:
+def _validate_none_count(params: dict[str, float | None], expected: int = 1) -> None:
     """Validate that exactly the expected number of parameters are None.
 
     Args:
@@ -114,13 +114,13 @@ def _validate_none_count(params: Dict[str, Optional[float]], expected: int = 1) 
 
 
 def power_t_test(
-    n: Optional[int] = None,
-    delta: Optional[float] = None,
+    n: int | None = None,
+    delta: float | None = None,
     sd: float = 1.0,
     sig_level: float = 0.05,
-    power: Optional[float] = None,
+    power: float | None = None,
     alternative: str = "two-sided",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Calculate power or sample size for t-test.
 
     Provide exactly 3 of: n, delta, power. The 4th will be calculated.
@@ -166,8 +166,8 @@ def power_t_test(
 
 
 def _calculate_t_test_n(
-    delta: float, power: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    delta: float, power: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate required sample size for t-test."""
     if delta == 0:
         raise ValueError("delta cannot be zero when calculating sample size")
@@ -189,8 +189,8 @@ def _calculate_t_test_n(
 
 
 def _calculate_t_test_delta(
-    n: int, power: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    n: int, power: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate detectable effect size for t-test."""
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
     t_crit = _cached_t_ppf(alpha_adj, df=n - 1)
@@ -210,8 +210,8 @@ def _calculate_t_test_delta(
 
 
 def _calculate_t_test_power(
-    n: int, delta: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    n: int, delta: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate statistical power for t-test."""
     effect_size = delta / base_params["sd"]
     ncp = effect_size * np.sqrt(n)
@@ -240,13 +240,13 @@ def _calculate_t_test_power(
 
 
 def power_proportion_test(
-    n: Optional[int] = None,
-    p1: Optional[float] = None,
+    n: int | None = None,
+    p1: float | None = None,
     p2: float = 0.5,
     sig_level: float = 0.05,
-    power: Optional[float] = None,
+    power: float | None = None,
     alternative: str = "two-sided",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Calculate power or sample size for proportion test.
 
     Args:
@@ -292,8 +292,8 @@ def power_proportion_test(
 
 
 def _calculate_proportion_n(
-    p1: float, power: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    p1: float, power: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate required sample size for proportion test."""
     if p1 is None or p1 == base_params["p2"]:
         raise ValueError("p1 must be different from p2")
@@ -316,8 +316,8 @@ def _calculate_proportion_n(
 
 
 def _calculate_proportion_p1(
-    n: int, power: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    n: int, power: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate detectable proportion difference."""
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
     z_alpha = stats.norm.ppf(1 - alpha_adj)
@@ -338,8 +338,8 @@ def _calculate_proportion_p1(
 
 
 def _calculate_proportion_power(
-    n: int, p1: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    n: int, p1: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate statistical power for proportion test."""
     h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(base_params["p2"])))
     mean_shift = h * np.sqrt(n)
@@ -368,11 +368,11 @@ def _calculate_proportion_power(
 
 def power_anova(
     n_groups: int,
-    n_per_group: Optional[int] = None,
-    effect_size: Optional[float] = None,
+    n_per_group: int | None = None,
+    effect_size: float | None = None,
     sig_level: float = 0.05,
-    power: Optional[float] = None,
-) -> Dict[str, float]:
+    power: float | None = None,
+) -> dict[str, float]:
     """Calculate power or sample size for one-way ANOVA.
 
     Args:
@@ -415,8 +415,8 @@ def power_anova(
 
 
 def _calculate_anova_n(
-    effect_size: float, power: float, base_params: Dict
-) -> Dict[str, float]:
+    effect_size: float, power: float, base_params: dict
+) -> dict[str, float]:
     """Calculate required sample size per group for ANOVA."""
     if effect_size <= 0:
         raise ValueError("effect_size must be positive")
@@ -442,8 +442,8 @@ def _calculate_anova_n(
 
 
 def _calculate_anova_effect(
-    n_per_group: int, power: float, base_params: Dict
-) -> Dict[str, float]:
+    n_per_group: int, power: float, base_params: dict
+) -> dict[str, float]:
     """Calculate detectable effect size for ANOVA."""
     n_groups = base_params["n_groups"]
     sig_level = base_params["sig_level"]
@@ -469,8 +469,8 @@ def _calculate_anova_effect(
 
 
 def _calculate_anova_power(
-    n_per_group: int, effect_size: float, base_params: Dict
-) -> Dict[str, float]:
+    n_per_group: int, effect_size: float, base_params: dict
+) -> dict[str, float]:
     """Calculate statistical power for ANOVA."""
     n_groups = base_params["n_groups"]
     sig_level = base_params["sig_level"]
@@ -491,12 +491,12 @@ def _calculate_anova_power(
 
 
 def power_correlation(
-    n: Optional[int] = None,
-    r: Optional[float] = None,
+    n: int | None = None,
+    r: float | None = None,
     sig_level: float = 0.05,
-    power: Optional[float] = None,
+    power: float | None = None,
     alternative: str = "two-sided",
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """Calculate power or sample size for correlation test.
 
     Args:
@@ -536,8 +536,8 @@ def power_correlation(
 
 
 def _calculate_correlation_n(
-    r: float, power: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    r: float, power: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate required sample size for correlation test."""
     if abs(r) >= 1:
         raise ValueError("r must be between -1 and 1")
@@ -559,8 +559,8 @@ def _calculate_correlation_n(
 
 
 def _calculate_correlation_r(
-    n: int, power: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    n: int, power: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate detectable correlation coefficient."""
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
     z_alpha = stats.norm.ppf(1 - alpha_adj)
@@ -580,8 +580,8 @@ def _calculate_correlation_r(
 
 
 def _calculate_correlation_power(
-    n: int, r: float, tails: int, base_params: Dict
-) -> Dict[str, float]:
+    n: int, r: float, tails: int, base_params: dict
+) -> dict[str, float]:
     """Calculate statistical power for correlation test."""
     z_r = 0.5 * np.log((1 + r) / (1 - r))
     sig_level = base_params["sig_level"]
@@ -627,7 +627,7 @@ def _mde_correlation(n: int, power: float, sig_level: float) -> float:
     return abs(result["r"])
 
 
-MDE_CALCULATORS: Dict[str, Callable[[int, float, float], float]] = {
+MDE_CALCULATORS: dict[str, Callable[[int, float, float], float]] = {
     "t-test": _mde_t_test,
     "proportion": _mde_proportion,
     "correlation": _mde_correlation,
@@ -674,7 +674,7 @@ def minimum_detectable_effect(
 
 def sample_size_summary(
     effect_size: float, power: float = 0.8, sig_level: float = 0.05
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """Get sample size requirements for multiple test types.
 
     Args:

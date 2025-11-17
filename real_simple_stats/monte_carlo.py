@@ -5,7 +5,7 @@ geometric Brownian motion for financial modeling and general-purpose
 simulation techniques.
 """
 
-from typing import Callable, Dict, List, Optional, Union
+from collections.abc import Callable
 
 import numpy as np
 
@@ -69,8 +69,8 @@ def geometric_brownian_motion(
     T: float,
     n_steps: int = 252,
     n_simulations: int = 1000,
-    random_seed: Optional[int] = None,
-) -> Dict[str, any]:
+    random_seed: int | None = None,
+) -> dict[str, any]:
     """Simulate paths using Geometric Brownian Motion.
 
     Geometric Brownian Motion (GBM) is commonly used to model stock prices
@@ -178,11 +178,11 @@ def geometric_brownian_motion(
 
 
 def monte_carlo_from_data(
-    data: List[float],
+    data: list[float],
     n_steps: int,
     n_simulations: int = 1000,
-    random_seed: Optional[int] = None,
-) -> Dict[str, any]:
+    random_seed: int | None = None,
+) -> dict[str, any]:
     """Run Monte Carlo simulation using parameters estimated from historical data.
 
     This function estimates drift (mu) and volatility (sigma) from historical
@@ -253,11 +253,11 @@ def monte_carlo_from_data(
 
 def monte_carlo_integration(
     func: Callable[[np.ndarray], np.ndarray],
-    lower_bounds: Union[float, List[float]],
-    upper_bounds: Union[float, List[float]],
+    lower_bounds: float | list[float],
+    upper_bounds: float | list[float],
     n_samples: int = 10000,
-    random_seed: Optional[int] = None,
-) -> Dict[str, float]:
+    random_seed: int | None = None,
+) -> dict[str, float]:
     """Estimate integral using Monte Carlo integration.
 
     Monte Carlo integration estimates the integral of a function by
@@ -295,9 +295,9 @@ def monte_carlo_integration(
         raise ValueError("n_samples must be at least 1")
 
     # Convert bounds to arrays
-    if not isinstance(lower_bounds, (list, np.ndarray)):
+    if not isinstance(lower_bounds, list | np.ndarray):
         lower_bounds = [lower_bounds]
-    if not isinstance(upper_bounds, (list, np.ndarray)):
+    if not isinstance(upper_bounds, list | np.ndarray):
         upper_bounds = [upper_bounds]
 
     lower_bounds = np.asarray(lower_bounds)
@@ -345,11 +345,11 @@ def monte_carlo_integration(
 
 def monte_carlo_probability(
     condition: Callable[[np.ndarray], np.ndarray],
-    lower_bounds: Union[float, List[float]],
-    upper_bounds: Union[float, List[float]],
+    lower_bounds: float | list[float],
+    upper_bounds: float | list[float],
     n_samples: int = 10000,
-    random_seed: Optional[int] = None,
-) -> Dict[str, float]:
+    random_seed: int | None = None,
+) -> dict[str, float]:
     """Estimate probability using Monte Carlo simulation.
 
     Estimates P(condition is True) by randomly sampling points
@@ -384,9 +384,9 @@ def monte_carlo_probability(
         raise ValueError("n_samples must be at least 1")
 
     # Convert bounds to arrays
-    if not isinstance(lower_bounds, (list, np.ndarray)):
+    if not isinstance(lower_bounds, list | np.ndarray):
         lower_bounds = [lower_bounds]
-    if not isinstance(upper_bounds, (list, np.ndarray)):
+    if not isinstance(upper_bounds, list | np.ndarray):
         upper_bounds = [upper_bounds]
 
     lower_bounds = np.asarray(lower_bounds)

@@ -1,5 +1,5 @@
 import math
-from typing import Dict, Sequence, Tuple
+from collections.abc import Sequence
 
 # --- BASIC PROBABILITY FUNCTIONS ---
 
@@ -248,7 +248,7 @@ def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
 # --- PROBABILITY TREES ---
 
 
-def probability_tree(branches: Sequence[Tuple[float, float]]) -> float:
+def probability_tree(branches: Sequence[tuple[float, float]]) -> float:
     """Calculates total probability of desired outcomes through tree branches.
 
     Args:
@@ -283,7 +283,7 @@ def probability_tree(branches: Sequence[Tuple[float, float]]) -> float:
 
 def probability_distribution_table(
     values: Sequence[int], probabilities: Sequence[float]
-) -> Dict[int, float]:
+) -> dict[int, float]:
     if abs(sum(probabilities) - 1.0) > 1e-6:
         raise ValueError("Probabilities must sum to 1")
     return dict(zip(values, probabilities))

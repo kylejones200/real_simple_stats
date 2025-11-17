@@ -4,7 +4,8 @@ This module provides functions to check assumptions for various
 statistical tests, helping users ensure their data meets test requirements.
 """
 
-from typing import Any, Dict, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from . import descriptive_statistics as desc
 
@@ -18,9 +19,9 @@ except ImportError:
 
 def check_t_test_assumptions(
     data: Sequence[float],
-    group2: Optional[Sequence[float]] = None,
+    group2: Sequence[float] | None = None,
     verbose: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Check assumptions for one-sample or two-sample t-test.
 
     Assumptions:
@@ -149,9 +150,9 @@ def check_t_test_assumptions(
 
 def _check_normality(
     data: Sequence[float], n: int, verbose: bool, group_name: str = "Data"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Check normality using multiple methods."""
-    result: Dict[str, Any] = {"passed": False, "methods": {}, "recommendation": ""}
+    result: dict[str, Any] = {"passed": False, "methods": {}, "recommendation": ""}
 
     # Method 1: Sample size rule
     if n >= 30:
@@ -283,7 +284,7 @@ def check_regression_assumptions(
     x: Sequence[float],
     y: Sequence[float],
     verbose: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Check assumptions for linear regression.
 
     Assumptions:
@@ -300,7 +301,7 @@ def check_regression_assumptions(
     Returns:
         Dictionary with assumption check results
     """
-    results: Dict[str, Any] = {}
+    results: dict[str, Any] = {}
 
     if verbose:
         print("=" * 70)

@@ -4,15 +4,13 @@ This module provides functions for multivariate analysis including
 multiple regression, PCA, and factor analysis.
 """
 
-from typing import Dict, List, Optional
-
 import numpy as np
 from scipy import linalg, stats
 
 
 def multiple_regression(
-    X: List[List[float]], y: List[float], include_intercept: bool = True
-) -> Dict[str, any]:
+    X: list[list[float]], y: list[float], include_intercept: bool = True
+) -> dict[str, any]:
     """Perform multiple linear regression.
 
     Args:
@@ -104,7 +102,7 @@ def multiple_regression(
     return result
 
 
-def pca(X: List[List[float]], n_components: Optional[int] = None) -> Dict[str, any]:
+def pca(X: list[list[float]], n_components: int | None = None) -> dict[str, any]:
     """Perform Principal Component Analysis (PCA).
 
     Args:
@@ -179,8 +177,8 @@ def pca(X: List[List[float]], n_components: Optional[int] = None) -> Dict[str, a
 
 
 def factor_analysis(
-    X: List[List[float]], n_factors: int, max_iter: int = 100
-) -> Dict[str, any]:
+    X: list[list[float]], n_factors: int, max_iter: int = 100
+) -> dict[str, any]:
     """Perform Factor Analysis.
 
     Args:
@@ -269,7 +267,7 @@ def factor_analysis(
     }
 
 
-def canonical_correlation(X: List[List[float]], Y: List[List[float]]) -> Dict[str, any]:
+def canonical_correlation(X: list[list[float]], Y: list[list[float]]) -> dict[str, any]:
     """Perform Canonical Correlation Analysis (CCA).
 
     Args:
@@ -344,8 +342,8 @@ def canonical_correlation(X: List[List[float]], Y: List[List[float]]) -> Dict[st
 
 
 def mahalanobis_distance(
-    X: List[List[float]], point: Optional[List[float]] = None
-) -> List[float]:
+    X: list[list[float]], point: list[float] | None = None
+) -> list[float]:
     """Calculate Mahalanobis distance from points to center of distribution.
 
     Args:

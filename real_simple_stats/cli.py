@@ -8,7 +8,6 @@ Provides quick access to statistical calculations from the terminal.
 import argparse
 import json
 import sys
-from typing import List
 
 from . import binomial_distributions as binom
 from . import descriptive_statistics as desc
@@ -17,7 +16,7 @@ from . import probability_utils as prob
 from .glossary import lookup
 
 
-def parse_numbers(numbers_str: str) -> List[float]:
+def parse_numbers(numbers_str: str) -> list[float]:
     """Parse a string of numbers into a list of floats."""
     try:
         # Handle comma-separated or space-separated numbers

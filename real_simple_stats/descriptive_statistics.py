@@ -1,6 +1,6 @@
 import math
 from collections import Counter
-from typing import Dict, List, Sequence, Union
+from collections.abc import Sequence
 
 # --- Basic Descriptive Functions ---
 
@@ -41,7 +41,7 @@ def is_continuous(values: Sequence[float]) -> bool:
     return not is_discrete(values)
 
 
-def five_number_summary(values: Sequence[float]) -> Dict[str, float]:
+def five_number_summary(values: Sequence[float]) -> dict[str, float]:
     """Return the five-number summary: min, Q1, median, Q3, max.
 
     Args:
@@ -221,8 +221,8 @@ def mean(values: Sequence[float]) -> float:
 
 
 def draw_frequency_table(
-    values: Sequence[Union[str, int]],
-) -> Dict[Union[str, int], int]:
+    values: Sequence[str | int],
+) -> dict[str | int, int]:
     """Generate a frequency table from a list of categorical or discrete values.
 
     Args:
@@ -238,7 +238,7 @@ def draw_frequency_table(
     return dict(Counter(values))
 
 
-def draw_cumulative_frequency_table(values: Sequence[int]) -> Dict[int, int]:
+def draw_cumulative_frequency_table(values: Sequence[int]) -> dict[int, int]:
     """Generate a cumulative frequency table from a list of discrete values.
 
     Args:
@@ -253,7 +253,7 @@ def draw_cumulative_frequency_table(values: Sequence[int]) -> Dict[int, int]:
     """
     freq = Counter(values)
     sorted_keys = sorted(freq)
-    cumulative: Dict[int, int] = {}
+    cumulative: dict[int, int] = {}
     total = 0
     for k in sorted_keys:
         total += freq[k]
@@ -263,7 +263,7 @@ def draw_cumulative_frequency_table(values: Sequence[int]) -> Dict[int, int]:
 
 def detect_fake_statistics(
     survey_sponsor: str, is_voluntary: bool, correlation_not_causation: bool
-) -> List[str]:
+) -> list[str]:
     """Detect potential issues with statistical claims or studies.
 
     Args:
@@ -279,7 +279,7 @@ def detect_fake_statistics(
         ['Potential bias: Self-funded study', 'Warning: Voluntary response samples are biased',
          'Warning: Correlation does not imply causation']
     """
-    warnings: List[str] = []
+    warnings: list[str] = []
     if survey_sponsor.lower() in {
         "diet pill company",
         "political campaign",

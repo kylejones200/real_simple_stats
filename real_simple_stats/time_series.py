@@ -4,15 +4,13 @@ This module provides functions for analyzing time series data including
 moving averages, autocorrelation, and trend analysis.
 """
 
-from typing import List, Tuple
-
 import numpy as np
 from scipy import stats
 
 
 def moving_average(
-    data: List[float], window_size: int, method: str = "simple"
-) -> List[float]:
+    data: list[float], window_size: int, method: str = "simple"
+) -> list[float]:
     """Calculate moving average of a time series.
 
     Args:
@@ -46,7 +44,7 @@ def moving_average(
         raise ValueError(f"Unknown method: {method}")
 
 
-def _simple_moving_average(data: List[float], window_size: int) -> List[float]:
+def _simple_moving_average(data: list[float], window_size: int) -> list[float]:
     """Calculate simple moving average (SMA)."""
     result = []
     for i in range(len(data) - window_size + 1):
@@ -55,7 +53,7 @@ def _simple_moving_average(data: List[float], window_size: int) -> List[float]:
     return result
 
 
-def _exponential_moving_average(data: List[float], window_size: int) -> List[float]:
+def _exponential_moving_average(data: list[float], window_size: int) -> list[float]:
     """Calculate exponential moving average (EMA)."""
     alpha = 2 / (window_size + 1)
     ema = [data[0]]
@@ -66,7 +64,7 @@ def _exponential_moving_average(data: List[float], window_size: int) -> List[flo
     return ema
 
 
-def _weighted_moving_average(data: List[float], window_size: int) -> List[float]:
+def _weighted_moving_average(data: list[float], window_size: int) -> list[float]:
     """Calculate weighted moving average (WMA)."""
     weights = np.arange(1, window_size + 1)
     weights = weights / weights.sum()
@@ -79,7 +77,7 @@ def _weighted_moving_average(data: List[float], window_size: int) -> List[float]
     return result
 
 
-def autocorrelation(data: List[float], max_lag: int = None) -> List[float]:
+def autocorrelation(data: list[float], max_lag: int = None) -> list[float]:
     """Calculate autocorrelation function (ACF).
 
     Args:
@@ -125,7 +123,7 @@ def autocorrelation(data: List[float], max_lag: int = None) -> List[float]:
     return acf
 
 
-def partial_autocorrelation(data: List[float], max_lag: int = None) -> List[float]:
+def partial_autocorrelation(data: list[float], max_lag: int = None) -> list[float]:
     """Calculate partial autocorrelation function (PACF).
 
     Args:
@@ -171,7 +169,7 @@ def partial_autocorrelation(data: List[float], max_lag: int = None) -> List[floa
     return pacf
 
 
-def linear_trend(data: List[float]) -> Tuple[float, float, float]:
+def linear_trend(data: list[float]) -> tuple[float, float, float]:
     """Fit a linear trend to time series data.
 
     Args:
@@ -201,7 +199,7 @@ def linear_trend(data: List[float]) -> Tuple[float, float, float]:
     return float(slope), float(intercept), float(r_squared)
 
 
-def detrend(data: List[float], method: str = "linear") -> List[float]:
+def detrend(data: list[float], method: str = "linear") -> list[float]:
     """Remove trend from time series data.
 
     Args:
@@ -236,8 +234,8 @@ def detrend(data: List[float], method: str = "linear") -> List[float]:
 
 
 def seasonal_decompose(
-    data: List[float], period: int
-) -> Tuple[List[float], List[float], List[float]]:
+    data: list[float], period: int
+) -> tuple[list[float], list[float], list[float]]:
     """Decompose time series into trend, seasonal, and residual components.
 
     Args:
@@ -297,7 +295,7 @@ def seasonal_decompose(
     return trend, seasonal, residual
 
 
-def difference(data: List[float], lag: int = 1, order: int = 1) -> List[float]:
+def difference(data: list[float], lag: int = 1, order: int = 1) -> list[float]:
     """Calculate differenced time series.
 
     Args:

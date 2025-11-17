@@ -5,7 +5,7 @@ helping users understand the math behind the results.
 """
 
 import math
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 from scipy.stats import t as t_dist
 
@@ -20,7 +20,7 @@ def t_test_verbose(
     alpha: float = 0.05,
     test_type: str = "two-tailed",
     verbose: bool = True,
-) -> Tuple[float, float, float, bool]:
+) -> tuple[float, float, float, bool]:
     """Perform a one-sample t-test with step-by-step output.
 
     Args:
@@ -150,7 +150,7 @@ def regression_verbose(
     x: Sequence[float],
     y: Sequence[float],
     verbose: bool = True,
-) -> Tuple[float, float, float, float, float]:
+) -> tuple[float, float, float, float, float]:
     """Perform linear regression with step-by-step output.
 
     Args:

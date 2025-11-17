@@ -4,7 +4,7 @@ This module provides functions for bootstrap, permutation tests,
 and cross-validation techniques.
 """
 
-from typing import Callable, Dict, List, Optional, Tuple
+from collections.abc import Callable
 
 import numpy as np
 
@@ -149,12 +149,12 @@ def _permutation_mean_diff_jit(
 
 
 def bootstrap(
-    data: List[float],
-    statistic: Callable[[List[float]], float],
+    data: list[float],
+    statistic: Callable[[list[float]], float],
     n_iterations: int = 1000,
     confidence_level: float = 0.95,
-    random_seed: Optional[int] = None,
-) -> Dict[str, any]:
+    random_seed: int | None = None,
+) -> dict[str, any]:
     """Perform bootstrap resampling to estimate sampling distribution.
 
     Args:
@@ -243,12 +243,12 @@ def bootstrap(
 
 
 def bootstrap_hypothesis_test(
-    data1: List[float],
-    data2: List[float],
-    statistic: Callable[[List[float], List[float]], float],
+    data1: list[float],
+    data2: list[float],
+    statistic: Callable[[list[float], list[float]], float],
     n_iterations: int = 1000,
-    random_seed: Optional[int] = None,
-) -> Dict[str, any]:
+    random_seed: int | None = None,
+) -> dict[str, any]:
     """Perform bootstrap hypothesis test for difference between two groups.
 
     Args:
@@ -312,13 +312,13 @@ def bootstrap_hypothesis_test(
 
 
 def permutation_test(
-    data1: List[float],
-    data2: List[float],
-    statistic: Callable[[List[float], List[float]], float],
+    data1: list[float],
+    data2: list[float],
+    statistic: Callable[[list[float], list[float]], float],
     n_permutations: int = 1000,
     alternative: str = "two-sided",
-    random_seed: Optional[int] = None,
-) -> Dict[str, any]:
+    random_seed: int | None = None,
+) -> dict[str, any]:
     """Perform permutation test for comparing two groups.
 
     Args:
@@ -428,8 +428,8 @@ def permutation_test(
 
 
 def jackknife(
-    data: List[float], statistic: Callable[[List[float]], float]
-) -> Dict[str, any]:
+    data: list[float], statistic: Callable[[list[float]], float]
+) -> dict[str, any]:
     """Perform jackknife resampling to estimate bias and variance.
 
     Args:
@@ -485,12 +485,12 @@ def jackknife(
 
 
 def cross_validate(
-    X: List[List[float]],
-    y: List[float],
+    X: list[list[float]],
+    y: list[float],
     model_fn: Callable,
     k_folds: int = 5,
-    random_seed: Optional[int] = None,
-) -> Dict[str, any]:
+    random_seed: int | None = None,
+) -> dict[str, any]:
     """Perform k-fold cross-validation.
 
     Args:
@@ -567,11 +567,11 @@ def cross_validate(
 
 
 def stratified_split(
-    X: List[List[float]],
-    y: List[int],
+    X: list[list[float]],
+    y: list[int],
     test_size: float = 0.2,
-    random_seed: Optional[int] = None,
-) -> Tuple[List[List[float]], List[List[float]], List[int], List[int]]:
+    random_seed: int | None = None,
+) -> tuple[list[list[float]], list[list[float]], list[int], list[int]]:
     """Split data into train and test sets with stratification.
 
     Args:

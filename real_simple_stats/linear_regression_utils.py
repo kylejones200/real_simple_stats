@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple
+from collections.abc import Sequence
 
 import numpy as np
 from scipy.stats import linregress
@@ -8,7 +8,7 @@ from scipy.stats import linregress
 
 def prepare_scatter_data(
     x: Sequence[float], y: Sequence[float]
-) -> Tuple[Sequence[float], Sequence[float]]:
+) -> tuple[Sequence[float], Sequence[float]]:
     """Prepare data for plotting a scatter plot (returns as-is)."""
     return x, y
 
@@ -32,7 +32,7 @@ def coefficient_of_determination(x: Sequence[float], y: Sequence[float]) -> floa
 
 def linear_regression(
     x: Sequence[float], y: Sequence[float]
-) -> Tuple[float, float, float, float, float]:
+) -> tuple[float, float, float, float, float]:
     """
     Returns slope, intercept, r_value, p_value, std_err
     Formula: y = a + b*x
@@ -57,7 +57,7 @@ def regression_equation(x: float, slope: float, intercept: float) -> float:
 
 def manual_slope_intercept(
     x: Sequence[float], y: Sequence[float]
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Computes slope and intercept manually."""
     x_mean = float(np.mean(x))
     y_mean = float(np.mean(y))

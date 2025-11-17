@@ -4,15 +4,13 @@ This module provides functions for Bayesian statistical analysis including
 prior/posterior distributions and credible intervals.
 """
 
-from typing import Dict, List, Tuple
-
 import numpy as np
 from scipy import stats
 
 
 def beta_binomial_update(
     prior_alpha: float, prior_beta: float, successes: int, trials: int
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Update Beta prior with binomial data to get posterior.
 
     Args:
@@ -49,9 +47,9 @@ def beta_binomial_update(
 def normal_normal_update(
     prior_mean: float,
     prior_variance: float,
-    data: List[float],
+    data: list[float],
     data_variance: float,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """Update Normal prior with Normal data to get posterior.
 
     Assumes known data variance (conjugate prior).
@@ -92,8 +90,8 @@ def normal_normal_update(
 
 
 def gamma_poisson_update(
-    prior_shape: float, prior_rate: float, data: List[int]
-) -> Tuple[float, float]:
+    prior_shape: float, prior_rate: float, data: list[int]
+) -> tuple[float, float]:
     """Update Gamma prior with Poisson data to get posterior.
 
     Args:
@@ -130,8 +128,8 @@ def gamma_poisson_update(
 
 
 def credible_interval(
-    distribution: str, params: Dict[str, float], credibility: float = 0.95
-) -> Tuple[float, float]:
+    distribution: str, params: dict[str, float], credibility: float = 0.95
+) -> tuple[float, float]:
     """Calculate credible interval for a posterior distribution.
 
     Args:
@@ -181,8 +179,8 @@ def credible_interval(
 
 
 def highest_density_interval(
-    samples: List[float], credibility: float = 0.95
-) -> Tuple[float, float]:
+    samples: list[float], credibility: float = 0.95
+) -> tuple[float, float]:
     """Calculate highest density interval (HDI) from samples.
 
     The HDI is the shortest interval containing the specified probability mass.
@@ -257,8 +255,8 @@ def bayes_factor(
 
 
 def posterior_predictive(
-    distribution: str, params: Dict[str, float], n_samples: int = 1000
-) -> List[float]:
+    distribution: str, params: dict[str, float], n_samples: int = 1000
+) -> list[float]:
     """Generate samples from posterior predictive distribution.
 
     Args:
@@ -324,7 +322,7 @@ def posterior_predictive(
         raise ValueError(f"Unknown distribution: {distribution}")
 
 
-def empirical_bayes_estimate(data: List[float]) -> Dict[str, float]:
+def empirical_bayes_estimate(data: list[float]) -> dict[str, float]:
     """Estimate prior parameters using empirical Bayes method.
 
     Assumes data comes from Normal distribution with unknown mean and variance.
@@ -357,7 +355,7 @@ def empirical_bayes_estimate(data: List[float]) -> Dict[str, float]:
     }
 
 
-def conjugate_prior_summary(family: str) -> Dict[str, str]:
+def conjugate_prior_summary(family: str) -> dict[str, str]:
     """Get information about conjugate prior families.
 
     Args:

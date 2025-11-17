@@ -1,5 +1,5 @@
 import math
-from typing import Sequence
+from collections.abc import Sequence
 
 # --- BINOMIAL CORE FUNCTIONS ---
 

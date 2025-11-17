@@ -1,5 +1,4 @@
 import math
-from typing import Tuple
 
 from scipy.stats import norm, t
 
@@ -42,7 +41,7 @@ def clt_probability_between(
 
 def confidence_interval_known_std(
     mean: float, std_dev: float, n: int, confidence: float
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """CI for known population standard deviation using Z-distribution."""
     alpha = 1 - confidence
     z = float(norm.ppf(1 - alpha / 2))
@@ -52,7 +51,7 @@ def confidence_interval_known_std(
 
 def confidence_interval_unknown_std(
     sample_mean: float, sample_std: float, n: int, confidence: float
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """CI for unknown population standard deviation using t-distribution."""
     alpha = 1 - confidence
     df = n - 1

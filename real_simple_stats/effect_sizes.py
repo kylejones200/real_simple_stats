@@ -4,13 +4,11 @@ This module provides functions for calculating various effect size measures
 including Cohen's d, eta-squared, Cramér's V, and odds ratios.
 """
 
-from typing import List, Tuple
-
 import numpy as np
 from scipy import stats
 
 
-def cohens_d(group1: List[float], group2: List[float], pooled: bool = True) -> float:
+def cohens_d(group1: list[float], group2: list[float], pooled: bool = True) -> float:
     """Calculate Cohen's d effect size for two groups.
 
     Args:
@@ -61,7 +59,7 @@ def cohens_d(group1: List[float], group2: List[float], pooled: bool = True) -> f
     return float(d)
 
 
-def hedges_g(group1: List[float], group2: List[float]) -> float:
+def hedges_g(group1: list[float], group2: list[float]) -> float:
     """Calculate Hedges' g effect size (bias-corrected Cohen's d).
 
     Args:
@@ -93,7 +91,7 @@ def hedges_g(group1: List[float], group2: List[float]) -> float:
     return float(d * correction)
 
 
-def glass_delta(group1: List[float], group2: List[float]) -> float:
+def glass_delta(group1: list[float], group2: list[float]) -> float:
     """Calculate Glass's delta effect size.
 
     Uses only the control group's standard deviation.
@@ -118,7 +116,7 @@ def glass_delta(group1: List[float], group2: List[float]) -> float:
     return cohens_d(group1, group2, pooled=False)
 
 
-def eta_squared(groups: List[List[float]]) -> float:
+def eta_squared(groups: list[list[float]]) -> float:
     """Calculate eta-squared effect size for ANOVA.
 
     Eta-squared represents the proportion of variance explained.
@@ -164,7 +162,7 @@ def eta_squared(groups: List[List[float]]) -> float:
     return float(eta2)
 
 
-def partial_eta_squared(groups: List[List[float]]) -> float:
+def partial_eta_squared(groups: list[list[float]]) -> float:
     """Calculate partial eta-squared effect size.
 
     Args:
@@ -211,7 +209,7 @@ def partial_eta_squared(groups: List[List[float]]) -> float:
     return float(partial_eta2)
 
 
-def omega_squared(groups: List[List[float]]) -> float:
+def omega_squared(groups: list[list[float]]) -> float:
     """Calculate omega-squared effect size (less biased than eta-squared).
 
     Args:
@@ -267,7 +265,7 @@ def omega_squared(groups: List[List[float]]) -> float:
     return float(max(0, omega2))  # Can't be negative
 
 
-def cramers_v(contingency_table: List[List[int]]) -> float:
+def cramers_v(contingency_table: list[list[int]]) -> float:
     """Calculate Cramér's V effect size for chi-square test.
 
     Args:
@@ -306,7 +304,7 @@ def cramers_v(contingency_table: List[List[int]]) -> float:
     return float(v)
 
 
-def phi_coefficient(contingency_table: List[List[int]]) -> float:
+def phi_coefficient(contingency_table: list[list[int]]) -> float:
     """Calculate phi coefficient for 2x2 contingency table.
 
     Args:
@@ -342,7 +340,7 @@ def phi_coefficient(contingency_table: List[List[int]]) -> float:
     return float(phi)
 
 
-def odds_ratio(contingency_table: List[List[int]]) -> Tuple[float, Tuple[float, float]]:
+def odds_ratio(contingency_table: list[list[int]]) -> tuple[float, tuple[float, float]]:
     """Calculate odds ratio and 95% confidence interval for 2x2 table.
 
     Args:
@@ -384,8 +382,8 @@ def odds_ratio(contingency_table: List[List[int]]) -> Tuple[float, Tuple[float, 
 
 
 def relative_risk(
-    contingency_table: List[List[int]],
-) -> Tuple[float, Tuple[float, float]]:
+    contingency_table: list[list[int]],
+) -> tuple[float, tuple[float, float]]:
     """Calculate relative risk and 95% confidence interval for 2x2 table.
 
     Args:
