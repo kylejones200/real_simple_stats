@@ -24,7 +24,7 @@ jobs:
 
       - name: Type check
         run: |
-          mypy real_simple_stats tests --exclude '.*/site-packages/.*'
+          mypy real_simple_stats tests --exclude '(site-packages|\.venv|venv)'
 
       - name: Lint
         run: |
