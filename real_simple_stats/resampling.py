@@ -617,7 +617,7 @@ def stratified_split(
         cls_indices = np.where(y_array == cls)[0]
         n_cls = len(cls_indices)
         n_test = int(n_cls * test_size)
-        
+
         # Ensure minority classes get at least 1 test sample if class has > 1 sample
         # and we have multiple classes (to maintain stratification)
         if n_test == 0 and n_cls > 1 and len(classes) > 1:
