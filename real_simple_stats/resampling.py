@@ -616,6 +616,14 @@ def stratified_split(
         cls_indices = np.where(y_array == cls)[0]
         n_cls = len(cls_indices)
         n_test = int(n_cls * test_size)
+        
+        # Ensure minority classes get at least 1 test sample if class has > 1 sample
+        # and we have multiple classes (to maintain stratification)
+        if n_test == 0 and n_cls > 1 and len(classes) > 1:
+            n_test = 1
+        # But don't take all samples if class is very small
+        if n_test >= n_cls and n_cls > 1:
+            n_test = max(1, n_cls - 1)
 
         # Shuffle class indices
         shuffled_indices = np.random.permutation(cls_indices)

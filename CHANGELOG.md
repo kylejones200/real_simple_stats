@@ -5,6 +5,38 @@ All notable changes to Real Simple Stats will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-11-17
+
+### Fixed
+
+Fixed several critical bugs that were causing crashes and incorrect results:
+
+- Resolved segmentation fault when running tests. The issue was caused by incompatible system-wide NumPy/SciPy installations. Package initialization now prefers the bundled virtualenv dependencies.
+
+- `five_number_summary()` was crashing on small datasets. It now handles n=1, n=2, and n=3 cases properly instead of trying to calculate quartiles from empty halves.
+
+- One-sided power analysis was ignoring the sign of effect sizes. Negative effects with "less-than" alternatives were returning the same power as positive effects. The calculations now correctly handle directionality.
+
+### Added
+
+- Normal distribution functions are now fully implemented. The CLI previously just printed placeholder messages, but `normal_pdf()` and `normal_cdf()` are now available both in Python and via the command line.
+
+- CLI argument validation across all subcommands. Missing or invalid arguments now show helpful error messages instead of cryptic Python exceptions. For example, running `rss-calc prob --type binomial --n 10` without `--k` and `--p` will tell you exactly what's missing.
+
+- Input validation for probability helper functions. Functions like `joint_probability()`, `bayes_theorem()`, and `expected_value()` now check that probabilities are in valid ranges and raise clear errors instead of producing `nan` or cryptic `math.comb` errors.
+
+- `stratified_split()` now ensures minority classes get at least one test sample when possible, preventing rare classes from being completely excluded from test sets.
+
+### Changed
+
+- Package initialization was tweaked to avoid dependency conflicts. The `__init__.py` now sets up the environment before any imports happen.
+
+- Error messages are more helpful. Instead of "TypeError: '<' not supported between instances of 'NoneType' and 'int'", you'll see "Error: --n (number of trials) is required for binomial distribution".
+
+- Added 10 new tests covering edge cases and validation (511 tests total, all passing).
+
+---
+
 ## [0.3.0] - 2025-01-05
 
 ### Added - Major Feature Release

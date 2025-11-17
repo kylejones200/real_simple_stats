@@ -40,12 +40,18 @@ Probability Calculations
 .. code-block:: python
 
     from real_simple_stats import probability_utils as prob
+    from real_simple_stats import normal_distributions as norm
+    from real_simple_stats import binomial_distributions as binom
 
-    # Simple probability
-    favorable = 3
-    total = 10
-    simple_prob = prob.simple_probability(favorable, total)
-    print(f"Simple probability: {simple_prob}")
+    # Normal distribution
+    pdf_value = norm.normal_pdf(x=0, mean=0, std_dev=1)
+    cdf_value = norm.normal_cdf(x=1.96, mean=0, std_dev=1)
+    print(f"Normal PDF at 0: {pdf_value:.6f}")
+    print(f"Normal CDF at 1.96: {cdf_value:.6f}")
+
+    # Binomial probability
+    prob_binom = binom.binomial_probability(n=10, k=3, p=0.5)
+    print(f"Binomial P(X=3): {prob_binom:.6f}")
 
     # Combinations and permutations
     n, k = 10, 3
@@ -57,7 +63,9 @@ Probability Calculations
 
 Output::
 
-    Simple probability: 0.3
+    Normal PDF at 0: 0.398942
+    Normal CDF at 1.96: 0.975002
+    Binomial P(X=3): 0.117188
     Combinations C(10,3): 120
     Permutations P(10,3): 720
 
@@ -129,11 +137,17 @@ Probability Calculations
 
 .. code-block:: bash
 
-    # Binomial probability
-    rss-calc probability --type binomial --n 10 --k 3 --p 0.5
+    # Normal distribution PDF
+    rss-calc prob --type normal --x 0 --mean 0 --std 1
 
-    # Combinations
-    rss-calc probability --type combination --n 10 --k 3
+    # Normal distribution CDF
+    rss-calc prob --type normal --x 1.96 --mean 0 --std 1 --cdf
+
+    # Binomial probability
+    rss-calc prob --type binomial --n 10 --k 3 --p 0.5
+
+    # Bayes' theorem
+    rss-calc prob --type bayes --p_b_given_a 0.9 --p_a 0.01 --p_b 0.05
 
 Glossary Lookup
 ~~~~~~~~~~~~~~
@@ -199,12 +213,12 @@ Comparing Two Groups
 Next Steps
 ---------
 
-Now that you've learned the basics:
+Next steps:
 
-1. **Explore the API Reference** - Learn about all available functions
-2. **Check out Tutorials** - Work through detailed examples
-3. **Try the CLI** - Use the command-line interface for quick calculations
-4. **Read the Examples** - See real-world applications
+1. **Explore the API Reference** - See what functions are available
+2. **Check out Tutorials** - Work through some examples
+3. **Try the CLI** - Use the command-line tool for quick calculations
+4. **Read the Examples** - See how others are using the library
 
 Common Patterns
 --------------
@@ -244,9 +258,8 @@ Working with Different Data Types
 Getting Help
 -----------
 
-* **Documentation**: You're reading it! Check the API reference for detailed function documentation.
-* **Examples**: See the ``examples/`` directory in the repository.
-* **Issues**: Report bugs or request features on `GitHub <https://github.com/kylejones200/real_simple_stats/issues>`_.
-* **Community**: Join discussions and ask questions.
+* **Documentation**: Check the API reference for function details
+* **Examples**: See the ``examples/`` directory in the repository
+* **Issues**: Report bugs or request features on `GitHub <https://github.com/kylejones200/real_simple_stats/issues>`_
 
-Ready to dive deeper? Check out the :doc:`tutorials` section for more comprehensive examples!
+Ready to dive deeper? Check out the :doc:`tutorials` section for more examples!

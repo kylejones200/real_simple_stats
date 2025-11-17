@@ -70,6 +70,9 @@ instance/
 docs/_build/
 docs/build/
 
+# Benchmark results (generated)
+benchmarks/BENCHMARK_RESULTS.txt
+
 # PyBuilder
 .pybuilder/
 target/

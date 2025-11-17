@@ -2,7 +2,7 @@
 
 ## 🎲 Overview
 
-The Monte Carlo module provides powerful simulation methods for statistical inference, financial modeling, and numerical integration. It includes:
+The Monte Carlo module provides simulation methods for statistical inference, financial modeling, and numerical integration. It includes:
 
 1. **Geometric Brownian Motion** - For modeling stock prices and financial time series
 2. **Data-driven simulations** - Estimate parameters from historical data

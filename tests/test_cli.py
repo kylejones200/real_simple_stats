@@ -153,7 +153,7 @@ class TestProbabilityCommand:
     def test_normal_pdf(self, mock_stdout):
         class Args:
             type = "normal"
-            x = 1.96
+            x = 0.0
             mean = 0
             std = 1
             cdf = False
@@ -166,7 +166,8 @@ class TestProbabilityCommand:
 
         probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "PDF calculation" in output
+        assert "PDF(X = 0.0)" in output
+        assert "0.398942" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_normal_cdf(self, mock_stdout):
@@ -185,7 +186,168 @@ class TestProbabilityCommand:
 
         probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "CDF calculation" in output
+        assert "P(X ≤ 1.96)" in output
+        assert "0.975002" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_normal_missing_x(self, mock_stdout):
+        class Args:
+            type = "normal"
+            x = None
+            mean = 0
+            std = 1
+            cdf = False
+            n = None
+            k = None
+            p = None
+            p_b_given_a = None
+            p_a = None
+            p_b = None
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --x is required" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_binomial_missing_n(self, mock_stdout):
+        class Args:
+            type = "binomial"
+            n = None
+            k = 3
+            p = 0.5
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+            p_b_given_a = None
+            p_a = None
+            p_b = None
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --n (number of trials) is required" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_binomial_missing_k(self, mock_stdout):
+        class Args:
+            type = "binomial"
+            n = 10
+            k = None
+            p = 0.5
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+            p_b_given_a = None
+            p_a = None
+            p_b = None
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --k (number of successes) is required" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_binomial_missing_p(self, mock_stdout):
+        class Args:
+            type = "binomial"
+            n = 10
+            k = 3
+            p = None
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+            p_b_given_a = None
+            p_a = None
+            p_b = None
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --p (probability of success) is required" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_binomial_invalid_k(self, mock_stdout):
+        class Args:
+            type = "binomial"
+            n = 10
+            k = 15
+            p = 0.5
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+            p_b_given_a = None
+            p_a = None
+            p_b = None
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --k (number of successes) must be between 0 and 10" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_binomial_invalid_p(self, mock_stdout):
+        class Args:
+            type = "binomial"
+            n = 10
+            k = 3
+            p = 1.5
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+            p_b_given_a = None
+            p_a = None
+            p_b = None
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --p (probability of success) must be between 0 and 1" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_bayes_missing_args(self, mock_stdout):
+        class Args:
+            type = "bayes"
+            p_b_given_a = None
+            p_a = 0.01
+            p_b = 0.05
+            n = None
+            k = None
+            p = None
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --p_b_given_a is required" in output
+
+    @patch("sys.stdout", new_callable=StringIO)
+    def test_bayes_invalid_p_b(self, mock_stdout):
+        class Args:
+            type = "bayes"
+            p_b_given_a = 0.9
+            p_a = 0.01
+            p_b = 0
+            n = None
+            k = None
+            p = None
+            cdf = False
+            x = None
+            mean = 0
+            std = 1
+
+        with pytest.raises(SystemExit):
+            probability_command(Args())
+        output = mock_stdout.getvalue()
+        assert "Error: --p_b cannot be zero" in output
 
 
 class TestHypothesisTestCommand:

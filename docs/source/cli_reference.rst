@@ -1,7 +1,7 @@
 Command Line Interface Reference
 =================================
 
-Real Simple Stats provides a comprehensive command-line interface (CLI) for quick statistical calculations without writing Python code.
+Real Simple Stats includes a command-line tool for quick calculations without writing Python code.
 
 Installation and Setup
 ----------------------
@@ -109,25 +109,57 @@ Options
    Type of probability calculation:
 
    * ``binomial`` - Binomial probability
-   * ``combination`` - Combinations (n choose k)
-   * ``permutation`` - Permutations
-   * ``simple`` - Simple probability
-   * ``normal`` - Normal distribution (planned)
+   * ``normal`` - Normal distribution (PDF or CDF)
+   * ``bayes`` - Bayes' theorem
+
+Normal Distribution Options
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. option:: --x X
+
+   Value at which to evaluate the PDF or CDF (required for normal)
+
+.. option:: --mean MEAN
+
+   Mean of the normal distribution (default: 0.0)
+
+.. option:: --std STD
+
+   Standard deviation of the normal distribution (default: 1.0, must be positive)
+
+.. option:: --cdf
+
+   Calculate cumulative distribution function (CDF) instead of PDF
 
 Binomial Distribution Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. option:: --n N
 
-   Number of trials (required for binomial)
+   Number of trials (required for binomial, must be non-negative)
 
 .. option:: --k K
 
-   Number of successes (required for binomial)
+   Number of successes (required for binomial, must be between 0 and n)
 
 .. option:: --p P
 
-   Probability of success (required for binomial)
+   Probability of success (required for binomial, must be between 0 and 1)
+
+Bayes' Theorem Options
+~~~~~~~~~~~~~~~~~~~~~
+
+.. option:: --p_b_given_a P_B_GIVEN_A
+
+   Conditional probability P(B|A) (required, must be between 0 and 1)
+
+.. option:: --p_a P_A
+
+   Prior probability P(A) (required, must be between 0 and 1)
+
+.. option:: --p_b P_B
+
+   Prior probability P(B) (required, must be between 0 and 1, cannot be zero)
 
 Combination/Permutation Options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,25 +186,25 @@ Simple Probability Options
 Examples
 ~~~~~~~
 
+Normal distribution PDF::
+
+    rss-calc prob --type normal --x 0 --mean 0 --std 1
+    # Output: PDF(X = 0.0) = 0.398942
+
+Normal distribution CDF::
+
+    rss-calc prob --type normal --x 1.96 --mean 0 --std 1 --cdf
+    # Output: P(X ≤ 1.96) = 0.975002
+
 Binomial probability::
 
-    rss-calc probability --type binomial --n 10 --k 3 --p 0.5
-    # Output: P(X = 3) = 0.1172
+    rss-calc prob --type binomial --n 10 --k 3 --p 0.5
+    # Output: P(X = 3) = 0.117188
 
-Combinations::
+Bayes' theorem::
 
-    rss-calc probability --type combination --n 10 --k 3
-    # Output: C(10,3) = 120
-
-Permutations::
-
-    rss-calc probability --type permutation --n 10 --k 3
-    # Output: P(10,3) = 720
-
-Simple probability::
-
-    rss-calc probability --type simple --favorable 3 --total 10
-    # Output: Probability = 0.3
+    rss-calc prob --type bayes --p_b_given_a 0.9 --p_a 0.01 --p_b 0.05
+    # Output: P(A|B) = 0.180000
 
 Hypothesis Testing Commands
 --------------------------
@@ -316,7 +348,13 @@ Common Errors and Solutions
 
 **Missing required arguments**
     * Check the help for required options: ``rss-calc <subcommand> --help``
-    * Ensure all required parameters are provided
+    * The CLI will tell you exactly which arguments are missing
+
+**Invalid argument values**
+    * Binomial: ``--n`` must be non-negative, ``--k`` must be between 0 and n, ``--p`` must be between 0 and 1
+    * Normal: ``--std`` must be positive
+    * Bayes: All probabilities must be between 0 and 1, and ``--p_b`` cannot be zero
+    * You'll get a specific error message explaining what's wrong
 
 **Invalid statistic type**
     * Use ``--stat all`` to see available options
@@ -348,4 +386,4 @@ Getting More Help
 * Report CLI bugs on `GitHub Issues <https://github.com/kylejones200/real_simple_stats/issues>`_
 * Request new CLI features through GitHub
 
-The CLI is designed to be intuitive and powerful. Start with simple commands and gradually explore more advanced features!
+The CLI is straightforward to use. Start with simple commands and explore more features as you need them.

@@ -409,7 +409,18 @@ print(f"Cohen's d = {d:.3f} ({interpretation})")
 
 ### Q: Can I use this with pandas DataFrames?
 
-**A:** Yes! Convert columns to lists or arrays:
+**A:** Yes! You have several options:
+
+**Option 1: Use pandas compatibility module (recommended)**
+```python
+import pandas as pd
+from real_simple_stats.pandas_compat import mean, median, standard_deviation
+
+df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
+mean_A = mean(df['A'])  # Works directly with Series!
+```
+
+**Option 2: Convert to list or array**
 ```python
 import pandas as pd
 import real_simple_stats as rss
@@ -421,9 +432,6 @@ mean_A = rss.mean(df['A'].tolist())
 
 # Method 2: Use values (NumPy array)
 mean_A = rss.mean(df['A'].values)
-
-# Regression
-slope, intercept, *_ = rss.linear_regression(df['A'].values, df['B'].values)
 ```
 
 ---
@@ -482,6 +490,130 @@ However, always validate results for critical applications.
 - **Educational**: Designed for learning, not just analysis
 
 See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for detailed comparisons.
+
+---
+
+## ⚠️ Common Pitfalls
+
+### Q: I'm getting different results than expected. What's wrong?
+
+**A:** Common issues:
+
+1. **Using population functions instead of sample functions**
+   ```python
+   # Wrong for sample data
+   std = rss.standard_deviation(data)  # Population formula (divides by n)
+   
+   # Correct for samples
+   std = rss.sample_std_dev(data)  # Sample formula (divides by n-1)
+   ```
+
+2. **Forgetting to handle missing values**
+   ```python
+   # Wrong - includes None/NaN
+   data = [1, 2, None, 4, 5]
+   mean = rss.mean(data)  # Error!
+   
+   # Correct - filter missing values
+   clean_data = [x for x in data if x is not None]
+   mean = rss.mean(clean_data)
+   ```
+
+3. **Using wrong test for your data**
+   - Paired data → use `paired_t_test()`, not `two_sample_t_test()`
+   - Small samples → use t-test, not z-test
+   - Non-normal data → consider non-parametric tests
+
+4. **Confusing one-tailed vs two-tailed tests**
+   ```python
+   # Two-tailed (default): H₁: μ ≠ μ₀
+   t_stat, p_value = rss.one_sample_t_test(data, mu=5)
+   
+   # One-tailed: H₁: μ < μ₀ or μ > μ₀
+   # Check the alternative parameter in function docs
+   ```
+
+---
+
+### Q: Why is my p-value different from what I calculated by hand?
+
+**A:** Common reasons:
+
+1. **Rounding differences**: Hand calculations often round intermediate steps
+2. **Using wrong degrees of freedom**: Check df = n - 1 for one-sample t-test
+3. **Two-tailed vs one-tailed**: Make sure you're comparing the right p-value
+4. **Using z-table instead of t-table**: For small samples, use t-distribution
+
+The package uses exact calculations, so trust the computed p-value over hand calculations.
+
+---
+
+### Q: My confidence interval seems wrong. What did I do?
+
+**A:** Check these:
+
+1. **Wrong critical value**: Make sure you're using the right distribution (t vs z)
+2. **Wrong standard error**: Sample vs population standard error
+3. **One-tailed vs two-tailed**: CI should be two-tailed (default)
+4. **Wrong degrees of freedom**: Especially for two-sample tests
+
+```python
+# Correct: Two-sample t-test CI
+t_stat, p_value = rss.two_sample_t_test(group1, group2)
+# Calculate CI using pooled standard error and correct df
+```
+
+---
+
+### Q: I'm getting a ValueError. What does it mean?
+
+**A:** Common ValueErrors and fixes:
+
+1. **"Cannot calculate standard deviation of empty list"**
+   - Fix: Check that your data list isn't empty
+   - Check for None values that got filtered out
+
+2. **"Standard deviation must be positive"**
+   - Fix: Check that std_dev parameter > 0
+   - For normal distributions, variance must be positive
+
+3. **"Probability must be between 0 and 1"**
+   - Fix: Check that probability values are in valid range
+   - Don't use percentages (0.05 not 5%)
+
+4. **"Number of successes (k) must be between 0 and n"**
+   - Fix: For binomial, k must satisfy 0 ≤ k ≤ n
+   - Check your k and n values
+
+---
+
+### Q: Why does my statistical test give different results than Excel/SPSS/R?
+
+**A:** Possible reasons:
+
+1. **Different default settings**: 
+   - Excel might use population formulas by default
+   - R uses sample formulas (n-1) by default
+   - Check which formula you're using
+
+2. **Different algorithms**: 
+   - Some software uses approximations
+   - Real Simple Stats uses SciPy (exact methods)
+
+3. **Data handling differences**:
+   - Missing value handling
+   - Rounding precision
+   - Ties in rank-based tests
+
+4. **Test parameters**:
+   - One-tailed vs two-tailed
+   - Different significance levels
+   - Different assumptions (equal variance, etc.)
+
+**Solution**: Always check:
+- Which formula is being used (sample vs population)
+- Test parameters (one-tailed vs two-tailed)
+- Data preprocessing (missing values, outliers)
 
 ---
 

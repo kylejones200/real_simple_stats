@@ -68,6 +68,95 @@ print(f"T-statistic: {t_stat}, P-value: {p_value}")
 
 Comprehensive documentation is available at [real-simple-stats.readthedocs.io](https://real-simple-stats.readthedocs.io/)
 
+### Conceptual Guides
+
+- **[What Can Statistics Do?](docs/WHAT_CAN_STATISTICS_DO.md)** - Understand the five main objectives of statistics and which functions to use
+
+## 🍳 Statistical Recipes
+
+Ready-to-use workflows for common statistical tasks:
+
+### Frog Jump Analysis (Real Dataset)
+```python
+# Overall analysis
+python examples/recipes/frog_jump_analysis.py
+# Complete analysis using real frog jump data from BANA statistics book
+# Includes: descriptive stats, hypothesis testing, confidence intervals
+
+# Professional vs Other Frogs Comparison
+python examples/recipes/frog_pro_vs_other.py
+# Compare two groups: professional frogs jump 54.7 cm farther on average!
+# Includes: two-sample t-test, effect size (Cohen's d), confidence intervals
+```
+
+### Compare Two Groups
+```python
+from examples.recipes.compare_two_groups import *
+# Complete workflow: t-test, effect size, confidence intervals
+```
+
+### Exploratory Data Analysis
+```python
+from examples.recipes.exploratory_analysis import *
+# Full EDA: descriptive stats, outliers, distribution shape
+```
+
+### Hypothesis Testing Workflow
+```python
+python examples/recipes/hypothesis_testing_workflow.py
+# Complete hypothesis testing workflow: state hypotheses, perform test, interpret results
+```
+
+### Power Analysis Planning
+```python
+python examples/recipes/power_analysis_planning.py
+# Plan your study: calculate required sample size, assess power, understand effect sizes
+# Includes: t-test power, proportion test power, one-sided vs two-sided comparisons
+```
+
+### Regression Analysis
+```python
+python examples/recipes/regression_analysis.py
+# Complete regression workflow: correlation, model fitting, interpretation, predictions
+# Includes: R², p-values, coefficient interpretation, manual calculations
+```
+
+### Educational Features: Verbose Mode & Assumptions
+```python
+python examples/recipes/verbose_and_assumptions_demo.py
+# Step-by-step calculations and assumption checking
+# Learn the math behind statistics and verify test requirements
+```
+
+**Verbose Mode** - See step-by-step calculations:
+```python
+from real_simple_stats.verbose_stats import t_test_verbose, regression_verbose
+
+# Step-by-step t-test
+t_test_verbose(data, mu_null=100, verbose=True)
+
+# Step-by-step regression
+regression_verbose(x, y, verbose=True)
+```
+
+**Assumptions Checking** - Verify test requirements:
+```python
+from real_simple_stats.assumptions import check_t_test_assumptions, check_regression_assumptions
+
+# Check t-test assumptions (normality, independence, equal variances)
+check_t_test_assumptions(data, verbose=True)
+
+# Check regression assumptions (linearity, homoscedasticity, normality)
+check_regression_assumptions(x, y, verbose=True)
+```
+```python
+from examples.recipes.hypothesis_testing_workflow import *
+# Step-by-step: hypotheses, assumptions, test, interpretation
+```
+
+See the [`examples/recipes/`](examples/recipes/) directory for complete, runnable examples.
+All recipes use real data from [`examples/data/`](examples/data/).
+
 ### Quick Examples
 
 #### Descriptive Statistics
@@ -96,6 +185,17 @@ from real_simple_stats import hypothesis_testing as ht
 sample = [23, 25, 28, 30, 32, 35, 38, 40]
 t_stat, p_val = ht.one_sample_t_test(sample, mu=30)
 print(f"t = {t_stat:.3f}, p = {p_val:.4f}")
+```
+
+#### Working with Pandas
+```python
+import pandas as pd
+from real_simple_stats.pandas_compat import mean, median, five_number_summary
+
+df = pd.read_csv('data.csv')
+# Works directly with pandas Series!
+mean_value = mean(df['column'])
+summary = five_number_summary(df['column'])
 ```
 
 ## 🛠️ Installation

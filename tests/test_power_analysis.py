@@ -28,6 +28,15 @@ class TestPowerTTest:
         assert result["delta"] > 0
         assert result["n"] == 50
 
+    def test_one_sided_directionality(self):
+        greater_power = power_t_test(n=40, delta=0.5, alternative="greater")
+        opposite_power = power_t_test(n=40, delta=-0.5, alternative="greater")
+        less_power = power_t_test(n=40, delta=-0.5, alternative="less")
+
+        assert 0 < opposite_power["power"] < 0.2
+        assert greater_power["power"] > opposite_power["power"]
+        assert less_power["power"] == pytest.approx(greater_power["power"])
+
     def test_invalid_parameters(self):
         # Must provide exactly 3 parameters
         with pytest.raises(ValueError):
@@ -49,6 +58,21 @@ class TestPowerProportionTest:
     def test_calculate_proportion(self):
         result = power_proportion_test(n=100, p2=0.5, power=0.8)
         assert 0 < result["p1"] < 1
+
+    def test_one_sided_directionality(self):
+        greater_power = power_proportion_test(
+            n=120, p1=0.6, p2=0.5, alternative="greater"
+        )
+        opposite_power = power_proportion_test(
+            n=120, p1=0.4, p2=0.5, alternative="greater"
+        )
+        less_power = power_proportion_test(
+            n=120, p1=0.4, p2=0.5, alternative="less"
+        )
+
+        assert 0 < opposite_power["power"] < 0.25
+        assert greater_power["power"] > opposite_power["power"]
+        assert less_power["power"] == pytest.approx(greater_power["power"])
 
     def test_invalid_proportion(self):
         with pytest.raises(ValueError):
@@ -87,6 +111,15 @@ class TestPowerCorrelation:
     def test_calculate_correlation(self):
         result = power_correlation(n=100, power=0.8)
         assert 0 < abs(result["r"]) < 1
+
+    def test_one_sided_directionality(self):
+        greater_power = power_correlation(n=80, r=0.3, alternative="greater")
+        opposite_power = power_correlation(n=80, r=-0.3, alternative="greater")
+        less_power = power_correlation(n=80, r=-0.3, alternative="less")
+
+        assert 0 < opposite_power["power"] < 0.25
+        assert greater_power["power"] > opposite_power["power"]
+        assert less_power["power"] == pytest.approx(greater_power["power"])
 
     def test_invalid_correlation(self):
         with pytest.raises(ValueError):
