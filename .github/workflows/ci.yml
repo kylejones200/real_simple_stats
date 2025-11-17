@@ -8,72 +8,28 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        language: [node, python]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node
-        if: matrix.language == 'node'
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-
-      - name: Install deps (Node)
-        if: matrix.language == 'node'
-        run: |
-          if [ -f package.json ]; then
-            npm ci
-          else
-            echo "No package.json found; skipping npm ci"
-          fi
-
-      - name: Type check (TS)
-        if: matrix.language == 'node'
-        run: |
-          if [ -f tsconfig.json ]; then npx tsc --noEmit; fi
-
-      - name: Lint (Node)
-        if: matrix.language == 'node'
-        run: |
-          if npm run | grep -q "lint"; then npm run lint; fi
-
-      - name: Test (Node)
-        if: matrix.language == 'node'
-        run: |
-          if npm run | grep -q "test"; then npm test -- --ci; fi
-
-      - name: Build (Node)
-        if: matrix.language == 'node'
-        run: |
-          if npm run | grep -q "build"; then npm run build; fi
-
       - name: Set up Python
-        if: matrix.language == 'python'
         uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
           cache: "pip"
 
-      - name: Install deps (Py)
-        if: matrix.language == 'python'
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Type check (Py)
-        if: matrix.language == 'python'
+      - name: Type check
         run: |
-          if python -c "import importlib.util; exit(0 if importlib.util.find_spec('mypy') else 1)"; then mypy .; fi
+          mypy real_simple_stats tests --exclude 'examples|benchmarks'
 
-      - name: Lint (Py)
-        if: matrix.language == 'python'
+      - name: Lint
         run: |
-          if python -c "import importlib.util; exit(0 if importlib.util.find_spec('ruff') else 1)"; then ruff check .; fi
+          ruff check .
 
-      - name: Test (Py)
-        if: matrix.language == 'python'
+      - name: Test
         run: |
-          if python -c "import importlib.util; exit(0 if importlib.util.find_spec('pytest') else 1)"; then pytest -q --maxfail=1; fi
+          pytest -q --maxfail=1
