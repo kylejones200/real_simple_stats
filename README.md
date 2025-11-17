@@ -1,9 +1,9 @@
 # Real Simple Stats Handbook — Python Edition
 
 [![PyPI version](https://badge.fury.io/py/real-simple-stats.svg)](https://badge.fury.io/py/real-simple-stats)
-[![Python versions](https://img.shields.io/pypi/pyversions/real-simple-stats.svg)](https://pypi.org/project/real-simple-stats/)
+[![Python versions](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/kylejones200/real_simple_stats/workflows/Continuous%20Integration/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
+[![CI](https://github.com/kylejones200/real_simple_stats/workflows/CI/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
 [![Documentation](https://github.com/kylejones200/real_simple_stats/workflows/Documentation/badge.svg)](https://kylejones200.github.io/real_simple_stats/)
 [![PyPI Publish](https://github.com/kylejones200/real_simple_stats/workflows/Publish%20to%20PyPI/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
 
@@ -271,7 +271,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📊 Project Stats
 
-- **Language**: Python 3.8+
+- **Language**: Python 3.12+
 - **Dependencies**: NumPy, SciPy, Matplotlib
 - **Test Coverage**: >95%
 - **Documentation**: Sphinx + ReadTheDocs
