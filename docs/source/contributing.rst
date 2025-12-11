@@ -3,59 +3,7 @@ Contributing to Real Simple Stats
 
 We welcome contributions to Real Simple Stats! This guide will help you get started with contributing to the project.
 
-Getting Started
---------------
 
-Development Setup
-~~~~~~~~~~~~~~~~
-
-1. **Fork the repository** on GitHub
-2. **Clone your fork** locally::
-
-    git clone https://github.com/yourusername/real_simple_stats.git
-    cd real_simple_stats
-
-3. **Set up development environment**::
-
-    # Create virtual environment
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-    # Install development dependencies
-    make install-dev
-    # Or manually: pip install -e ".[dev]"
-
-4. **Install pre-commit hooks**::
-
-    make pre-commit-install
-    # Or manually: pre-commit install
-
-5. **Verify setup**::
-
-    make test
-    make lint
-    make type-check
-
-Development Workflow
-~~~~~~~~~~~~~~~~~~
-
-1. **Create a feature branch**::
-
-    git checkout -b feature/your-feature-name
-
-2. **Make your changes** following our coding standards
-3. **Run quality checks**::
-
-    make quality  # Runs tests, linting, formatting, and type checking
-
-4. **Commit your changes**::
-
-    git add .
-    git commit -m "Add your descriptive commit message"
-
-5. **Push and create pull request**::
-
-    git push origin feature/your-feature-name
 
 Code Quality Standards
 ---------------------
@@ -312,4 +260,4 @@ Contributors are recognized in:
 * **Changelog**: Contributors credited for their changes
 * **Documentation**: Authors acknowledged in relevant sections
 
-Thank you for contributing to Real Simple Stats! Your efforts help make statistical analysis more accessible to everyone.
+Thank you for contributing to Real Simple Stats! 
