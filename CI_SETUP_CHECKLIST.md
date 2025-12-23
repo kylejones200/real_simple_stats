@@ -217,6 +217,21 @@ git push
 - Disable problematic hooks in `.pre-commit-config.yaml` (set `stages: []`)
 - Or use `git commit --no-verify` if hooks are too strict
 
+**Issue: "Read the Docs: Invalid configuration key: python.version"**
+- Read the Docs v2 doesn't support `python.version` in the `python:` section
+- Remove `python.version` from `.readthedocs.yaml`
+- Python version should only be in `build.tools.python: "3.12"` (or your version)
+- Correct format:
+  ```yaml
+  build:
+    tools:
+      python: "3.12"
+  python:
+    install:
+      - method: pip
+        path: .
+  ```
+
 ## Philosophy for Solo Developers
 
 - **Tests must pass** (ensures code works)
