@@ -24,7 +24,6 @@ sphinx:
 
 # Python configuration
 python:
-  version: "3.12"
   install:
     - method: pip
       path: .
