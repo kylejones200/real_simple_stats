@@ -4,7 +4,7 @@
 
 set -e
 
-echo "🔍 Running pre-push CI checks..."
+echo "Running pre-push CI checks..."
 echo ""
 
 # Check if .python-version exists
