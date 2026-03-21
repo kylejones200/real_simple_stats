@@ -4,7 +4,7 @@ Run Real Simple Stats directly in your browser without any installation!
 
 ---
 
-## 🚀 Quick Start Options
+## Quick Start Options
 
 ### Google Colab (Recommended)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kylejones200/real_simple_stats/blob/main/examples/interactive_tutorial.ipynb)
@@ -147,7 +147,7 @@ jupyter notebook
 
 ---
 
-## 🎯 Quick Examples
+## Quick Examples
 
 ### Example 1: Basic Statistics
 ```python
@@ -248,7 +248,7 @@ print(f"Total participants needed: {result['n'] * 2}")
 
 ---
 
-## 🎓 Educational Modules
+## Educational Modules
 
 ### Module 1: Understanding p-values
 **Interactive Visualization**
@@ -468,7 +468,7 @@ def run_test(test_type, alpha):
     print(f"Significance level: {alpha}")
 
     if p_value < alpha:
-        print(f"✓ Reject H₀ (p < {alpha})")
+        print(f"Reject H₀ (p < {alpha})")
     else:
         print(f"✗ Fail to reject H₀ (p ≥ {alpha})")
 ```
@@ -477,11 +477,7 @@ def run_test(test_type, alpha):
 
 ## 🌐 Web-Based Demos
 
-### Streamlit Apps
-Coming soon: Interactive web apps for common analyses
-
-### Observable Notebooks
-Coming soon: JavaScript-based interactive visualizations
+Interactive web demos can use [Chart.js](https://www.chartjs.org/), [Observable](https://observablehq.com), or similar for visualizations. Compute statistics with Real Simple Stats (via Pyodide in the browser, or from a backend) and pass the results to your charting library.
 
 ---
 
@@ -515,7 +511,7 @@ jupyter lab
 
 ---
 
-## 🎯 Learning Paths
+## Learning Paths
 
 ### Path 1: Complete Beginner
 1. Getting Started Tutorial
@@ -537,7 +533,7 @@ jupyter lab
 
 ---
 
-## 💡 Tips for Interactive Learning
+## Tips for Interactive Learning
 
 **Best Practices:**
 1. **Run all cells** from top to bottom first
@@ -553,7 +549,7 @@ jupyter lab
 
 ---
 
-## 🔗 Additional Resources
+## Additional Resources
 
 - **Documentation**: [ReadTheDocs](https://real-simple-stats.readthedocs.io/)
 - **GitHub**: [Source Code](https://github.com/kylejones200/real_simple_stats)
@@ -575,6 +571,6 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for details.
 
 ---
 
-**Happy Learning! 🎓**
+**Happy Learning!**
 
 Try the examples above and explore statistical concepts interactively!

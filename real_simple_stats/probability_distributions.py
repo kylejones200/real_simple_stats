@@ -1,4 +1,8 @@
+import logging
+
 from scipy.stats import expon, geom, nbinom, poisson
+
+logger = logging.getLogger(__name__)
 
 # --- POISSON DISTRIBUTION ---
 
@@ -76,24 +80,25 @@ def variance_exponential(lam: float) -> float:
 
 # Example usage
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     # Poisson
-    print("Poisson P(X=3), λ=2:", poisson_pmf(3, 2))
-    print("Poisson P(X≤3), λ=2:", poisson_cdf(3, 2))
+    logger.info("Poisson P(X=3), λ=2: %s", poisson_pmf(3, 2))
+    logger.info("Poisson P(X≤3), λ=2: %s", poisson_cdf(3, 2))
 
     # Geometric
-    print("Geometric P(X=4), p=0.2:", geometric_pmf(4, 0.2))
-    print("Geometric P(X≤4), p=0.2:", geometric_cdf(4, 0.2))
+    logger.info("Geometric P(X=4), p=0.2: %s", geometric_pmf(4, 0.2))
+    logger.info("Geometric P(X≤4), p=0.2: %s", geometric_cdf(4, 0.2))
 
     # Exponential
-    print("Exponential f(x=2), λ=0.5:", exponential_pdf(2, 0.5))
-    print("Exponential P(X≤2), λ=0.5:", exponential_cdf(2, 0.5))
+    logger.info("Exponential f(x=2), λ=0.5: %s", exponential_pdf(2, 0.5))
+    logger.info("Exponential P(X≤2), λ=0.5: %s", exponential_cdf(2, 0.5))
 
     # Negative Binomial
-    print(
-        "Negative Binomial P(k=3 failures before 2 successes, p=0.5):",
+    logger.info(
+        "Negative Binomial P(k=3 failures before 2 successes, p=0.5): %s",
         negative_binomial_pmf(3, 2, 0.5),
     )
 
     # Expectations
-    print("E[X] for Poisson(λ=4):", expected_value_poisson(4))
-    print("Var[X] for Geometric(p=0.2):", variance_geometric(0.2))
+    logger.info("E[X] for Poisson(λ=4): %s", expected_value_poisson(4))
+    logger.info("Var[X] for Geometric(p=0.2): %s", variance_geometric(0.2))

@@ -1,3 +1,5 @@
+import logging
+
 from real_simple_stats.binomial_distributions import (
     binomial_mean,
     binomial_probability,
@@ -9,27 +11,30 @@ from real_simple_stats.binomial_distributions import (
     normal_approximation,
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Parameters
 n, p = 10, 0.4
 k = 3
 
 # Check if this is a binomial setup
-print("Is binomial:", is_binomial_experiment(n, ["pass", "fail"], p))
+logger.info("Is binomial: %s", is_binomial_experiment(n, ["pass", "fail"], p))
 
 # Exact probability using binomial formula
-print(f"P(X = {k}):", binomial_probability(n, k, p))
+logger.info("P(X = %s): %s", k, binomial_probability(n, k, p))
 
 # Descriptive stats
-print("Mean:", binomial_mean(n, p))
-print("Variance:", binomial_variance(n, p))
-print("Standard deviation:", binomial_std_dev(n, p))
+logger.info("Mean: %s", binomial_mean(n, p))
+logger.info("Variance: %s", binomial_variance(n, p))
+logger.info("Standard deviation: %s", binomial_std_dev(n, p))
 
 # Expected values
-print("Expected value (single outcome):", expected_value_single(85, 0.2))
-print(
-    "Expected value (multiple outcomes):",
+logger.info("Expected value (single outcome): %s", expected_value_single(85, 0.2))
+logger.info(
+    "Expected value (multiple outcomes): %s",
     expected_value_multiple([10, 20, 30], [0.1, 0.5, 0.4]),
 )
 
 # Normal approximation with continuity correction
-print(f"Normal approximation P(X ≤ {k}):", normal_approximation(n, p, k))
+logger.info("Normal approximation P(X ≤ %s): %s", k, normal_approximation(n, p, k))

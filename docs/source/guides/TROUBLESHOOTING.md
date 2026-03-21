@@ -96,7 +96,7 @@ ERROR: pip's dependency resolver does not currently take into account all the pa
 
 ---
 
-## 🐍 Import Errors
+## Import Errors
 
 ### Error: "ImportError: cannot import name 'function_name'"
 
@@ -152,7 +152,7 @@ help(rss)
 
 ---
 
-## 📊 Data Input Errors
+## Data Input Errors
 
 ### Error: "TypeError: 'int' object is not iterable"
 
@@ -356,7 +356,7 @@ if n > 170:
 
 ---
 
-## 📈 Statistical Test Errors
+## Statistical Test Errors
 
 ### Error: "ValueError: Degrees of freedom must be positive"
 
@@ -561,25 +561,25 @@ result = rss.pca(X, n_components=n_components)
 2. **Use progress indicator:**
    ```python
    from tqdm import tqdm
+   import numpy as np
 
-   # Custom implementation with progress bar
    results = []
-   for i in tqdm(range(n_iterations)):
-       # Your bootstrap code
-       pass
+   for _ in tqdm(range(n_iterations)):
+       sample = np.random.choice(data, size=len(data), replace=True)
+       results.append(np.mean(sample))
    ```
 
 ---
 
-## 🎯 Result Interpretation Issues
+## Result Interpretation Issues
 
 ### Issue: "Unexpected p-value"
 
 **Checklist:**
-1. ✅ Using correct test (one-sample vs. two-sample)?
-2. ✅ Data in correct format?
-3. ✅ Assumptions met (normality, equal variance)?
-4. ✅ Using two-tailed vs. one-tailed correctly?
+1. Using correct test (one-sample vs. two-sample)?
+2. Data in correct format?
+3. Assumptions met (normality, equal variance)?
+4. Using two-tailed vs. one-tailed correctly?
 
 **Debug:**
 ```python
@@ -703,11 +703,11 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
 
 ### Before asking for help:
 
-1. ✅ Read error message carefully
-2. ✅ Check this troubleshooting guide
-3. ✅ Review [FAQ](FAQ.md)
-4. ✅ Check [API documentation](API_COMPARISON.md)
-5. ✅ Search [existing issues](https://github.com/kylejones200/real_simple_stats/issues)
+1. Read error message carefully
+2. Check this troubleshooting guide
+3. Review [FAQ](FAQ.md)
+4. Check [API documentation](API_COMPARISON.md)
+5. Search [existing issues](https://github.com/kylejones200/real_simple_stats/issues)
 
 ### When reporting issues:
 
@@ -740,7 +740,7 @@ result = rss.some_function(data)
 
 ---
 
-## 🔗 Additional Resources
+## Additional Resources
 
 - **FAQ**: [Common questions](FAQ.md)
 - **API Reference**: [Function lookup](API_COMPARISON.md)
@@ -749,7 +749,7 @@ result = rss.some_function(data)
 
 ---
 
-## 💡 Prevention Tips
+## Prevention Tips
 
 ### Best Practices to Avoid Errors
 

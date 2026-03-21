@@ -1,6 +1,9 @@
+import logging
 import math
 
 from scipy.stats import norm
+
+logger = logging.getLogger(__name__)
 
 # --- Z-SCORE CALCULATIONS ---
 
@@ -113,14 +116,15 @@ def normal_cdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
 
 # Example usage
 if __name__ == "__main__":
-    print("Z-score of x=85 with mean=80, std_dev=5:", z_score(85, 80, 5))
-    print("Z-score using SE:", z_score_standard_error(84, 80, 10, 100))
+    logging.basicConfig(level=logging.INFO)
+    logger.info("Z-score of x=85 with mean=80, std_dev=5: %s", z_score(85, 80, 5))
+    logger.info("Z-score using SE: %s", z_score_standard_error(84, 80, 10, 100))
 
-    print("Area between 0 and z=1.96:", area_between_0_and_z(1.96))
-    print("Area in tail beyond z=2.0:", area_in_tail(2.0))
-    print("Area between z=1 and z=2:", area_between_z_scores(1, 2))
-    print("Area left of z=-1:", area_left_of_z(-1))
-    print("Area right of z=1.5:", area_right_of_z(1.5))
-    print("Area outside range -1.96 to 1.96:", area_outside_range(-1.96, 1.96))
+    logger.info("Area between 0 and z=1.96: %s", area_between_0_and_z(1.96))
+    logger.info("Area in tail beyond z=2.0: %s", area_in_tail(2.0))
+    logger.info("Area between z=1 and z=2: %s", area_between_z_scores(1, 2))
+    logger.info("Area left of z=-1: %s", area_left_of_z(-1))
+    logger.info("Area right of z=1.5: %s", area_right_of_z(1.5))
+    logger.info("Area outside range -1.96 to 1.96: %s", area_outside_range(-1.96, 1.96))
 
-    print("Chebyshev's Theorem (k=2):", chebyshev_theorem(2))
+    logger.info("Chebyshev's Theorem (k=2): %s", chebyshev_theorem(2))

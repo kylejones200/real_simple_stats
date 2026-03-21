@@ -4,12 +4,15 @@ This module provides step-by-step output for statistical calculations,
 helping users understand the math behind the results.
 """
 
+import logging
 import math
 from collections.abc import Sequence
 
 from scipy.stats import t as t_dist
 
 from . import descriptive_statistics as desc
+
+logger = logging.getLogger(__name__)
 from . import hypothesis_testing as ht
 from . import linear_regression_utils as lr
 
@@ -34,9 +37,9 @@ def t_test_verbose(
         Tuple of (t_statistic, p_value, critical_value, reject_null)
     """
     if verbose:
-        print("=" * 70)
-        print("One-Sample T-Test: Step-by-Step Calculation")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("One-Sample T-Test: Step-by-Step Calculation")
+        logger.info("=" * 70)
 
     # Step 1: Calculate sample statistics
     n = len(data)
@@ -44,45 +47,48 @@ def t_test_verbose(
     sample_std = desc.sample_std_dev(data)
 
     if verbose:
-        print("\nStep 1: Calculate Sample Statistics")
-        print("-" * 70)
-        print(f"Sample size: n = {n}")
-        print(f"Sample mean: x̄ = {sample_mean:.4f}")
-        print(f"Sample standard deviation: s = {sample_std:.4f}")
-        print("\nFormula: x̄ = Σx / n")
-        print("         s = √[Σ(x - x̄)² / (n - 1)]")
+        logger.info("\nStep 1: Calculate Sample Statistics")
+        logger.info("-" * 70)
+        logger.info("Sample size: n = %s", n)
+        logger.info("Sample mean: x̄ = %.4f", sample_mean)
+        logger.info("Sample standard deviation: s = %.4f", sample_std)
+        logger.info("\nFormula: x̄ = Σx / n")
+        logger.info("         s = √[Σ(x - x̄)² / (n - 1)]")
 
     # Step 2: Calculate standard error
     standard_error = sample_std / math.sqrt(n)
 
     if verbose:
-        print("\nStep 2: Calculate Standard Error")
-        print("-" * 70)
-        print("Standard error: SE = s / √n")
-        print(f"                SE = {sample_std:.4f} / √{n}")
-        print(f"                SE = {sample_std:.4f} / {math.sqrt(n):.4f}")
-        print(f"                SE = {standard_error:.4f}")
+        logger.info("\nStep 2: Calculate Standard Error")
+        logger.info("-" * 70)
+        logger.info("Standard error: SE = s / √n")
+        logger.info("                SE = %.4f / √%s", sample_std, n)
+        logger.info("                SE = %.4f / %.4f", sample_std, math.sqrt(n))
+        logger.info("                SE = %.4f", standard_error)
 
     # Step 3: Calculate t-statistic
     t_stat = (sample_mean - mu_null) / standard_error
 
     if verbose:
-        print("\nStep 3: Calculate T-Statistic")
-        print("-" * 70)
-        print("Formula: t = (x̄ - μ₀) / SE")
-        print(
-            f"         t = ({sample_mean:.4f} - {mu_null:.4f}) / {standard_error:.4f}"
+        logger.info("\nStep 3: Calculate T-Statistic")
+        logger.info("-" * 70)
+        logger.info("Formula: t = (x̄ - μ₀) / SE")
+        logger.info(
+            "         t = (%.4f - %.4f) / %.4f",
+            sample_mean,
+            mu_null,
+            standard_error,
         )
-        print(f"         t = {sample_mean - mu_null:.4f} / {standard_error:.4f}")
-        print(f"         t = {t_stat:.4f}")
+        logger.info("         t = %.4f / %.4f", sample_mean - mu_null, standard_error)
+        logger.info("         t = %.4f", t_stat)
 
     # Step 4: Calculate degrees of freedom
     df = n - 1
 
     if verbose:
-        print("\nStep 4: Degrees of Freedom")
-        print("-" * 70)
-        print(f"df = n - 1 = {n} - 1 = {df}")
+        logger.info("\nStep 4: Degrees of Freedom")
+        logger.info("-" * 70)
+        logger.info("df = n - 1 = %s - 1 = %s", n, df)
 
     # Step 5: Find critical value
     if test_type == "two-tailed":
@@ -96,52 +102,52 @@ def t_test_verbose(
         p_value = t_dist.cdf(t_stat, df)
 
     if verbose:
-        print("\nStep 5: Critical Value")
-        print("-" * 70)
-        print(f"Test type: {test_type}")
-        print(f"Significance level: α = {alpha}")
-        print(f"Degrees of freedom: df = {df}")
+        logger.info("\nStep 5: Critical Value")
+        logger.info("-" * 70)
+        logger.info("Test type: %s", test_type)
+        logger.info("Significance level: α = %s", alpha)
+        logger.info("Degrees of freedom: df = %s", df)
         if test_type == "two-tailed":
-            print(f"Critical value: t_{{{alpha / 2:.3f}, {df}}} = ±{t_critical:.4f}")
+            logger.info("Critical value: t_{%s, %s} = ±%.4f", alpha / 2, df, t_critical)
         elif test_type == "less":
-            print(f"Critical value: t_{{{alpha:.3f}, {df}}} = {t_critical:.4f}")
+            logger.info("Critical value: t_{%s, %s} = %.4f", alpha, df, t_critical)
         else:
-            print(f"Critical value: t_{{{alpha:.3f}, {df}}} = {t_critical:.4f}")
+            logger.info("Critical value: t_{%s, %s} = %.4f", alpha, df, t_critical)
 
     # Step 6: Calculate p-value
     if verbose:
-        print("\nStep 6: Calculate P-Value")
-        print("-" * 70)
+        logger.info("\nStep 6: Calculate P-Value")
+        logger.info("-" * 70)
         if test_type == "two-tailed":
-            print(f"P-value = 2 × P(t > |{t_stat:.4f}|)")
-            print(f"        = 2 × P(t > {abs(t_stat):.4f})")
+            logger.info("P-value = 2 × P(t > |%.4f|)", t_stat)
+            logger.info("        = 2 × P(t > %.4f)", abs(t_stat))
         elif test_type == "greater":
-            print(f"P-value = P(t > {t_stat:.4f})")
+            logger.info("P-value = P(t > %.4f)", t_stat)
         else:
-            print(f"P-value = P(t < {t_stat:.4f})")
-        print(f"        = {p_value:.6f}")
+            logger.info("P-value = P(t < %.4f)", t_stat)
+        logger.info("        = %.6f", p_value)
 
     # Step 7: Make decision
     reject = p_value < alpha
 
     if verbose:
-        print("\nStep 7: Decision")
-        print("-" * 70)
-        print("Compare p-value to significance level:")
-        print(f"  p-value = {p_value:.6f}")
-        print(f"  α = {alpha}")
+        logger.info("\nStep 7: Decision")
+        logger.info("-" * 70)
+        logger.info("Compare p-value to significance level:")
+        logger.info("  p-value = %.6f", p_value)
+        logger.info("  α = %s", alpha)
         if reject:
-            print(f"\nSince {p_value:.6f} < {alpha}, we REJECT H₀")
-            print(
+            logger.info("\nSince %.6f < %s, we REJECT H₀", p_value, alpha)
+            logger.info(
                 "Conclusion: There is sufficient evidence to reject the null hypothesis"
             )
         else:
-            print(f"\nSince {p_value:.6f} ≥ {alpha}, we FAIL TO REJECT H₀")
-            print(
+            logger.info("\nSince %.6f ≥ %s, we FAIL TO REJECT H₀", p_value, alpha)
+            logger.info(
                 "Conclusion: There is insufficient evidence to reject the null hypothesis"
             )
 
-        print("\n" + "=" * 70)
+        logger.info("\n" + "=" * 70)
 
     return t_stat, p_value, t_critical, reject
 
@@ -162,84 +168,84 @@ def regression_verbose(
         Tuple of (slope, intercept, r_value, p_value, std_err)
     """
     if verbose:
-        print("=" * 70)
-        print("Linear Regression: Step-by-Step Calculation")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("Linear Regression: Step-by-Step Calculation")
+        logger.info("=" * 70)
 
     n = len(x)
     x_mean = desc.mean(x)
     y_mean = desc.mean(y)
 
     if verbose:
-        print("\nStep 1: Calculate Means")
-        print("-" * 70)
-        print(f"Sample size: n = {n}")
-        print(f"x̄ (mean of x) = {x_mean:.4f}")
-        print(f"ȳ (mean of y) = {y_mean:.4f}")
-        print("\nFormula: x̄ = Σx / n")
-        print("         ȳ = Σy / n")
+        logger.info("\nStep 1: Calculate Means")
+        logger.info("-" * 70)
+        logger.info("Sample size: n = %s", n)
+        logger.info("x̄ (mean of x) = %.4f", x_mean)
+        logger.info("ȳ (mean of y) = %.4f", y_mean)
+        logger.info("\nFormula: x̄ = Σx / n")
+        logger.info("         ȳ = Σy / n")
 
     # Step 2: Calculate sums for slope
     numerator = sum((xi - x_mean) * (yi - y_mean) for xi, yi in zip(x, y))
     denominator = sum((xi - x_mean) ** 2 for xi in x)
 
     if verbose:
-        print("\nStep 2: Calculate Components for Slope")
-        print("-" * 70)
-        print("Numerator: Σ(x - x̄)(y - ȳ)")
-        print(f"  = Σ(x - {x_mean:.4f})(y - {y_mean:.4f})")
-        print(f"  = {numerator:.4f}")
-        print("\nDenominator: Σ(x - x̄)²")
-        print(f"  = Σ(x - {x_mean:.4f})²")
-        print(f"  = {denominator:.4f}")
+        logger.info("\nStep 2: Calculate Components for Slope")
+        logger.info("-" * 70)
+        logger.info("Numerator: Σ(x - x̄)(y - ȳ)")
+        logger.info("  = Σ(x - %.4f)(y - %.4f)", x_mean, y_mean)
+        logger.info("  = %.4f", numerator)
+        logger.info("\nDenominator: Σ(x - x̄)²")
+        logger.info("  = Σ(x - %.4f)²", x_mean)
+        logger.info("  = %.4f", denominator)
 
     # Step 3: Calculate slope
     slope = numerator / denominator
 
     if verbose:
-        print("\nStep 3: Calculate Slope (b)")
-        print("-" * 70)
-        print("Formula: b = Σ(x - x̄)(y - ȳ) / Σ(x - x̄)²")
-        print(f"         b = {numerator:.4f} / {denominator:.4f}")
-        print(f"         b = {slope:.4f}")
+        logger.info("\nStep 3: Calculate Slope (b)")
+        logger.info("-" * 70)
+        logger.info("Formula: b = Σ(x - x̄)(y - ȳ) / Σ(x - x̄)²")
+        logger.info("         b = %.4f / %.4f", numerator, denominator)
+        logger.info("         b = %.4f", slope)
 
     # Step 4: Calculate intercept
     intercept = y_mean - slope * x_mean
 
     if verbose:
-        print("\nStep 4: Calculate Intercept (a)")
-        print("-" * 70)
-        print("Formula: a = ȳ - b·x̄")
-        print(f"         a = {y_mean:.4f} - ({slope:.4f} × {x_mean:.4f})")
-        print(f"         a = {y_mean:.4f} - {slope * x_mean:.4f}")
-        print(f"         a = {intercept:.4f}")
+        logger.info("\nStep 4: Calculate Intercept (a)")
+        logger.info("-" * 70)
+        logger.info("Formula: a = ȳ - b·x̄")
+        logger.info("         a = %.4f - (%.4f × %.4f)", y_mean, slope, x_mean)
+        logger.info("         a = %.4f - %.4f", y_mean, slope * x_mean)
+        logger.info("         a = %.4f", intercept)
 
     # Step 5: Get full regression results (for correlation, p-value, etc.)
     slope_full, intercept_full, r_value, p_value, std_err = lr.linear_regression(x, y)
 
     if verbose:
-        print("\nStep 5: Regression Equation")
-        print("-" * 70)
-        print("y = a + bx")
-        print(f"y = {intercept:.4f} + {slope:.4f}x")
+        logger.info("\nStep 5: Regression Equation")
+        logger.info("-" * 70)
+        logger.info("y = a + bx")
+        logger.info("y = %.4f + %.4f x", intercept, slope)
 
-        print("\nStep 6: Correlation and Model Fit")
-        print("-" * 70)
+        logger.info("\nStep 6: Correlation and Model Fit")
+        logger.info("-" * 70)
         r_squared = r_value**2
-        print(f"Correlation coefficient (r): {r_value:.4f}")
-        print(f"Coefficient of determination (R²): {r_squared:.4f}")
-        print(f"Interpretation: {r_squared:.1%} of variance in y is explained by x")
+        logger.info("Correlation coefficient (r): %.4f", r_value)
+        logger.info("Coefficient of determination (R²): %.4f", r_squared)
+        logger.info("Interpretation: %.1f%% of variance in y is explained by x", r_squared * 100)
 
-        print("\nStep 7: Statistical Significance")
-        print("-" * 70)
-        print(f"P-value: {p_value:.6f}")
+        logger.info("\nStep 7: Statistical Significance")
+        logger.info("-" * 70)
+        logger.info("P-value: %.6f", p_value)
         if p_value < 0.05:
-            print("Since p < 0.05, the relationship is statistically significant")
+            logger.info("Since p < 0.05, the relationship is statistically significant")
         else:
-            print("Since p ≥ 0.05, the relationship is not statistically significant")
+            logger.info("Since p ≥ 0.05, the relationship is not statistically significant")
 
-        print(f"\nStandard error: {std_err:.4f}")
-        print("\n" + "=" * 70)
+        logger.info("\nStandard error: %.4f", std_err)
+        logger.info("\n" + "=" * 70)
 
     return slope_full, intercept_full, r_value, p_value, std_err
 
@@ -258,29 +264,28 @@ def mean_verbose(
         Mean value
     """
     if verbose:
-        print("=" * 70)
-        print("Mean Calculation: Step-by-Step")
-        print("=" * 70)
-        print(f"\nData: {data}")
-        print("\nStep 1: Sum all values")
-        print("-" * 70)
-        print("Sum = ", end="")
-        print(" + ".join(str(x) for x in data))
+        logger.info("=" * 70)
+        logger.info("Mean Calculation: Step-by-Step")
+        logger.info("=" * 70)
+        logger.info("\nData: %s", data)
+        logger.info("\nStep 1: Sum all values")
+        logger.info("-" * 70)
+        logger.info("Sum = %s", " + ".join(str(x) for x in data))
         total = sum(data)
-        print(f"     = {total}")
+        logger.info("     = %s", total)
 
-        print("\nStep 2: Count the number of values")
-        print("-" * 70)
+        logger.info("\nStep 2: Count the number of values")
+        logger.info("-" * 70)
         n = len(data)
-        print(f"n = {n}")
+        logger.info("n = %s", n)
 
-        print("\nStep 3: Divide sum by count")
-        print("-" * 70)
+        logger.info("\nStep 3: Divide sum by count")
+        logger.info("-" * 70)
         mean_val = total / n
-        print("Mean = Sum / n")
-        print(f"     = {total} / {n}")
-        print(f"     = {mean_val:.4f}")
-        print("\n" + "=" * 70)
+        logger.info("Mean = Sum / n")
+        logger.info("     = %s / %s", total, n)
+        logger.info("     = %.4f", mean_val)
+        logger.info("\n" + "=" * 70)
     else:
         mean_val = desc.mean(data)
 

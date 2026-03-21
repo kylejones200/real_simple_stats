@@ -9,7 +9,7 @@
 
 A comprehensive, educational Python statistics library covering basic through advanced statistical concepts. Perfect for students, educators, and anyone learning statistics!
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 pip install real-simple-stats
@@ -157,6 +157,50 @@ from examples.recipes.hypothesis_testing_workflow import *
 See the [`examples/recipes/`](examples/recipes/) directory for complete, runnable examples.
 All recipes use real data from [`examples/data/`](examples/data/).
 
+### Module Demos (Standalone Scripts)
+
+Quick demos for individual modules—run with `python examples/<name>_demo.py`:
+
+| Demo | Description |
+|------|-------------|
+| `descriptive_statistics_demo` | Five-number summary, variance, frequency tables |
+| `binomial_distribution_demo` | Binomial probability, mean, normal approximation |
+| `chi_squared_demo` | Chi-square statistic, critical values, goodness-of-fit |
+| `normal_distributions_demo` | Z-scores, areas under curve, PDF, CDF, Chebyshev |
+| `probability_utils_demo` | Bayes' theorem, combinations, conditional probability |
+| `probability_distributions_demo` | Poisson, geometric, exponential distributions |
+| `sampling_and_intervals_demo` | Confidence intervals, sample size, CLT |
+| `effect_sizes_demo` | Cohen's d, eta squared, odds ratio |
+| `linear_regression_demo` | Correlation, R², slope, intercept, prediction |
+| `glossary_demo` | Look up 24+ statistical terms and symbols |
+| `hypothesis_testing_demo` | Critical values, t-score, p-value, reject decision |
+| `power_analysis_demo` | Sample size, power for t-test and proportion test |
+| `monte_carlo_demo` | Integration, probability estimation, GBM simulation |
+| `multivariate_demo` | Multiple regression, PCA |
+| `time_series_demo` | Moving average, linear trend, autocorrelation |
+| `resampling_demo` | Bootstrap CI, permutation test |
+| `assumptions_demo` | T-test and regression assumption checks |
+| `plotsmith_demo` | PlotSmith integration: histograms, bar charts, heatmaps (requires `pip install real-simple-stats[plots]`) |
+
+### PlotSmith Integration (Optional)
+
+Use [PlotSmith](https://plotsmith.readthedocs.io/) for minimalist, publication-ready visualizations:
+
+```bash
+pip install real-simple-stats[plots]
+```
+
+```python
+from real_simple_stats import descriptive_statistics as desc
+from plotsmith import plot_histogram, plot_bar, plot_heatmap
+
+data = [72, 68, 75, 71, 69, 74, 70]
+fig, ax = plot_histogram(data, bins=8, title="Score Distribution")
+fig.savefig("distribution.png", bbox_inches="tight")
+```
+
+Run `python examples/plotsmith_demo.py` for histograms, bar charts, and correlation heatmaps.
+
 ### Quick Examples
 
 #### Descriptive Statistics
@@ -198,7 +242,7 @@ mean_value = mean(df['column'])
 summary = five_number_summary(df['column'])
 ```
 
-## 🛠️ Installation
+## Installation
 
 ### From PyPI (Recommended)
 ```bash
@@ -244,7 +288,7 @@ ruff check .
 pytest -q --maxfail=1
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 - **Education**: Statistics courses and self-study
 - **Research**: Quick statistical calculations and hypothesis testing
@@ -269,7 +313,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
-## 📊 Project Stats
+## Project Stats
 
 - **Language**: Python 3.12+
 - **Dependencies**: NumPy, SciPy, Matplotlib

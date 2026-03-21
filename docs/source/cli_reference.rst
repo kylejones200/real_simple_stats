@@ -372,11 +372,7 @@ Tips and Best Practices
 Output Formats
 -------------
 
-The CLI provides human-readable output by default. Future versions may include:
-
-* JSON output for programmatic use
-* CSV format for spreadsheet import
-* Formatted tables for complex results
+The CLI provides human-readable output by default.
 
 Getting More Help
 ----------------

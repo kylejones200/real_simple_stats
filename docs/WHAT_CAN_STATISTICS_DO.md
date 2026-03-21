@@ -4,7 +4,7 @@ Statistics helps you accomplish five main objectives. Understanding these catego
 
 ## The Five Objectives
 
-### 1. **Describe** 📊
+### 1. **Describe**
 Characterize populations and samples using descriptive statistics, visualizations, and summary measures.
 
 **What it answers**: "What does my data look like?"
@@ -61,7 +61,7 @@ print(f"Effect size: {effect:.3f}")
 
 ---
 
-### 3. **Identify or Classify** 🏷️
+### 3. **Identify or Classify**
 Classify and identify entities or groups using descriptive statistics, intervals, and multivariate techniques.
 
 **What it answers**: "What category does this belong to?" or "What patterns exist?"

@@ -19,7 +19,7 @@ Fixed several critical bugs that were causing crashes and incorrect results:
 
 ### Added
 
-- Normal distribution functions are now fully implemented. The CLI previously just printed placeholder messages, but `normal_pdf()` and `normal_cdf()` are now available both in Python and via the command line.
+- Normal distribution functions are now fully implemented. The CLI previously lacked normal distribution support; `normal_pdf()` and `normal_cdf()` are now available both in Python and via the command line.
 
 - CLI argument validation across all subcommands. Missing or invalid arguments now show helpful error messages instead of cryptic Python exceptions. For example, running `rss-calc prob --type binomial --n 10` without `--k` and `--p` will tell you exactly what's missing.
 

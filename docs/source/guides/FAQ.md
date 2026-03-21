@@ -45,7 +45,7 @@ import real_simple_stats as rss
 
 ---
 
-## 🎯 General Usage
+## General Usage
 
 ### Q: How do I import the package?
 
@@ -107,7 +107,7 @@ rss.population_std_dev([1, 2, 3, 4, 5])
 
 ---
 
-## 📊 Statistical Tests
+## Statistical Tests
 
 ### Q: When should I use a t-test vs. z-test?
 
@@ -185,7 +185,7 @@ print(f"Need {result['n']} participants per group")
 
 ---
 
-## 📈 Regression & Correlation
+## Regression & Correlation
 
 ### Q: What's the difference between correlation and regression?
 
@@ -236,7 +236,7 @@ print(f"Coefficients: {result['coefficients']}")
 
 ---
 
-## 🎲 Probability & Distributions
+## Probability & Distributions
 
 ### Q: How do I calculate probabilities for normal distribution?
 
@@ -343,7 +343,7 @@ print(f"Explained variance: {result['explained_variance']}")
 
 ---
 
-## 🎯 Effect Sizes
+## Effect Sizes
 
 ### Q: Why do I need effect sizes?
 
@@ -437,10 +437,10 @@ slope, intercept, *_ = rss.linear_regression(df['A'].values, df['B'].values)
 ### Q: Can I use this for production/research?
 
 **A:** Yes! The package is:
-- ✅ Well-tested (86% code coverage)
-- ✅ Based on established statistical methods
-- ✅ Uses reliable numerical libraries (SciPy, NumPy)
-- ✅ Documented with references
+- Well-tested (86% code coverage)
+- Based on established statistical methods
+- Uses reliable numerical libraries (SciPy, NumPy)
+- Documented with references
 
 However, always validate results for critical applications.
 
@@ -455,7 +455,7 @@ However, always validate results for critical applications.
 
 ---
 
-## 🎓 Educational Questions
+## Educational Questions
 
 ### Q: Can I use this for teaching?
 
@@ -555,7 +555,7 @@ std = rss.sample_std_dev(data)  # Will be 0
 
 ---
 
-## 💡 Best Practices
+## Best Practices
 
 ### Q: What's the recommended workflow?
 
@@ -616,7 +616,7 @@ alpha_corrected = 0.05 / 3
 
 ---
 
-## 🔗 Additional Resources
+## Additional Resources
 
 ### Q: Where can I learn more?
 

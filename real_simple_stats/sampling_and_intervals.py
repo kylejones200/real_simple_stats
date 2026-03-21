@@ -1,6 +1,9 @@
+import logging
 import math
 
 from scipy.stats import norm, t
+
+logger = logging.getLogger(__name__)
 
 # --- CENTRAL LIMIT THEOREM UTILITIES ---
 
@@ -74,26 +77,27 @@ def slovins_formula(N: int, e: float) -> int:
 
 # Example usage
 if __name__ == "__main__":
-    print("Sampling distribution variance:", sampling_distribution_variance(15, 100))
-    print("CLT P(mean > 82):", clt_probability_greater_than(82, 80, 10, 100))
-    print("CLT P(mean < 75):", clt_probability_less_than(75, 80, 10, 100))
-    print("CLT P(78 < mean < 82):", clt_probability_between(78, 82, 80, 10, 100))
+    logging.basicConfig(level=logging.INFO)
+    logger.info("Sampling distribution variance: %s", sampling_distribution_variance(15, 100))
+    logger.info("CLT P(mean > 82): %s", clt_probability_greater_than(82, 80, 10, 100))
+    logger.info("CLT P(mean < 75): %s", clt_probability_less_than(75, 80, 10, 100))
+    logger.info("CLT P(78 < mean < 82): %s", clt_probability_between(78, 82, 80, 10, 100))
 
     # Confidence intervals
-    print(
-        "Confidence interval (known std):",
+    logger.info(
+        "Confidence interval (known std): %s",
         confidence_interval_known_std(100, 15, 36, 0.95),
     )
-    print(
-        "Confidence interval (unknown std):",
+    logger.info(
+        "Confidence interval (unknown std): %s",
         confidence_interval_unknown_std(100, 15, 36, 0.95),
     )
 
     # Required sample size
-    print(
-        "Required sample size for width=10, 95% confidence:",
+    logger.info(
+        "Required sample size for width=10, 95%% confidence: %s",
         required_sample_size(0.95, 10, 15),
     )
 
     # Slovin's formula
-    print("Slovin's formula (N=1000, e=0.05):", slovins_formula(1000, 0.05))
+    logger.info("Slovin's formula (N=1000, e=0.05): %s", slovins_formula(1000, 0.05))

@@ -20,6 +20,7 @@ class TestSetMinimalistStyle:
         assert mock_rcparams.update.called
 
 
+@patch("real_simple_stats.plots.PLOTSMITH_AVAILABLE", False)
 class TestPlotNormHist:
     @patch("matplotlib.pyplot.show")
     @patch("matplotlib.pyplot.savefig")

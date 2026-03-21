@@ -5,7 +5,7 @@ This guide helps you quickly find the Real Simple Stats function you need, with 
 
 ---
 
-## 📊 Descriptive Statistics
+## Descriptive Statistics
 
 | Task | Real Simple Stats | NumPy | SciPy | Pandas | statsmodels |
 |------|-------------------|-------|-------|--------|-------------|
@@ -30,7 +30,7 @@ print(rss.five_number_summary(data))     # {'min': 1, 'q1': 3.25, ...}
 
 ---
 
-## 📈 Probability Distributions
+## Probability Distributions
 
 ### Normal Distribution
 
@@ -163,7 +163,7 @@ slope, intercept, r2 = rss.linear_trend(data)
 
 ---
 
-## 🎲 Resampling Methods
+## Resampling Methods
 
 | Method | Real Simple Stats | scikit-learn | scipy |
 |--------|-------------------|--------------|-------|
@@ -195,7 +195,7 @@ print(f"p-value: {result['p_value']:.3f}")
 
 ---
 
-## 📊 Effect Sizes
+## Effect Sizes
 
 | Effect Size | Real Simple Stats | Other Libraries |
 |-------------|-------------------|-----------------|
@@ -258,7 +258,7 @@ print(f"Statistical power: {result['power']:.3f}")
 
 ---
 
-## 🎯 Bayesian Statistics
+## Bayesian Statistics
 
 | Method | Real Simple Stats | PyMC | Stan |
 |--------|-------------------|------|------|
@@ -381,7 +381,7 @@ print(f"Explained variance: {result['explained_variance']}")
 
 ---
 
-## 🎓 Learning Path
+## Learning Path
 
 **Beginner → Intermediate → Advanced**
 
@@ -392,7 +392,7 @@ print(f"Explained variance: {result['explained_variance']}")
 
 ---
 
-## 💡 Tips
+## Tips
 
 - **All functions return simple Python types** (floats, lists, dicts) - no custom objects
 - **Type hints included** for better IDE support

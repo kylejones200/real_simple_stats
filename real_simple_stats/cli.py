@@ -7,9 +7,12 @@ Provides quick access to statistical calculations from the terminal.
 
 import argparse
 import json
+import logging
 import sys
 
 from . import binomial_distributions as binom
+
+logger = logging.getLogger(__name__)
 from . import descriptive_statistics as desc
 from . import normal_distributions as norm_dist
 from . import probability_utils as prob
@@ -44,106 +47,102 @@ def descriptive_stats_command(args):
             "iqr": desc.interquartile_range(data),
             "cv": desc.coefficient_of_variation(data) if len(data) > 1 else 0,
         }
-        print(json.dumps(results, indent=2))
+        logger.info("%s", json.dumps(results, indent=2))
     elif args.stat == "mean":
-        print(f"Mean: {desc.mean(data)}")
+        logger.info("Mean: %s", desc.mean(data))
     elif args.stat == "median":
-        print(f"Median: {desc.median(data)}")
+        logger.info("Median: %s", desc.median(data))
     elif args.stat == "std":
         if len(data) > 1:
-            print(f"Standard Deviation: {desc.sample_std_dev(data)}")
+            logger.info("Standard Deviation: %s", desc.sample_std_dev(data))
         else:
-            print("Error: Standard deviation requires at least 2 values")
+            logger.error("Standard deviation requires at least 2 values")
     elif args.stat == "summary":
         summary = desc.five_number_summary(data)
         for key, value in summary.items():
-            print(f"{key.capitalize()}: {value}")
+            logger.info("%s: %s", key.capitalize(), value)
 
 
 def probability_command(args):
     """Handle probability calculations."""
     if args.type == "normal":
         if args.x is None:
-            print("Error: --x is required for normal distribution calculations")
+            logger.error("--x is required for normal distribution calculations")
             sys.exit(1)
         if args.std is not None and args.std <= 0:
-            print("Error: --std must be positive")
+            logger.error("--std must be positive")
             sys.exit(1)
 
         try:
             if args.cdf:
                 result = norm_dist.normal_cdf(args.x, args.mean, args.std)
-                print(f"P(X ≤ {args.x}) = {result:.6f}")
+                logger.info("P(X ≤ %s) = %.6f", args.x, result)
             else:
                 result = norm_dist.normal_pdf(args.x, args.mean, args.std)
-                print(f"PDF(X = {args.x}) = {result:.6f}")
+                logger.info("PDF(X = %s) = %.6f", args.x, result)
         except ValueError as e:
-            print(f"Error: {e}")
+            logger.error("%s", e)
             sys.exit(1)
 
     elif args.type == "binomial":
         if args.n is None:
-            print("Error: --n (number of trials) is required for binomial distribution")
+            logger.error("--n (number of trials) is required for binomial distribution")
             sys.exit(1)
         if args.k is None:
-            print(
-                "Error: --k (number of successes) is required for binomial distribution"
-            )
+            logger.error("--k (number of successes) is required for binomial distribution")
             sys.exit(1)
         if args.p is None:
-            print(
-                "Error: --p (probability of success) is required for binomial distribution"
-            )
+            logger.error("--p (probability of success) is required for binomial distribution")
             sys.exit(1)
 
         # Validate inputs
         if args.n < 0:
-            print("Error: --n (number of trials) must be non-negative")
+            logger.error("--n (number of trials) must be non-negative")
             sys.exit(1)
         if args.k < 0 or args.k > args.n:
-            print(f"Error: --k (number of successes) must be between 0 and {args.n}")
+            logger.error("--k (number of successes) must be between 0 and %s", args.n)
             sys.exit(1)
         if not 0 <= args.p <= 1:
-            print("Error: --p (probability of success) must be between 0 and 1")
+            logger.error("--p (probability of success) must be between 0 and 1")
             sys.exit(1)
 
         try:
             result = binom.binomial_probability(args.n, args.k, args.p)
-            print(f"P(X = {args.k}) = {result:.6f}")
+            logger.info("P(X = %s) = %.6f", args.k, result)
         except ValueError as e:
-            print(f"Error: {e}")
+            logger.error("%s", e)
             sys.exit(1)
 
     elif args.type == "bayes":
         if args.p_b_given_a is None:
-            print("Error: --p_b_given_a is required for Bayes' theorem")
+            logger.error("--p_b_given_a is required for Bayes' theorem")
             sys.exit(1)
         if args.p_a is None:
-            print("Error: --p_a is required for Bayes' theorem")
+            logger.error("--p_a is required for Bayes' theorem")
             sys.exit(1)
         if args.p_b is None:
-            print("Error: --p_b is required for Bayes' theorem")
+            logger.error("--p_b is required for Bayes' theorem")
             sys.exit(1)
 
         # Validate inputs
         if not 0 <= args.p_b_given_a <= 1:
-            print("Error: --p_b_given_a must be between 0 and 1")
+            logger.error("--p_b_given_a must be between 0 and 1")
             sys.exit(1)
         if not 0 <= args.p_a <= 1:
-            print("Error: --p_a must be between 0 and 1")
+            logger.error("--p_a must be between 0 and 1")
             sys.exit(1)
         if not 0 <= args.p_b <= 1:
-            print("Error: --p_b must be between 0 and 1")
+            logger.error("--p_b must be between 0 and 1")
             sys.exit(1)
         if args.p_b == 0:
-            print("Error: --p_b cannot be zero (division by zero)")
+            logger.error("--p_b cannot be zero (division by zero)")
             sys.exit(1)
 
         try:
             result = prob.bayes_theorem(args.p_b_given_a, args.p_a, args.p_b)
-            print(f"P(A|B) = {result:.6f}")
+            logger.info("P(A|B) = %.6f", result)
         except ValueError as e:
-            print(f"Error: {e}")
+            logger.error("%s", e)
             sys.exit(1)
 
 
@@ -153,36 +152,42 @@ def hypothesis_test_command(args):
 
     if args.type == "t_test":
         if args.mu is None:
-            print("Error: --mu (null hypothesis mean) is required for t-test")
+            logger.error("--mu (null hypothesis mean) is required for t-test")
             return
 
         # Note: one_sample_t_test may not exist in current implementation
         # t_stat, p_value = ht.one_sample_t_test(data, args.mu)
-        print("One-sample t-test:")
-        print(f"Sample data: {data}")
-        print(f"Null hypothesis mean: {args.mu}")
+        logger.info("One-sample t-test:")
+        logger.info("Sample data: %s", data)
+        logger.info("Null hypothesis mean: %s", args.mu)
 
         alpha = args.alpha or 0.05
         # if p_value < alpha:
-        #     print(f"Result: Reject H₀ at α = {alpha}")
+        #     logger.info("Result: Reject H₀ at α = %s", alpha)
         # else:
-        #     print(f"Result: Fail to reject H₀ at α = {alpha}")
-        print(f"Significance level: α = {alpha}")
+        #     logger.info("Result: Fail to reject H₀ at α = %s", alpha)
+        logger.info("Significance level: α = %s", alpha)
 
 
 def glossary_command(args):
     """Handle glossary lookups."""
     try:
         definition = lookup(args.term)
-        print(f"\n{args.term.upper()}:")
-        print(f"{definition}\n")
+        logger.info("\n%s:", args.term.upper())
+        logger.info("%s\n", definition)
     except KeyError:
-        print(f"Term '{args.term}' not found in glossary.")
-        print("Try a different spelling or check available terms.")
+        logger.warning("Term '%s' not found in glossary.", args.term)
+        logger.warning("Try a different spelling or check available terms.")
 
 
 def main():
     """Main CLI entry point."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+        stream=sys.stdout,
+        force=True,
+    )
     parser = argparse.ArgumentParser(
         description="Real Simple Stats - Statistical calculations from the command line",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -279,7 +284,7 @@ Examples:
         elif args.command == "glossary":
             glossary_command(args)
     except Exception as e:
-        print(f"Error: {e}")
+        logger.error("%s", e)
         sys.exit(1)
 
 

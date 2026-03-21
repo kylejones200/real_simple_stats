@@ -45,6 +45,9 @@ docs = [
     "jupyter",
     "nbsphinx"
 ]
+plots = [
+    "plotsmith>=0.2.0"
+]
 
 [project.urls]
 Homepage = "https://github.com/kylejones200/real_simple_stats"

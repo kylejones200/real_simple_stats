@@ -1,6 +1,27 @@
 # Real Simple Stats - Quick Reference Guide v0.3.0
 
-## 🚀 Quick Start
+## Plotting with PlotSmith (Optional)
+
+```bash
+pip install real-simple-stats[plots]
+```
+
+```python
+# Built-in plots use PlotSmith when available
+from real_simple_stats.plots import plot_norm_hist
+import numpy as np
+data = np.random.normal(50, 10, 200)
+plot_norm_hist(data, 50, 10)  # Uses PlotSmith if installed
+
+# Or use PlotSmith directly
+from plotsmith import plot_histogram, plot_bar, plot_heatmap
+fig, ax = plot_histogram(data, bins=15, title="Distribution")
+fig.savefig("dist.png")
+```
+
+---
+
+## Quick Start
 
 ```python
 import real_simple_stats as rss
@@ -9,7 +30,7 @@ import numpy as np
 
 ---
 
-## 📊 Time Series Analysis
+## Time Series Analysis
 
 ```python
 # Moving averages
@@ -34,7 +55,7 @@ diff_data = rss.difference(data, lag=1, order=1)
 
 ---
 
-## 🔢 Multivariate Analysis
+##  Multivariate Analysis
 
 ```python
 # Multiple regression
@@ -57,7 +78,7 @@ distances = rss.mahalanobis_distance(X)
 
 ---
 
-## 🎲 Bayesian Statistics
+##  Bayesian Statistics
 
 ```python
 # Beta-Binomial conjugate prior
@@ -91,7 +112,7 @@ predictions = rss.posterior_predictive(
 
 ---
 
-## 🔄 Resampling Methods
+##  Resampling Methods
 
 ```python
 # Bootstrap
@@ -133,7 +154,7 @@ X_train, X_test, y_train, y_test = rss.stratified_split(X, y, test_size=0.2)
 
 ---
 
-## 📏 Effect Sizes
+##  Effect Sizes
 
 ```python
 # Cohen's d (for t-tests)
@@ -207,7 +228,7 @@ summary = rss.sample_size_summary(effect_size=0.5, power=0.8)
 
 ---
 
-## 📖 Interpretation Guidelines
+##  Interpretation Guidelines
 
 ### Cohen's d
 - **< 0.2**: Negligible
@@ -242,7 +263,7 @@ summary = rss.sample_size_summary(effect_size=0.5, power=0.8)
 
 ---
 
-## 🎯 Common Workflows
+## Common Workflows
 
 ### Study Design
 ```python
@@ -294,7 +315,7 @@ smoothed = rss.moving_average(detrended, window_size=5)
 
 ---
 
-## 💡 Tips & Best Practices
+## Tips & Best Practices
 
 1. **Always check assumptions** before applying statistical tests
 2. **Report effect sizes** alongside p-values for practical significance
@@ -307,7 +328,7 @@ smoothed = rss.moving_average(detrended, window_size=5)
 
 ---
 
-## 🔗 See Also
+##  See Also
 
 - **Full Documentation**: [ADVANCED_FEATURES_SUMMARY.md](ADVANCED_FEATURES_SUMMARY.md)
 - **API Reference**: Use `help(rss.function_name)` for detailed documentation
@@ -317,5 +338,5 @@ smoothed = rss.moving_average(detrended, window_size=5)
 ---
 
 **Version**: 0.3.0
-**Last Updated**: 2025
+**Last Updated**: 2026
 **License**: MIT

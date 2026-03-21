@@ -1,6 +1,9 @@
+import logging
 from collections.abc import Sequence
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 from scipy.stats import linregress
 
 # --- SCATTER PLOT PREP (data only, no plotting here) ---
@@ -70,17 +73,18 @@ def manual_slope_intercept(
 
 # Example usage
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     x = [1, 2, 3, 4, 5]
     y = [2, 4, 5, 4, 5]
 
-    print("Correlation (r):", pearson_correlation(x, y))
-    print("R²:", coefficient_of_determination(x, y))
+    logger.info("Correlation (r): %s", pearson_correlation(x, y))
+    logger.info("R²: %s", coefficient_of_determination(x, y))
 
     slope, intercept, r, p, stderr = linear_regression(x, y)
-    print("Slope:", slope)
-    print("Intercept:", intercept)
-    print("Regression equation for x=6:", regression_equation(6, slope, intercept))
+    logger.info("Slope: %s", slope)
+    logger.info("Intercept: %s", intercept)
+    logger.info("Regression equation for x=6: %s", regression_equation(6, slope, intercept))
 
     m_slope, m_intercept = manual_slope_intercept(x, y)
-    print("Manual slope:", m_slope)
-    print("Manual intercept:", m_intercept)
+    logger.info("Manual slope: %s", m_slope)
+    logger.info("Manual intercept: %s", m_intercept)

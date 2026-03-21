@@ -4,10 +4,13 @@ This module provides functions to check assumptions for various
 statistical tests, helping users ensure their data meets test requirements.
 """
 
+import logging
 from collections.abc import Sequence
 from typing import Any
 
 from . import descriptive_statistics as desc
+
+logger = logging.getLogger(__name__)
 
 try:
     from scipy import stats
@@ -41,15 +44,15 @@ def check_t_test_assumptions(
 
     if verbose:
         test_type = "Two-sample" if group2 is not None else "One-sample"
-        print("=" * 70)
-        print(f"{test_type} T-Test: Assumptions Check")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("%s T-Test: Assumptions Check", test_type)
+        logger.info("=" * 70)
 
     # Check 1: Normality
     if verbose:
-        print("\n1. Normality Assumption")
-        print("-" * 70)
-        print("The data should be approximately normally distributed.")
+        logger.info("\n1. Normality Assumption")
+        logger.info("-" * 70)
+        logger.info("The data should be approximately normally distributed.")
 
     n1 = len(data)
     normality1 = _check_normality(data, n1, verbose, "Group 1")
@@ -65,14 +68,14 @@ def check_t_test_assumptions(
 
     # Check 2: Independence
     if verbose:
-        print("\n2. Independence Assumption")
-        print("-" * 70)
-        print("Observations should be independent (not correlated).")
-        print("✓ This assumption cannot be tested statistically.")
-        print("  Ensure your sampling method produces independent observations:")
-        print("  - Random sampling")
-        print("  - No repeated measures on same subject")
-        print("  - No clustering or grouping effects")
+        logger.info("\n2. Independence Assumption")
+        logger.info("-" * 70)
+        logger.info("Observations should be independent (not correlated).")
+        logger.info("This assumption cannot be tested statistically.")
+        logger.info("  Ensure your sampling method produces independent observations:")
+        logger.info("  - Random sampling")
+        logger.info("  - No repeated measures on same subject")
+        logger.info("  - No clustering or grouping effects")
 
     results["independence"] = {  # type: ignore[assignment]
         "passed": None,  # Cannot be tested
@@ -82,29 +85,29 @@ def check_t_test_assumptions(
     # Check 3: Equal variances (for two-sample test)
     if group2 is not None:
         if verbose:
-            print("\n3. Equal Variances (Homoscedasticity)")
-            print("-" * 70)
-            print("For two-sample t-test, variances should be approximately equal.")
+            logger.info("\n3. Equal Variances (Homoscedasticity)")
+            logger.info("-" * 70)
+            logger.info("For two-sample t-test, variances should be approximately equal.")
 
         var1 = desc.sample_variance(data)
         var2 = desc.sample_variance(group2)
         variance_ratio = max(var1, var2) / min(var1, var2)
 
         if verbose:
-            print(f"Group 1 variance: {var1:.4f}")
-            print(f"Group 2 variance: {var2:.4f}")
-            print(f"Variance ratio: {variance_ratio:.4f}")
+            logger.info("Group 1 variance: %.4f", var1)
+            logger.info("Group 2 variance: %.4f", var2)
+            logger.info("Variance ratio: %.4f", variance_ratio)
 
         # Rule of thumb: ratio < 2 suggests equal variances
         equal_var = variance_ratio < 2.0
 
         if verbose:
             if equal_var:
-                print("✓ Variances appear equal (ratio < 2.0)")
-                print("  Standard two-sample t-test is appropriate")
+                logger.info("Variances appear equal (ratio < 2.0)")
+                logger.info("  Standard two-sample t-test is appropriate")
             else:
-                print("⚠️  Variances may be unequal (ratio ≥ 2.0)")
-                print("  Consider using Welch's t-test (unequal variances)")
+                logger.info("Variances may be unequal (ratio >= 2.0)")
+                logger.info("  Consider using Welch's t-test (unequal variances)")
 
         results["equal_variances"] = {
             "passed": equal_var,
@@ -116,26 +119,26 @@ def check_t_test_assumptions(
 
     # Overall assessment
     if verbose:
-        print("\n" + "=" * 70)
-        print("Overall Assessment")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("Overall Assessment")
+        logger.info("=" * 70)
 
         all_passed = results["normality_overall"]
         if group2 is not None:
             all_passed = all_passed and results["equal_variances"]["passed"]
 
         if all_passed:
-            print("✓ All testable assumptions are met.")
-            print("  The t-test is appropriate for your data.")
+            logger.info("All testable assumptions are met.")
+            logger.info("  The t-test is appropriate for your data.")
         else:
-            print("⚠️  Some assumptions may be violated.")
+            logger.info("Some assumptions may be violated.")
             if not results["normality_overall"]:
-                print(
+                logger.info(
                     "  - Normality: Consider non-parametric alternative (Mann-Whitney U)"
                 )
             if group2 is not None and not results["equal_variances"]["passed"]:
-                print("  - Equal variances: Use Welch's t-test")
-            print(
+                logger.info("  - Equal variances: Use Welch's t-test")
+            logger.info(
                 "\nNote: T-tests are robust to minor violations, especially with larger samples."
             )
 
@@ -165,9 +168,9 @@ def _check_normality(
     result["methods"]["sample_size"] = {"passed": size_ok, "note": size_note}
 
     if verbose:
-        print(f"\n{group_name}:")
-        print(f"  Sample size: n = {n}")
-        print(f"  {size_note}")
+        logger.info("\n%s:", group_name)
+        logger.info("  Sample size: n = %s", n)
+        logger.info("  %s", size_note)
 
     # Method 2: Skewness check
     mean_val = desc.mean(data)
@@ -185,11 +188,11 @@ def _check_normality(
         }
 
         if verbose:
-            print(f"  Skewness: {skewness:.4f}")
+            logger.info("  Skewness: %.4f", skewness)
             if skew_ok:
-                print(f"  ✓ Skewness is acceptable (|{skewness:.4f}| < 1)")
+                logger.info("  Skewness is acceptable (|%.4f| < 1)", skewness)
             else:
-                print(f"  ⚠️  Data may be skewed (|{skewness:.4f}| ≥ 1)")
+                logger.info("  Data may be skewed (|%.4f| >= 1)", skewness)
     else:
         result["methods"]["skewness"] = {
             "passed": None,
@@ -212,12 +215,12 @@ def _check_normality(
     }
 
     if verbose:
-        print(f"  Mean: {mean_val:.4f}, Median: {median_val:.4f}")
-        print(f"  Difference: {mean_median_diff:.4f}")
+        logger.info("  Mean: %.4f, Median: %.4f", mean_val, median_val)
+        logger.info("  Difference: %.4f", mean_median_diff)
         if symmetry_ok:
-            print("  ✓ Mean and median are close (suggests symmetry)")
+            logger.info("  Mean and median are close (suggests symmetry)")
         else:
-            print("  ⚠️  Mean and median differ (may indicate skewness)")
+            logger.info("  Mean and median differ (may indicate skewness)")
 
     # Method 4: Shapiro-Wilk test (if scipy available and n <= 5000)
     if SCIPY_AVAILABLE and 3 <= n <= 5000:
@@ -233,13 +236,13 @@ def _check_normality(
             }
 
             if verbose:
-                print(
-                    f"  Shapiro-Wilk test: W = {shapiro_stat:.4f}, p = {shapiro_p:.6f}"
+                logger.info(
+                    "  Shapiro-Wilk test: W = %.4f, p = %.6f", shapiro_stat, shapiro_p
                 )
                 if shapiro_ok:
-                    print("  ✓ Shapiro-Wilk test suggests normality (p > 0.05)")
+                    logger.info("  Shapiro-Wilk test suggests normality (p > 0.05)")
                 else:
-                    print("  ⚠️  Shapiro-Wilk test suggests non-normality (p ≤ 0.05)")
+                    logger.info("  Shapiro-Wilk test suggests non-normality (p <= 0.05)")
         except Exception:
             result["methods"]["shapiro_wilk"] = {
                 "passed": None,
@@ -304,9 +307,9 @@ def check_regression_assumptions(
     results: dict[str, Any] = {}
 
     if verbose:
-        print("=" * 70)
-        print("Linear Regression: Assumptions Check")
-        print("=" * 70)
+        logger.info("=" * 70)
+        logger.info("Linear Regression: Assumptions Check")
+        logger.info("=" * 70)
 
     # Calculate regression to get residuals
     from . import linear_regression_utils as lr
@@ -318,22 +321,22 @@ def check_regression_assumptions(
 
     # Check 1: Linearity
     if verbose:
-        print("\n1. Linearity Assumption")
-        print("-" * 70)
-        print("The relationship between x and y should be linear.")
+        logger.info("\n1. Linearity Assumption")
+        logger.info("-" * 70)
+        logger.info("The relationship between x and y should be linear.")
 
     r_squared = r_value**2
     linearity_ok = r_squared > 0.5  # Rule of thumb
 
     if verbose:
-        print(f"Correlation coefficient (r): {r_value:.4f}")
-        print(f"R²: {r_squared:.4f}")
+        logger.info("Correlation coefficient (r): %.4f", r_value)
+        logger.info("R²: %.4f", r_squared)
         if linearity_ok:
-            print("✓ Strong linear relationship (R² > 0.5)")
-            print("  Consider plotting x vs y to visually confirm linearity")
+            logger.info("Strong linear relationship (R-squared > 0.5)")
+            logger.info("  Consider plotting x vs y to visually confirm linearity")
         else:
-            print("⚠️  Weak linear relationship (R² ≤ 0.5)")
-            print(
+            logger.info("Weak linear relationship (R-squared <= 0.5)")
+            logger.info(
                 "  Consider: transformation, polynomial regression, or non-linear model"
             )
 
@@ -348,11 +351,11 @@ def check_regression_assumptions(
 
     # Check 2: Independence
     if verbose:
-        print("\n2. Independence Assumption")
-        print("-" * 70)
-        print("Residuals should be independent (no autocorrelation).")
-        print("✓ This assumption cannot be tested statistically.")
-        print("  Ensure your data collection method produces independent observations.")
+        logger.info("\n2. Independence Assumption")
+        logger.info("-" * 70)
+        logger.info("Residuals should be independent (no autocorrelation).")
+        logger.info("This assumption cannot be tested statistically.")
+        logger.info("  Ensure your data collection method produces independent observations.")
 
     results["independence"] = {
         "passed": None,
@@ -361,9 +364,9 @@ def check_regression_assumptions(
 
     # Check 3: Homoscedasticity (constant variance)
     if verbose:
-        print("\n3. Homoscedasticity (Constant Variance)")
-        print("-" * 70)
-        print("Residuals should have constant variance across all x values.")
+        logger.info("\n3. Homoscedasticity (Constant Variance)")
+        logger.info("-" * 70)
+        logger.info("Residuals should have constant variance across all x values.")
 
     # Simple check: variance of residuals in first half vs second half
     n = len(residuals)
@@ -380,19 +383,19 @@ def check_regression_assumptions(
 
     if verbose:
         if variance_ratio is not None:
-            print(f"Variance of residuals (first half): {var_first:.4f}")
-            print(f"Variance of residuals (second half): {var_second:.4f}")
-            print(f"Variance ratio: {variance_ratio:.4f}")
+            logger.info("Variance of residuals (first half): %.4f", var_first)
+            logger.info("Variance of residuals (second half): %.4f", var_second)
+            logger.info("Variance ratio: %.4f", variance_ratio)
             if homoscedasticity_ok:
-                print("✓ Variances appear constant (ratio < 2.0)")
-                print("  Consider plotting residuals vs x to visually confirm")
+                logger.info("Variances appear constant (ratio < 2.0)")
+                logger.info("  Consider plotting residuals vs x to visually confirm")
             else:
-                print("⚠️  Variances may not be constant (ratio ≥ 2.0)")
-                print(
+                logger.info("Variances may not be constant (ratio >= 2.0)")
+                logger.info(
                     "  Consider: transformation, weighted regression, or robust methods"
                 )
         else:
-            print("⚠️  Cannot test (sample too small)")
+            logger.info("Cannot test (sample too small)")
 
     results["homoscedasticity"] = {
         "passed": homoscedasticity_ok,
@@ -404,18 +407,18 @@ def check_regression_assumptions(
 
     # Check 4: Normality of residuals
     if verbose:
-        print("\n4. Normality of Residuals")
-        print("-" * 70)
-        print("Residuals should be approximately normally distributed.")
+        logger.info("\n4. Normality of Residuals")
+        logger.info("-" * 70)
+        logger.info("Residuals should be approximately normally distributed.")
 
     normality = _check_normality(residuals, len(residuals), verbose, "Residuals")
     results["normality"] = normality
 
     # Overall assessment
     if verbose:
-        print("\n" + "=" * 70)
-        print("Overall Assessment")
-        print("=" * 70)
+        logger.info("\n" + "=" * 70)
+        logger.info("Overall Assessment")
+        logger.info("=" * 70)
 
         all_passed = (
             results["linearity"]["passed"]
@@ -424,16 +427,16 @@ def check_regression_assumptions(
         )
 
         if all_passed:
-            print("✓ All testable assumptions are met.")
-            print("  Linear regression is appropriate for your data.")
+            logger.info("All testable assumptions are met.")
+            logger.info("  Linear regression is appropriate for your data.")
         else:
-            print("⚠️  Some assumptions may be violated.")
+            logger.info("Some assumptions may be violated.")
             if not results["linearity"]["passed"]:
-                print("  - Linearity: Consider non-linear model")
+                logger.info("  - Linearity: Consider non-linear model")
             if not results["homoscedasticity"]["passed"]:
-                print("  - Homoscedasticity: Consider transformation")
+                logger.info("  - Homoscedasticity: Consider transformation")
             if not results["normality"]["passed"]:
-                print("  - Normality: Regression is robust to this violation")
+                logger.info("  - Normality: Regression is robust to this violation")
 
     results["all_passed"] = (
         results["linearity"]["passed"]

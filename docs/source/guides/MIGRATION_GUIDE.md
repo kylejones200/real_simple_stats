@@ -302,7 +302,7 @@ slope, intercept, r_value, p_value, std_err = rss.linear_regression(x, y)
 
 ---
 
-## 📊 From statsmodels to Real Simple Stats
+## From statsmodels to Real Simple Stats
 
 ### Function Translations
 
@@ -477,7 +477,7 @@ print(f"p = {p_value:.4f}")
 
 ---
 
-## 📊 From Excel to Real Simple Stats
+## From Excel to Real Simple Stats
 
 ### Common Excel Functions
 
@@ -627,7 +627,7 @@ print(f"Cohen's d={d:.2f} ({interpretation})")
 
 ---
 
-## 🎯 Quick Reference Card
+## Quick Reference Card
 
 ### Most Common Translations
 
@@ -653,7 +653,7 @@ qnorm(p, mean, sd)         → rss.normal_ppf(p, mu, sigma)
 
 ---
 
-## 💡 Tips for Successful Migration
+## Tips for Successful Migration
 
 1. **Start small**: Migrate one analysis at a time
 2. **Verify results**: Compare outputs with original software
@@ -664,7 +664,7 @@ qnorm(p, mean, sd)         → rss.normal_ppf(p, mu, sigma)
 
 ---
 
-## 🔗 Additional Resources
+## Additional Resources
 
 - **API Comparison**: [Detailed function mapping](API_COMPARISON.md)
 - **Examples**: [Interactive tutorials](INTERACTIVE_EXAMPLES.md)

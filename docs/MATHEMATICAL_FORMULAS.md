@@ -4,7 +4,7 @@ Complete mathematical reference for all Real Simple Stats functions with LaTeX f
 
 ---
 
-## 📊 Descriptive Statistics
+## Descriptive Statistics
 
 ### Mean (Arithmetic Average)
 
@@ -76,7 +76,7 @@ where $Q_1$ is the 25th percentile and $Q_3$ is the 75th percentile.
 
 ---
 
-## 📈 Probability Distributions
+## Probability Distributions
 
 ### Normal Distribution
 
@@ -392,7 +392,7 @@ $$\nabla x_t = x_t - x_{t-1}$$
 
 ---
 
-## 🎲 Resampling Methods
+## Resampling Methods
 
 ### Bootstrap Confidence Interval
 
@@ -433,7 +433,7 @@ where $\theta_{(i)}$ is the statistic computed without observation $i$.
 
 ---
 
-## 📊 Effect Sizes
+## Effect Sizes
 
 ### Cohen's d
 
@@ -595,7 +595,7 @@ $$MDE = \frac{(z_{1-\alpha/2} + z_{1-\beta})\sigma}{\sqrt{n}}$$
 
 ---
 
-## 🎯 Bayesian Statistics
+## Bayesian Statistics
 
 ### Beta-Binomial Conjugate Update
 
@@ -719,7 +719,7 @@ $$D_M(\mathbf{x}) = \sqrt{(\mathbf{x} - \boldsymbol{\mu})^T \mathbf{\Sigma}^{-1}
 
 ---
 
-## 📊 Confidence Intervals
+## Confidence Intervals
 
 ### CI for Mean (Known σ)
 
@@ -739,7 +739,7 @@ $$\bar{x} \pm t_{\alpha/2, n-1} \frac{s}{\sqrt{n}}$$
 
 ---
 
-## 🎲 Central Limit Theorem
+## Central Limit Theorem
 
 ### Sampling Distribution of the Mean
 

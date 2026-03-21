@@ -1,4 +1,8 @@
+import logging
+
 # --- STATISTICS GLOSSARY ---
+
+logger = logging.getLogger(__name__)
 
 GLOSSARY = {
     "!": "Factorial — product of all positive integers up to a given number n. Example: 4! = 4×3×2×1 = 24.",
@@ -46,6 +50,7 @@ def lookup(term: str) -> str:
 
 # Example usage
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     terms = ["μ", "σ", "p", "r²", "H0", "Σ"]
     for t in terms:
-        print(f"{t}: {lookup(t)}")
+        logger.info("%s: %s", t, lookup(t))

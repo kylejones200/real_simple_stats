@@ -13,6 +13,7 @@ Key Finding: Professional frogs jump significantly farther than other frogs!
 """
 
 import csv
+import logging
 from pathlib import Path
 
 import numpy as np
@@ -21,12 +22,15 @@ from scipy.stats import t as t_dist
 from real_simple_stats import descriptive_statistics as desc
 from real_simple_stats import effect_sizes as es
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 # Load the frog jump data
 data_file = Path(__file__).parent.parent / "data" / "froggy.csv"
 
-print("=" * 70)
-print("Professional Frogs vs Other Frogs: Jump Distance Comparison")
-print("=" * 70)
+logger.info("=" * 70)
+logger.info("Professional Frogs vs Other Frogs: Jump Distance Comparison")
+logger.info("=" * 70)
 
 # Read and separate the data by frog type
 pro_jumps = []
@@ -48,15 +52,15 @@ with open(data_file) as f:
         except (ValueError, KeyError):
             continue
 
-print("\nDataset Summary:")
-print(f"  Professional frogs: {len(pro_jumps)} successful jumps")
-print(f"  Other frogs: {len(other_jumps)} successful jumps")
-print(f"  Total: {len(pro_jumps) + len(other_jumps)} successful jumps")
+logger.info("\nDataset Summary:")
+logger.info(f"  Professional frogs: {len(pro_jumps)} successful jumps")
+logger.info(f"  Other frogs: {len(other_jumps)} successful jumps")
+logger.info(f"  Total: {len(pro_jumps) + len(other_jumps)} successful jumps")
 
 # Step 1: Descriptive Statistics for Each Group
-print("\n" + "=" * 70)
-print("1. Descriptive Statistics by Group")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("1. Descriptive Statistics by Group")
+logger.info("=" * 70)
 
 # Professional frogs
 pro_mean = desc.mean(pro_jumps)
@@ -65,14 +69,14 @@ pro_std = desc.sample_std_dev(pro_jumps)
 pro_cv = desc.coefficient_of_variation(pro_jumps) * 100
 pro_summary = desc.five_number_summary(pro_jumps)
 
-print("\nProfessional Frogs:")
-print(f"  Sample size (n): {len(pro_jumps)}")
-print(f"  Mean: {pro_mean:.2f} cm")
-print(f"  Median: {pro_median:.2f} cm")
-print(f"  Standard deviation: {pro_std:.2f} cm")
-print(f"  Coefficient of variation: {pro_cv:.1f}%")
-print(f"  Range: {pro_summary['min']:.2f} - {pro_summary['max']:.2f} cm")
-print(f"  IQR: {pro_summary['Q3'] - pro_summary['Q1']:.2f} cm")
+logger.info("\nProfessional Frogs:")
+logger.info(f"  Sample size (n): {len(pro_jumps)}")
+logger.info(f"  Mean: {pro_mean:.2f} cm")
+logger.info(f"  Median: {pro_median:.2f} cm")
+logger.info(f"  Standard deviation: {pro_std:.2f} cm")
+logger.info(f"  Coefficient of variation: {pro_cv:.1f}%")
+logger.info(f"  Range: {pro_summary['min']:.2f} - {pro_summary['max']:.2f} cm")
+logger.info(f"  IQR: {pro_summary['Q3'] - pro_summary['Q1']:.2f} cm")
 
 # Other frogs
 other_mean = desc.mean(other_jumps)
@@ -81,37 +85,37 @@ other_std = desc.sample_std_dev(other_jumps)
 other_cv = desc.coefficient_of_variation(other_jumps) * 100
 other_summary = desc.five_number_summary(other_jumps)
 
-print("\nOther Frogs:")
-print(f"  Sample size (n): {len(other_jumps)}")
-print(f"  Mean: {other_mean:.2f} cm")
-print(f"  Median: {other_median:.2f} cm")
-print(f"  Standard deviation: {other_std:.2f} cm")
-print(f"  Coefficient of variation: {other_cv:.1f}%")
-print(f"  Range: {other_summary['min']:.2f} - {other_summary['max']:.2f} cm")
-print(f"  IQR: {other_summary['Q3'] - other_summary['Q1']:.2f} cm")
+logger.info("\nOther Frogs:")
+logger.info(f"  Sample size (n): {len(other_jumps)}")
+logger.info(f"  Mean: {other_mean:.2f} cm")
+logger.info(f"  Median: {other_median:.2f} cm")
+logger.info(f"  Standard deviation: {other_std:.2f} cm")
+logger.info(f"  Coefficient of variation: {other_cv:.1f}%")
+logger.info(f"  Range: {other_summary['min']:.2f} - {other_summary['max']:.2f} cm")
+logger.info(f"  IQR: {other_summary['Q3'] - other_summary['Q1']:.2f} cm")
 
 # Difference
 mean_difference = pro_mean - other_mean
-print("\nDifference:")
-print(f"  Mean difference: {mean_difference:.2f} cm")
-print(f"  Professional frogs jump {mean_difference:.2f} cm farther on average")
-print(f"  That's {mean_difference / other_mean * 100:.1f}% farther than other frogs!")
+logger.info("\nDifference:")
+logger.info(f"  Mean difference: {mean_difference:.2f} cm")
+logger.info(f"  Professional frogs jump {mean_difference:.2f} cm farther on average")
+logger.info(f"  That's {mean_difference / other_mean * 100:.1f}% farther than other frogs!")
 
 # Step 2: Hypothesis Test
-print("\n" + "=" * 70)
-print("2. Hypothesis Test: Do Professional Frogs Jump Farther?")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("2. Hypothesis Test: Do Professional Frogs Jump Farther?")
+logger.info("=" * 70)
 
-print("\nResearch Question: Is there a significant difference in jump distance")
-print("                  between professional and other frogs?")
+logger.info("\nResearch Question: Is there a significant difference in jump distance")
+logger.info("                  between professional and other frogs?")
 
-print("\nHypotheses:")
-print("  H₀: μ_pro = μ_other (no difference in mean jump distance)")
-print("  H₁: μ_pro > μ_other (professional frogs jump farther)")
-print("  This is a one-tailed (right-tailed) test")
+logger.info("\nHypotheses:")
+logger.info("  H₀: μ_pro = μ_other (no difference in mean jump distance)")
+logger.info("  H₁: μ_pro > μ_other (professional frogs jump farther)")
+logger.info("  This is a one-tailed (right-tailed) test")
 
 alpha = 0.05
-print(f"  Significance level: α = {alpha}")
+logger.info(f"  Significance level: α = {alpha}")
 
 # Perform two-sample t-test using scipy (since real_simple_stats doesn't have it)
 from scipy.stats import ttest_ind
@@ -120,12 +124,12 @@ t_stat, p_value_two_tailed = ttest_ind(pro_jumps, other_jumps, equal_var=False)
 # For one-tailed test, divide p-value by 2 (since we expect pro > other)
 p_value = p_value_two_tailed / 2
 
-print("\nTest Results:")
-print(f"  Professional mean: {pro_mean:.2f} cm")
-print(f"  Other mean: {other_mean:.2f} cm")
-print(f"  Mean difference: {mean_difference:.2f} cm")
-print(f"  t-statistic: {t_stat:.4f}")
-print(f"  p-value (one-tailed): {p_value:.6f}")
+logger.info("\nTest Results:")
+logger.info(f"  Professional mean: {pro_mean:.2f} cm")
+logger.info(f"  Other mean: {other_mean:.2f} cm")
+logger.info(f"  Mean difference: {mean_difference:.2f} cm")
+logger.info(f"  t-statistic: {t_stat:.4f}")
+logger.info(f"  p-value (one-tailed): {p_value:.6f}")
 
 # Make decision
 if p_value < alpha:
@@ -137,19 +141,19 @@ else:
     conclusion = "There is insufficient evidence that professional frogs jump farther"
     significance = "not statistically significant"
 
-print(
+logger.info(
     f"\nDecision: {decision} (p = {p_value:.4f} {'<' if p_value < alpha else '≥'} α = {alpha})"
 )
-print(f"Conclusion: {conclusion}")
-print(f"The difference is {significance}!")
+logger.info(f"Conclusion: {conclusion}")
+logger.info(f"The difference is {significance}!")
 
 # Step 3: Effect Size
-print("\n" + "=" * 70)
-print("3. Effect Size: How Large is the Difference?")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("3. Effect Size: How Large is the Difference?")
+logger.info("=" * 70)
 
 cohens_d = es.cohens_d(pro_jumps, other_jumps)
-print(f"\nCohen's d: {cohens_d:.4f}")
+logger.info(f"\nCohen's d: {cohens_d:.4f}")
 
 # Interpret effect size
 if abs(cohens_d) < 0.2:
@@ -161,25 +165,25 @@ elif abs(cohens_d) < 0.8:
 else:
     effect_size = "large"
 
-print(f"\nEffect Size Interpretation: {effect_size}")
-print("\nThis means:")
+logger.info(f"\nEffect Size Interpretation: {effect_size}")
+logger.info("\nThis means:")
 if abs(cohens_d) < 0.2:
-    print("  The difference, while statistically significant, is very small.")
-    print("  Professional frogs jump farther, but the practical difference is minimal.")
+    logger.info("  The difference, while statistically significant, is very small.")
+    logger.info("  Professional frogs jump farther, but the practical difference is minimal.")
 elif abs(cohens_d) < 0.5:
-    print("  There is a small but meaningful difference.")
-    print("  Professional frogs consistently jump farther than other frogs.")
+    logger.info("  There is a small but meaningful difference.")
+    logger.info("  Professional frogs consistently jump farther than other frogs.")
 elif abs(cohens_d) < 0.8:
-    print("  There is a medium-sized, practically important difference.")
-    print("  Professional frogs show substantially better jumping performance.")
+    logger.info("  There is a medium-sized, practically important difference.")
+    logger.info("  Professional frogs show substantially better jumping performance.")
 else:
-    print("  There is a large, very important difference.")
-    print("  Professional frogs demonstrate dramatically better jumping ability.")
+    logger.info("  There is a large, very important difference.")
+    logger.info("  Professional frogs demonstrate dramatically better jumping ability.")
 
 # Step 4: Confidence Interval for the Difference
-print("\n" + "=" * 70)
-print("4. Confidence Interval for Mean Difference")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("4. Confidence Interval for Mean Difference")
+logger.info("=" * 70)
 
 # Calculate 95% CI for difference using Welch's t-test (unequal variances)
 n1, n2 = len(pro_jumps), len(other_jumps)
@@ -201,68 +205,68 @@ margin = t_critical * se_diff
 ci_lower = mean_difference - margin
 ci_upper = mean_difference + margin
 
-print(f"\n95% Confidence Interval for difference: [{ci_lower:.2f}, {ci_upper:.2f}] cm")
-print("\nInterpretation:")
-print("  We're 95% confident that professional frogs jump between")
-print(f"  {ci_lower:.2f} and {ci_upper:.2f} cm farther than other frogs, on average.")
+logger.info(f"\n95% Confidence Interval for difference: [{ci_lower:.2f}, {ci_upper:.2f}] cm")
+logger.info("\nInterpretation:")
+logger.info("  We're 95% confident that professional frogs jump between")
+logger.info(f"  {ci_lower:.2f} and {ci_upper:.2f} cm farther than other frogs, on average.")
 if ci_lower > 0:
-    print("  This interval does NOT include zero,")
-    print("  which confirms the difference is statistically significant.")
+    logger.info("  This interval does NOT include zero,")
+    logger.info("  which confirms the difference is statistically significant.")
 else:
-    print("  This interval includes zero,")
-    print("  which suggests the difference may not be significant.")
+    logger.info("  This interval includes zero,")
+    logger.info("  which suggests the difference may not be significant.")
 
 # Step 5: Visual Summary
-print("\n" + "=" * 70)
-print("5. Summary Statistics")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("5. Summary Statistics")
+logger.info("=" * 70)
 
-print(f"\n{'Metric':<30} {'Professional':<15} {'Other':<15} {'Difference':<15}")
-print("-" * 75)
-print(f"{'Sample size (n)':<30} {len(pro_jumps):<15} {len(other_jumps):<15} {'':<15}")
-print(
+logger.info(f"\n{'Metric':<30} {'Professional':<15} {'Other':<15} {'Difference':<15}")
+logger.info("-" * 75)
+logger.info(f"{'Sample size (n)':<30} {len(pro_jumps):<15} {len(other_jumps):<15} {'':<15}")
+logger.info(
     f"{'Mean (cm)':<30} {pro_mean:<15.2f} {other_mean:<15.2f} {mean_difference:>+14.2f}"
 )
-print(
+logger.info(
     f"{'Median (cm)':<30} {pro_median:<15.2f} {other_median:<15.2f} {pro_median - other_median:>+14.2f}"
 )
-print(f"{'Std Dev (cm)':<30} {pro_std:<15.2f} {other_std:<15.2f} {'':<15}")
-print(
+logger.info(f"{'Std Dev (cm)':<30} {pro_std:<15.2f} {other_std:<15.2f} {'':<15}")
+logger.info(
     f"{'Coefficient of Variation (%)':<30} {pro_cv:<15.1f} {other_cv:<15.1f} {'':<15}"
 )
 
 # Step 6: Final Interpretation
-print("\n" + "=" * 70)
-print("6. Final Interpretation")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("6. Final Interpretation")
+logger.info("=" * 70)
 
-print("\nKey Findings:")
-print(f"  ✓ Professional frogs jump {mean_difference:.2f} cm farther on average")
-print(f"  ✓ This difference is {significance} (p = {p_value:.4f})")
-print(f"  ✓ Effect size is {effect_size} (Cohen's d = {cohens_d:.4f})")
-print(f"  ✓ 95% CI: [{ci_lower:.2f}, {ci_upper:.2f}] cm")
+logger.info("\nKey Findings:")
+logger.info(f"  Professional frogs jump {mean_difference:.2f} cm farther on average")
+logger.info(f"  This difference is {significance} (p = {p_value:.4f})")
+logger.info(f"  Effect size is {effect_size} (Cohen's d = {cohens_d:.4f})")
+logger.info(f"  95% CI: [{ci_lower:.2f}, {ci_upper:.2f}] cm")
 
-print("\nPractical Implications:")
+logger.info("\nPractical Implications:")
 if abs(cohens_d) >= 0.8:
-    print("  • The difference is large enough to be practically important")
-    print("  • Professional frogs show substantially better performance")
+    logger.info("  • The difference is large enough to be practically important")
+    logger.info("  • Professional frogs show substantially better performance")
 elif abs(cohens_d) >= 0.5:
-    print("  • The difference is meaningful in practice")
-    print("  • Professional frogs consistently outperform other frogs")
+    logger.info("  • The difference is meaningful in practice")
+    logger.info("  • Professional frogs consistently outperform other frogs")
 else:
-    print("  • While statistically significant, the practical difference is smaller")
-    print("  • Both groups show similar jumping ability overall")
+    logger.info("  • While statistically significant, the practical difference is smaller")
+    logger.info("  • Both groups show similar jumping ability overall")
 
-print("\nStatistical Conclusion:")
-print(
+logger.info("\nStatistical Conclusion:")
+logger.info(
     f"  We have {'strong' if p_value < 0.01 else 'moderate' if p_value < 0.05 else 'weak'} evidence"
 )
-print("  that professional frogs jump farther than other frogs.")
-print(
+logger.info("  that professional frogs jump farther than other frogs.")
+logger.info(
     f"  The mean difference of {mean_difference:.2f} cm is {'large' if abs(cohens_d) >= 0.8 else 'moderate' if abs(cohens_d) >= 0.5 else 'small but'} meaningful."
 )
 
-print("\n" + "=" * 70)
-print("This analysis demonstrates how to compare two groups using")
-print("Real Simple Stats with real-world data from the BANA statistics book.")
-print("=" * 70)
+logger.info("\n" + "=" * 70)
+logger.info("This analysis demonstrates how to compare two groups using")
+logger.info("Real Simple Stats with real-world data from the BANA statistics book.")
+logger.info("=" * 70)

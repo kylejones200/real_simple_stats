@@ -1,5 +1,8 @@
+import logging
 import math
 from collections.abc import Sequence
+
+logger = logging.getLogger(__name__)
 
 # --- BASIC PROBABILITY FUNCTIONS ---
 
@@ -324,25 +327,24 @@ def expected_value(values: Sequence[float], probabilities: Sequence[float]) -> f
 
 # Example usage
 if __name__ == "__main__":
-    print("Probability not happening:", probability_not(0.4))
-    print("Joint probability of A and B:", joint_probability(0.8, 0.5))
-    print("Conditional probability P(A|B):", conditional_probability(0.25, 0.5))
-    print("Mutually exclusive OR:", mutually_exclusive(0.3, 0.4))
-    print("General addition rule:", general_addition_rule(0.3, 0.4, 0.1))
+    logging.basicConfig(level=logging.INFO)
+    logger.info("Probability not happening: %s", probability_not(0.4))
+    logger.info("Joint probability of A and B: %s", joint_probability(0.8, 0.5))
+    logger.info("Conditional probability P(A|B): %s", conditional_probability(0.25, 0.5))
+    logger.info("Mutually exclusive OR: %s", mutually_exclusive(0.3, 0.4))
+    logger.info("General addition rule: %s", general_addition_rule(0.3, 0.4, 0.1))
 
-    print("Combinations (5 choose 3):", combinations(5, 3))
-    print("Permutations (5P3):", permutations(5, 3))
-    print(
-        "Counting meals:", fundamental_counting([4, 3, 2, 5])
-    )  # Sandwich, side, dessert, drink
+    logger.info("Combinations (5 choose 3): %s", combinations(5, 3))
+    logger.info("Permutations (5P3): %s", permutations(5, 3))
+    logger.info("Counting meals: %s", fundamental_counting([4, 3, 2, 5]))
 
-    print("Bayes' Theorem:", bayes_theorem(0.7, 0.5, 0.4))
+    logger.info("Bayes' Theorem: %s", bayes_theorem(0.7, 0.5, 0.4))
 
     tree_branches = [(0.5, 0.7), (0.25, 0.25), (0.25, 0.25)]
-    print("Tree probability (passenger plane):", probability_tree(tree_branches))
+    logger.info("Tree probability (passenger plane): %s", probability_tree(tree_branches))
 
     values = [0, 1, 2, 3]
     probs = [0.1, 0.3, 0.4, 0.2]
     dist = probability_distribution_table(values, probs)
-    print("Probability distribution:", dist)
-    print("Expected value:", expected_value(values, probs))
+    logger.info("Probability distribution: %s", dist)
+    logger.info("Expected value: %s", expected_value(values, probs))

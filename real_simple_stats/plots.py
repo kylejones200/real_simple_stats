@@ -1,5 +1,19 @@
-import matplotlib.pyplot as plt
+"""Plotting utilities for Real Simple Stats.
+
+Uses PlotSmith when available (pip install real-simple-stats[plots]),
+otherwise falls back to matplotlib.
+"""
+
 import numpy as np
+
+try:
+    from plotsmith import plot_histogram as _plot_histogram
+
+    PLOTSMITH_AVAILABLE = True
+except ImportError:
+    PLOTSMITH_AVAILABLE = False
+
+import matplotlib.pyplot as plt
 
 
 def set_minimalist_style():
@@ -27,9 +41,33 @@ def set_minimalist_style():
 def plot_norm_hist(
     data, mean, std, bins=30, show_pdf=True, show_lines=True, title=True
 ):
-    """Plot a histogram of data with optional normal curve and markers."""
-    set_minimalist_style()
+    """Plot a histogram of data with optional normal curve and markers.
 
+    Uses PlotSmith when available (pip install real-simple-stats[plots]),
+    otherwise matplotlib.
+    """
+    if PLOTSMITH_AVAILABLE:
+        kwargs = {"bins": bins}
+        if title:
+            kwargs["title"] = f"Normal Distribution (μ = {mean:.2f}, σ = {std:.2f})"
+        fig, ax = _plot_histogram(data, **kwargs)
+        x_min, x_max = ax.get_xlim()
+        x = np.linspace(x_min, x_max, 300)
+        if show_pdf:
+            y = (1 / (std * np.sqrt(2 * np.pi))) * np.exp(
+                -((x - mean) ** 2) / (2 * std**2)
+            )
+            ax.plot(x, y, color="black", linewidth=1.5)
+        if show_lines:
+            ax.axvline(mean - 2 * std, color="black", linestyle="--", linewidth=1)
+            ax.axvline(mean + 2 * std, color="black", linestyle="--", linewidth=1)
+        if not title:
+            ax.set_title("")
+        fig.savefig("norm_hist.png", bbox_inches="tight", dpi=300)
+        plt.show()
+        return
+
+    set_minimalist_style()
     _, bins_edges, _ = plt.hist(
         data, bins=bins, density=True, alpha=0.5, edgecolor="black"
     )
@@ -82,7 +120,6 @@ def plot_observed_vs_expected(observed, expected, title="Observed vs Expected"):
         title: Plot title.
     """
     set_minimalist_style()
-
     x = range(len(observed))
     width = 0.4
     plt.bar(

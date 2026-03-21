@@ -1,4 +1,5 @@
-"""Pandas compatibility layer for Real Simple Stats.
+"""
+Pandas compatibility layer for Real Simple Stats.
 
 This module provides seamless integration with pandas DataFrames and Series,
 allowing you to use Real Simple Stats functions directly on pandas objects.
@@ -116,8 +117,7 @@ def five_number_summary(data: Union[Sequence[float], "pd.Series"]) -> dict:
 def one_sample_t_test(data: Union[Sequence[float], "pd.Series"], mu: float) -> tuple:
     """Perform one-sample t-test, accepting pandas Series.
 
-    Note: This is a placeholder. real_simple_stats doesn't have a direct
-    one_sample_t_test function. Use t_score and calculate p-value manually.
+    Delegates to hypothesis_testing.t_score and scipy.stats for the p-value.
     """
     from scipy.stats import t as t_dist
 
@@ -140,8 +140,7 @@ def two_sample_t_test(
 ) -> tuple:
     """Perform two-sample t-test, accepting pandas Series.
 
-    Note: This is a placeholder. real_simple_stats doesn't have a direct
-    two_sample_t_test function. Use scipy.stats.ttest_ind for now.
+    Delegates to scipy.stats.ttest_ind for independent samples.
     """
     from scipy.stats import ttest_ind
 

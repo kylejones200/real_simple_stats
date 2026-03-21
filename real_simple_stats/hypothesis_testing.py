@@ -1,6 +1,9 @@
+import logging
 import math
 
 from scipy.stats import f, norm, t
+
+logger = logging.getLogger(__name__)
 
 # --- HYPOTHESIS TESTING BASICS ---
 
@@ -73,30 +76,31 @@ def critical_value_f(alpha: float, dfn: int, dfd: int) -> float:
 
 # Example usage
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     # Hypotheses
-    print(state_null_hypothesis("μ = 100"))
-    print(state_alternate_hypothesis("μ ≠ 100"))
+    logger.info("%s", state_null_hypothesis("μ = 100"))
+    logger.info("%s", state_alternate_hypothesis("μ ≠ 100"))
 
     # Tail tests
-    print("Is right-tailed:", is_right_tailed(2.1, 1.96))
-    print("Is left-tailed:", is_left_tailed(-2.2, 1.96))
-    print("Is two-tailed:", is_two_tailed(2.3, 1.96))
+    logger.info("Is right-tailed: %s", is_right_tailed(2.1, 1.96))
+    logger.info("Is left-tailed: %s", is_left_tailed(-2.2, 1.96))
+    logger.info("Is two-tailed: %s", is_two_tailed(2.3, 1.96))
 
     # P-value and decision
     z = 2.05
     p = p_value_method(z, "two-tailed")
-    print("P-value:", p)
-    print("Reject H0 at alpha=0.05:", reject_null(p, 0.05))
+    logger.info("P-value: %s", p)
+    logger.info("Reject H0 at alpha=0.05: %s", reject_null(p, 0.05))
 
     # T-test
     t_stat = t_score(sample_mean=104, population_mean=100, sample_std=10, n=25)
-    print("T-score:", t_stat)
-    print("Critical t (df=24):", critical_value_t(0.05, 24))
+    logger.info("T-score: %s", t_stat)
+    logger.info("Critical t (df=24): %s", critical_value_t(0.05, 24))
 
     # F-test
     f_stat = f_test(var1=36, var2=25)
-    print("F statistic:", f_stat)
-    print("Critical F (df1=9, df2=11):", critical_value_f(0.05, 9, 11))
+    logger.info("F statistic: %s", f_stat)
+    logger.info("Critical F (df1=9, df2=11): %s", critical_value_f(0.05, 9, 11))
 
     # Critical z values
-    print("Critical Z (alpha=0.05):", critical_value_z(0.05))
+    logger.info("Critical Z (alpha=0.05): %s", critical_value_z(0.05))

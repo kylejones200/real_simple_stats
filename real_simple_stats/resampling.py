@@ -1,4 +1,5 @@
-"""Resampling methods for statistical inference.
+"""
+Resampling methods for statistical inference.
 
 This module provides functions for bootstrap, permutation tests,
 and cross-validation techniques.
@@ -346,12 +347,14 @@ def permutation_test(
         >>> 0 <= result['p_value'] <= 1
         True
     """
-    if len(data1) < 1 or len(data2) < 1:
-        raise ValueError("Both samples must contain at least 1 value")
-    if n_permutations < 1:
-        raise ValueError("n_permutations must be at least 1")
-    if alternative not in VALID_ALTERNATIVES:
-        raise ValueError(f"alternative must be one of {VALID_ALTERNATIVES}")
+    validation_errors = {
+        "samples": (len(data1) < 1 or len(data2) < 1, "Both samples must contain at least 1 value"),
+        "n_permutations": (n_permutations < 1, "n_permutations must be at least 1"),
+        "alternative": (alternative not in VALID_ALTERNATIVES, f"alternative must be one of {VALID_ALTERNATIVES}"),
+    }
+    for fails, msg in validation_errors.values():
+        if fails:
+            raise ValueError(msg)
 
     data1_array = np.asarray(data1)
     data2_array = np.asarray(data2)

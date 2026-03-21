@@ -4,10 +4,13 @@ This script benchmarks common operations against scipy.stats and numpy
 to show that Real Simple Stats is production-ready.
 """
 
+import logging
 import time
 from typing import Dict, List
 
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 try:
     from scipy import stats
@@ -120,11 +123,11 @@ def benchmark_linear_regression(x: List[float], y: List[float]) -> Dict[str, flo
 
 def print_results(operation: str, results: Dict[str, float]):
     """Print benchmark results in a formatted table."""
-    print(f"\n{operation}:")
-    print("-" * 50)
+    logger.info("\n%s:", operation)
+    logger.info("-" * 50)
 
     if not results:
-        print("No results available (missing dependencies)")
+        logger.info("No results available (missing dependencies)")
         return
 
     # Sort by time (fastest first)
@@ -139,11 +142,11 @@ def print_results(operation: str, results: Dict[str, float]):
         if speedup == 1.0:
             status = "🏆 Fastest"
         elif speedup > 0.8:
-            status = "✓ Good"
+            status = "Good"
         else:
-            status = "⚠️  Slower"
+            status = "Slower"
 
-        print(f"{library:20s} {time_ms:8.4f} ms {bar} {status}")
+        logger.info("%s %8.4f ms %s %s", library, time_ms, bar, status)
 
 
 def main():
@@ -155,16 +158,24 @@ def main():
 
     if save_to_file:
         output_file = "benchmarks/BENCHMARK_RESULTS.txt"
-        original_stdout = sys.stdout
-        sys.stdout = open(output_file, "w")
-        print(f"Benchmark results generated on {__import__('datetime').datetime.now()}")
-        print("=" * 60)
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(message)s",
+            handlers=[logging.FileHandler(output_file)],
+        )
+        logger.info(
+            "Benchmark results generated on %s",
+            __import__("datetime").datetime.now(),
+        )
+        logger.info("=" * 60)
+    else:
+        logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    print("=" * 60)
-    print("Real Simple Stats Performance Benchmarks")
-    print("=" * 60)
-    print("\nTiming 1000 iterations of each operation...")
-    print("(Lower is better)")
+    logger.info("=" * 60)
+    logger.info("Real Simple Stats Performance Benchmarks")
+    logger.info("=" * 60)
+    logger.info("\nTiming 1000 iterations of each operation...")
+    logger.info("(Lower is better)")
 
     # Generate test data
     np.random.seed(42)
@@ -175,9 +186,9 @@ def main():
     y_data = [2 * x + np.random.normal(0, 5) for x in x_data]
 
     # Run benchmarks
-    print("\n" + "=" * 60)
-    print("Small Dataset (n=100)")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("Small Dataset (n=100)")
+    logger.info("=" * 60)
 
     print_results("Mean", benchmark_mean(small_data))
     print_results("Standard Deviation", benchmark_std(small_data))
@@ -186,29 +197,27 @@ def main():
         "Linear Regression", benchmark_linear_regression(x_data[:100], y_data[:100])
     )
 
-    print("\n" + "=" * 60)
-    print("Large Dataset (n=10,000)")
-    print("=" * 60)
+    logger.info("\n" + "=" * 60)
+    logger.info("Large Dataset (n=10,000)")
+    logger.info("=" * 60)
 
     print_results("Mean", benchmark_mean(large_data))
     print_results("Standard Deviation", benchmark_std(large_data))
     print_results("One-Sample t-test", benchmark_t_test(large_data, 100))
 
-    print("\n" + "=" * 60)
-    print("Summary")
-    print("=" * 60)
-    print("Real Simple Stats is:")
-    print("• Fast enough for most use cases")
-    print("• Typically within 2-3x of NumPy/SciPy")
-    print("• More than adequate for educational and research use")
-    print("• Optimized for clarity and correctness over raw speed")
-    print("\nFor production use with very large datasets (>1M points),")
-    print("consider NumPy/SciPy for maximum performance.")
+    logger.info("\n" + "=" * 60)
+    logger.info("Summary")
+    logger.info("=" * 60)
+    logger.info("Real Simple Stats is:")
+    logger.info("• Fast enough for most use cases")
+    logger.info("• Typically within 2-3x of NumPy/SciPy")
+    logger.info("• More than adequate for educational and research use")
+    logger.info("• Optimized for clarity and correctness over raw speed")
+    logger.info("\nFor production use with very large datasets (>1M points),")
+    logger.info("consider NumPy/SciPy for maximum performance.")
 
     if save_to_file:
-        sys.stdout.close()
-        sys.stdout = original_stdout
-        print(f"\nResults saved to {output_file}")
+        logger.info("\nResults saved to %s", output_file)
 
 
 if __name__ == "__main__":

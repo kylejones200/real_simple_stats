@@ -1,4 +1,7 @@
+import logging
 import math
+
+logger = logging.getLogger(__name__)
 
 
 def percent_to_decimal(percent: float) -> float:
@@ -55,18 +58,19 @@ def factorial(n):
 
 # Example usage
 if __name__ == "__main__":
-    print("Convert 75% to decimal:", percent_to_decimal(75))
-    print("Convert 0.75 to percent:", decimal_to_percent(0.75))
-    print("Round 0.1284 to 2 decimal places:", round_to_decimal_places(0.1284, 2))
-    print("PEMDAS example result:", order_of_operations_example())
+    logging.basicConfig(level=logging.INFO)
+    logger.info("Convert 75%% to decimal: %s", percent_to_decimal(75))
+    logger.info("Convert 0.75 to percent: %s", decimal_to_percent(0.75))
+    logger.info("Round 0.1284 to 2 decimal places: %s", round_to_decimal_places(0.1284, 2))
+    logger.info("PEMDAS example result: %s", order_of_operations_example())
 
     data = [2, 19, 44, 44, 44, 51, 56, 78, 86, 99, 99]
-    print("Mean:", mean(data))
-    print("Median:", median(data))
-    print("Mode:", mode(data))
+    logger.info("Mean: %s", mean(data))
+    logger.info("Median: %s", median(data))
+    logger.info("Mode: %s", mode(data))
 
     scores = [80, 80, 85]
     weights = [0.4, 0.4, 0.2]
-    print("Weighted Mean:", weighted_mean(scores, weights))
+    logger.info("Weighted Mean: %s", weighted_mean(scores, weights))
 
-    print("Factorial of 5:", factorial(5))
+    logger.info("Factorial of 5: %s", factorial(5))

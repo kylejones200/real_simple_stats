@@ -1,6 +1,6 @@
 # Monte Carlo Simulation Guide
 
-## 🎲 Overview
+## Overview
 
 The Monte Carlo module provides simulation methods for statistical inference, financial modeling, and numerical integration. It includes:
 
@@ -22,7 +22,7 @@ The Monte Carlo module provides simulation methods for statistical inference, fi
 
 ---
 
-## 🚀 Geometric Brownian Motion
+## Geometric Brownian Motion
 
 ### What is it?
 
@@ -115,7 +115,7 @@ plt.show()
 
 ---
 
-## 📊 Monte Carlo from Historical Data
+## Monte Carlo from Historical Data
 
 ### What is it?
 
@@ -233,7 +233,7 @@ print(f"Integral of e^(-x^2) from 0 to 1: {result['integral']:.4f}")
 
 ---
 
-## 🎯 Probability Estimation
+## Probability Estimation
 
 ### What is it?
 
@@ -469,7 +469,7 @@ print(f"\nProbability of loss: {np.mean(result['final_values'] < initial_value):
 
 ---
 
-## 🎓 Mathematical Background
+## Mathematical Background
 
 ### Geometric Brownian Motion
 
@@ -508,7 +508,7 @@ Standard error: SE = σ/√N, where σ is the standard deviation of f(xᵢ)
 
 ---
 
-## 🚀 Best Practices
+## Best Practices
 
 ### 1. Choose Appropriate Number of Simulations
 
@@ -529,7 +529,7 @@ result = rss.geometric_brownian_motion(S0=100, mu=0.1, sigma=0.2, T=1.0, n_simul
 # Reproducible results
 result1 = rss.geometric_brownian_motion(S0=100, mu=0.1, sigma=0.2, T=1.0, random_seed=42)
 result2 = rss.geometric_brownian_motion(S0=100, mu=0.1, sigma=0.2, T=1.0, random_seed=42)
-# result1 == result2 ✅
+# result1 == result2
 ```
 
 ### 3. Validate Parameters
@@ -565,13 +565,13 @@ for n_sims in [100, 1000, 10000, 100000]:
 
 The Monte Carlo module provides:
 
-- ✅ **Fast simulations** with Numba JIT (10-25x speedup)
-- ✅ **Financial modeling** with Geometric Brownian Motion
-- ✅ **Data-driven forecasts** from historical data
-- ✅ **Numerical integration** for complex functions
-- ✅ **Probability estimation** through simulation
-- ✅ **Comprehensive testing** (25 tests, 100% passing)
-- ✅ **Production-ready** code with error handling
+- **Fast simulations** with Numba JIT (10-25x speedup)
+- **Financial modeling** with Geometric Brownian Motion
+- **Data-driven forecasts** from historical data
+- **Numerical integration** for complex functions
+- **Probability estimation** through simulation
+- **Comprehensive testing** (25 tests, 100% passing)
+- **Production-ready** code with error handling
 
 **Perfect for:**
 - Stock price forecasting
@@ -595,4 +595,4 @@ print(f"Expected price: ${result['statistics']['mean']:.2f}")
 
 ---
 
-**Happy simulating!** 🎲📈
+**Happy simulating!**

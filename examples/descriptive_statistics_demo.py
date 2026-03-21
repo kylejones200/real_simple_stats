@@ -1,4 +1,6 @@
-from real_simple_stats.descriptives import (
+import logging
+
+from real_simple_stats.descriptive_statistics import (
     coefficient_of_variation,
     detect_fake_statistics,
     draw_cumulative_frequency_table,
@@ -9,12 +11,15 @@ from real_simple_stats.descriptives import (
     sample_variance,
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 x = [1, 2, 5, 6, 7, 9, 12, 15, 18, 19, 27]
-print("Five-number summary:", five_number_summary(x))
-print("IQR:", interquartile_range(x))
-print("Sample variance:", sample_variance(x))
-print("Sample standard deviation:", sample_std_dev(x))
-print("Coefficient of variation:", coefficient_of_variation(x))
+logger.info("Five-number summary: %s", five_number_summary(x))
+logger.info("IQR: %s", interquartile_range(x))
+logger.info("Sample variance: %s", sample_variance(x))
+logger.info("Sample standard deviation: %s", sample_std_dev(x))
+logger.info("Coefficient of variation: %s", coefficient_of_variation(x))
 
 blood_types = [
     "A",
@@ -38,9 +43,9 @@ blood_types = [
     "O",
     "A",
 ]
-print("Frequency table:", draw_frequency_table(blood_types))
+logger.info("Frequency table: %s", draw_frequency_table(blood_types))
 
 values = [1, 1, 2, 2, 3, 3, 3, 4]
-print("Cumulative frequency:", draw_cumulative_frequency_table(values))
+logger.info("Cumulative frequency: %s", draw_cumulative_frequency_table(values))
 
-print("Bias warnings:", detect_fake_statistics("diet pill company", True, True))
+logger.info("Bias warnings: %s", detect_fake_statistics("diet pill company", True, True))
