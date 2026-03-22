@@ -135,6 +135,20 @@ Changed
 
 * Added 10 new tests covering edge cases and validation (511 tests total, all passing).
 
+[0.3.2] - 2026-03-21
+--------------------
+
+Fixed
+~~~~~
+
+* CLI tests were failing in CI because commands use ``logger.info()`` but logging was only configured in ``main()``. Tests that call commands directly now configure logging with the captured stdout.
+
+Changed
+~~~~~~~
+
+* Removed emojis project-wide from docs, examples, and scripts
+* Interactive examples documentation now recommends Chart.js and Observable for web visualizations instead of Streamlit
+
 [Unreleased]
 -----------
 
