@@ -1,5 +1,6 @@
 """Tests for CLI module."""
 
+import logging
 from io import StringIO
 from unittest.mock import patch
 
@@ -44,6 +45,9 @@ class TestParseNumbers:
 class TestDescriptiveStatsCommand:
     @patch("sys.stdout", new_callable=StringIO)
     def test_mean_calculation(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "1,2,3,4,5"
             stat = "mean"
@@ -55,6 +59,9 @@ class TestDescriptiveStatsCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_median_calculation(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "1,2,3,4,5"
             stat = "median"
@@ -66,6 +73,9 @@ class TestDescriptiveStatsCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_std_calculation(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "1,2,3,4,5"
             stat = "std"
@@ -77,6 +87,9 @@ class TestDescriptiveStatsCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_std_single_value(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "5"
             stat = "std"
@@ -84,10 +97,13 @@ class TestDescriptiveStatsCommand:
 
         descriptive_stats_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error" in output
+        assert "Standard deviation requires" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_summary_calculation(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "1,2,3,4,5"
             stat = "summary"
@@ -100,6 +116,9 @@ class TestDescriptiveStatsCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_all_statistics(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "1,2,3,4,5"
             stat = None
@@ -115,6 +134,9 @@ class TestDescriptiveStatsCommand:
 class TestProbabilityCommand:
     @patch("sys.stdout", new_callable=StringIO)
     def test_binomial_probability(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "binomial"
             n = 10
@@ -134,6 +156,9 @@ class TestProbabilityCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_bayes_theorem(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "bayes"
             p_b_given_a = 0.9
@@ -153,6 +178,9 @@ class TestProbabilityCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_normal_pdf(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "normal"
             x = 0.0
@@ -173,6 +201,9 @@ class TestProbabilityCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_normal_cdf(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "normal"
             x = 1.96
@@ -193,6 +224,9 @@ class TestProbabilityCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_normal_missing_x(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "normal"
             x = None
@@ -209,10 +243,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --x is required" in output
+        assert "--x is required" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_binomial_missing_n(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "binomial"
             n = None
@@ -229,10 +266,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --n (number of trials) is required" in output
+        assert "--n (number of trials) is required" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_binomial_missing_k(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "binomial"
             n = 10
@@ -249,10 +289,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --k (number of successes) is required" in output
+        assert "--k (number of successes) is required" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_binomial_missing_p(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "binomial"
             n = 10
@@ -269,10 +312,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --p (probability of success) is required" in output
+        assert "--p (probability of success) is required" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_binomial_invalid_k(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "binomial"
             n = 10
@@ -289,10 +335,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --k (number of successes) must be between 0 and 10" in output
+        assert "--k (number of successes) must be between 0 and 10" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_binomial_invalid_p(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "binomial"
             n = 10
@@ -309,10 +358,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --p (probability of success) must be between 0 and 1" in output
+        assert "--p (probability of success) must be between 0 and 1" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_bayes_missing_args(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "bayes"
             p_b_given_a = None
@@ -329,10 +381,13 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --p_b_given_a is required" in output
+        assert "--p_b_given_a is required" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_bayes_invalid_p_b(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             type = "bayes"
             p_b_given_a = 0.9
@@ -349,12 +404,15 @@ class TestProbabilityCommand:
         with pytest.raises(SystemExit):
             probability_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error: --p_b cannot be zero" in output
+        assert "--p_b cannot be zero" in output
 
 
 class TestHypothesisTestCommand:
     @patch("sys.stdout", new_callable=StringIO)
     def test_t_test_with_mu(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "23,25,28,30,32"
             type = "t_test"
@@ -368,6 +426,9 @@ class TestHypothesisTestCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_t_test_without_mu(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "23,25,28,30,32"
             type = "t_test"
@@ -376,10 +437,13 @@ class TestHypothesisTestCommand:
 
         hypothesis_test_command(Args())
         output = mock_stdout.getvalue()
-        assert "Error" in output
+        assert "--mu (null hypothesis mean) is required" in output
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_t_test_custom_alpha(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             data = "23,25,28,30,32"
             type = "t_test"
@@ -394,6 +458,9 @@ class TestHypothesisTestCommand:
 class TestGlossaryCommand:
     @patch("sys.stdout", new_callable=StringIO)
     def test_lookup_existing_term(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             term = "mean"
 
@@ -403,6 +470,9 @@ class TestGlossaryCommand:
 
     @patch("sys.stdout", new_callable=StringIO)
     def test_lookup_nonexistent_term(self, mock_stdout):
+        logging.basicConfig(
+            level=logging.INFO, format="%(message)s", stream=mock_stdout, force=True
+        )
         class Args:
             term = "nonexistent_term_xyz"
 
