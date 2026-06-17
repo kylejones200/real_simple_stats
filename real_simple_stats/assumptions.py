@@ -118,14 +118,14 @@ def check_t_test_assumptions(
         results["equal_variances"] = None  # type: ignore[assignment]
 
     # Overall assessment
+    all_passed = results["normality_overall"]
+    if group2 is not None:
+        all_passed = all_passed and results["equal_variances"]["passed"]
+
     if verbose:
         logger.info("\n" + "=" * 70)
         logger.info("Overall Assessment")
         logger.info("=" * 70)
-
-        all_passed = results["normality_overall"]
-        if group2 is not None:
-            all_passed = all_passed and results["equal_variances"]["passed"]
 
         if all_passed:
             logger.info("All testable assumptions are met.")
@@ -142,11 +142,7 @@ def check_t_test_assumptions(
                 "\nNote: T-tests are robust to minor violations, especially with larger samples."
             )
 
-    results["all_passed"] = (
-        all_passed
-        if group2 is None
-        else (results["normality_overall"] and results["equal_variances"]["passed"])
-    )
+    results["all_passed"] = all_passed
 
     return results
 

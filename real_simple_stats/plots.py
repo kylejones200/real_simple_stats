@@ -146,6 +146,198 @@ def plot_observed_vs_expected(observed, expected, title="Observed vs Expected"):
     plt.show()
 
 
+# ---------------------------------------------------------------------------
+# Intuition plots — visualizations that teach a concept, not just display data.
+# ---------------------------------------------------------------------------
+
+
+def plot_p_value_area(
+    t_stat,
+    df,
+    alternative="two-sided",
+    alpha=0.05,
+    ax=None,
+):
+    """Show a p-value for what it is: an area in the tail of a distribution.
+
+    Draws the t-distribution under H₀, shades the tail region(s) beyond the
+    observed statistic (that shaded area *is* the p-value), and marks the
+    critical value(s) where the rejection region begins. This is the single
+    picture that makes "p-value" click for most people.
+
+    Parameters
+    ----------
+    t_stat : float
+        The observed t statistic.
+    df : int
+        Degrees of freedom.
+    alternative : {"two-sided", "greater", "less"}
+        Test direction.
+    alpha : float
+        Significance level, used to draw the critical value(s).
+    ax : matplotlib Axes, optional
+        Draw onto an existing axis instead of creating a figure.
+
+    Returns
+    -------
+    (fig, ax)
+    """
+    from scipy.stats import t as _t
+
+    set_minimalist_style()
+    created = ax is None
+    if created:
+        fig, ax = plt.subplots(figsize=(7, 4))
+    else:
+        fig = ax.figure
+
+    span = max(4.0, abs(t_stat) + 1.0)
+    x = np.linspace(-span, span, 1000)
+    y = _t.pdf(x, df)
+    ax.plot(x, y, color="black", linewidth=1.2)
+
+    shade = "#c0392b"
+    if alternative == "two-sided":
+        a = abs(t_stat)
+        right = x >= a
+        left = x <= -a
+        ax.fill_between(x[right], y[right], color=shade, alpha=0.45)
+        ax.fill_between(x[left], y[left], color=shade, alpha=0.45)
+        crit = float(_t.ppf(1 - alpha / 2, df))
+        for c in (crit, -crit):
+            ax.axvline(c, color="gray", linestyle="--", linewidth=0.9)
+        ax.axvline(t_stat, color=shade, linewidth=1.6)
+        ax.axvline(-abs(t_stat), color=shade, linewidth=0.8, alpha=0.5)
+    elif alternative == "greater":
+        right = x >= t_stat
+        ax.fill_between(x[right], y[right], color=shade, alpha=0.45)
+        crit = float(_t.ppf(1 - alpha, df))
+        ax.axvline(crit, color="gray", linestyle="--", linewidth=0.9)
+        ax.axvline(t_stat, color=shade, linewidth=1.6)
+    else:  # less
+        left = x <= t_stat
+        ax.fill_between(x[left], y[left], color=shade, alpha=0.45)
+        crit = float(_t.ppf(alpha, df))
+        ax.axvline(crit, color="gray", linestyle="--", linewidth=0.9)
+        ax.axvline(t_stat, color=shade, linewidth=1.6)
+
+    if alternative == "two-sided":
+        p_value = 2 * float(_t.sf(abs(t_stat), df))
+    elif alternative == "greater":
+        p_value = float(_t.sf(t_stat, df))
+    else:
+        p_value = float(_t.cdf(t_stat, df))
+
+    ax.annotate(
+        f"t = {t_stat:.2f}",
+        xy=(t_stat, _t.pdf(t_stat, df)),
+        xytext=(t_stat, max(y) * 0.6),
+        ha="center",
+        color=shade,
+        fontsize=11,
+    )
+    ax.set_title(
+        f"The p-value is the shaded area  (p = {p_value:.4f})", loc="left"
+    )
+    ax.set_xlabel("t  (standard errors from the hypothesized mean)")
+    ax.set_ylabel("density under H₀")
+    ax.set_yticks([])
+    if created:
+        fig.tight_layout()
+    return fig, ax
+
+
+def plot_ci_coverage(
+    true_mean=0.0,
+    true_sd=1.0,
+    n=30,
+    n_intervals=100,
+    confidence=0.95,
+    seed=0,
+    ax=None,
+):
+    """Show what "95% confidence" actually means, by simulation.
+
+    Draws ``n_intervals`` fresh samples from a known population, builds a
+    confidence interval from each, and plots them. Intervals that capture the
+    true mean are black; the ones that miss are red. About ``confidence`` of
+    them should contain the true value — that long-run capture rate, not any
+    single interval, is what the confidence level refers to.
+
+    Parameters
+    ----------
+    true_mean, true_sd : float
+        The (known, simulated) population parameters.
+    n : int
+        Size of each sample.
+    n_intervals : int
+        How many samples/intervals to simulate.
+    confidence : float
+        Nominal confidence level, e.g. 0.95.
+    seed : int
+        RNG seed for reproducibility.
+    ax : matplotlib Axes, optional
+
+    Returns
+    -------
+    (fig, ax)
+    """
+    from scipy.stats import t as _t
+
+    set_minimalist_style()
+    created = ax is None
+    if created:
+        fig, ax = plt.subplots(figsize=(6, 7))
+    else:
+        fig = ax.figure
+
+    rng = np.random.default_rng(seed)
+    df = n - 1
+    crit = float(_t.ppf(1 - (1 - confidence) / 2, df))
+
+    captured = 0
+    miss_color, hit_color = "#c0392b", "black"
+    for i in range(n_intervals):
+        sample = rng.normal(true_mean, true_sd, n)
+        m = float(np.mean(sample))
+        se = float(np.std(sample, ddof=1)) / np.sqrt(n)
+        lo, hi = m - crit * se, m + crit * se
+        hit = lo <= true_mean <= hi
+        captured += hit
+        ax.plot(
+            [lo, hi],
+            [i, i],
+            color=hit_color if hit else miss_color,
+            linewidth=1.1 if hit else 1.6,
+            alpha=0.8 if hit else 1.0,
+        )
+        ax.plot(m, i, "o", color=hit_color if hit else miss_color, markersize=2.5)
+
+    ax.axvline(true_mean, color="#2c7fb8", linewidth=1.4)
+    ax.text(
+        true_mean,
+        n_intervals * 1.01,
+        "true mean",
+        color="#2c7fb8",
+        ha="center",
+        va="bottom",
+        fontsize=10,
+    )
+    rate = captured / n_intervals
+    ax.set_title(
+        f"{int(confidence * 100)}% CIs over {n_intervals} samples — "
+        f"{captured} captured the true mean ({rate:.0%})",
+        loc="left",
+        fontsize=11,
+    )
+    ax.set_xlabel("estimate of the mean")
+    ax.set_yticks([])
+    ax.set_ylabel(f"{n_intervals} repeated samples")
+    if created:
+        fig.tight_layout()
+    return fig, ax
+
+
 if __name__ == "__main__":
     # Example usage
 
