@@ -55,3 +55,8 @@ from .sampling_and_intervals import *  # noqa: F403, F401
 # Advanced statistical methods (new in v0.3.0)
 from .time_series import *  # noqa: F403, F401
 from .verbose_stats import *  # noqa: F403, F401
+
+# Methods from Python for Business Analytics
+from .causal_inference import *  # noqa: F403, F401
+from .market_basket import *  # noqa: F403, F401
+from .survival import *  # noqa: F403, F401

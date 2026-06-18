@@ -338,6 +338,148 @@ def plot_ci_coverage(
     return fig, ax
 
 
+def plot_honest_vs_misleading(
+    values,
+    labels=None,
+    title="Does your y-axis start at zero?",
+    ax_pair=None,
+):
+    """Show the same bar chart with a truncated axis vs. an honest full axis.
+
+    A truncated y-axis can make a tiny difference look dramatic.  This side-by-
+    side comparison makes the distortion immediately obvious — a useful teaching
+    tool for data visualization ethics.
+
+    Args:
+        values: Numeric values for each bar.
+        labels: Category labels.  Defaults to A, B, C, …
+        title: Overall figure title.
+        ax_pair: Optional (ax_misleading, ax_honest) to draw onto.
+
+    Returns:
+        (fig, (ax_misleading, ax_honest))
+
+    Example:
+        >>> fig, axes = plot_honest_vs_misleading(
+        ...     [98, 101, 99, 103], labels=["Q1", "Q2", "Q3", "Q4"]
+        ... )
+    """
+    values = list(values)
+    if labels is None:
+        labels = [chr(65 + i) for i in range(len(values))]
+
+    set_minimalist_style()
+
+    if ax_pair is None:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    else:
+        ax1, ax2 = ax_pair
+        fig = ax1.figure
+
+    color = "#5E81AC"
+    span = max(values) - min(values)
+    pad = span * 0.15 if span > 0 else 1.0
+
+    # Misleading: truncated axis
+    ax1.bar(labels, values, color=color, alpha=0.75)
+    ax1.set_ylim(min(values) - pad, max(values) + pad)
+    ax1.set_title("MISLEADING — truncated y-axis", color="#BF616A", fontsize=12)
+    ax1.set_ylabel("Value")
+
+    # Honest: axis starts at zero
+    ax2.bar(labels, values, color=color, alpha=0.75)
+    ax2.set_ylim(0, max(values) * 1.15)
+    ax2.set_title("HONEST — y-axis starts at zero", color="#A3BE8C", fontsize=12)
+    ax2.set_ylabel("Value")
+
+    fig.suptitle(title, fontsize=13, y=1.02)
+    fig.tight_layout()
+    return fig, (ax1, ax2)
+
+
+def plot_survival_curve(
+    km_result,
+    parametric_results=None,
+    ax=None,
+):
+    """Plot a Kaplan-Meier curve with optional parametric overlays.
+
+    Args:
+        km_result: Dict from ``real_simple_stats.kaplan_meier``.
+        parametric_results: Optional list of dicts from
+            ``real_simple_stats.fit_parametric_survival`` or
+            ``real_simple_stats.compare_survival_models``.  Each is plotted
+            using its ``survival_fn``.
+        ax: Existing Axes, or None to create one.
+
+    Returns:
+        (fig, ax)
+
+    Example:
+        >>> from real_simple_stats import kaplan_meier
+        >>> r = kaplan_meier([2, 3, 5, 7, 4, 8, 10, 11], [1, 1, 1, 1, 1, 0, 1, 0])
+        >>> fig, ax = plot_survival_curve(r)
+    """
+    set_minimalist_style()
+    created = ax is None
+    if created:
+        fig, ax = plt.subplots(figsize=(8, 5))
+    else:
+        fig = ax.figure
+
+    t = km_result["times"]
+    s = km_result["survival_prob"]
+    ci_lo = km_result["ci_lower"]
+    ci_hi = km_result["ci_upper"]
+
+    ax.step(t, s, where="post", color="black", linewidth=2, label="Kaplan–Meier")
+    ax.fill_between(
+        t, ci_lo, ci_hi, step="post", alpha=0.15, color="black", label="95% CI"
+    )
+
+    if parametric_results:
+        colors = ["#c0392b", "#2980b9", "#27ae60", "#8e44ad"]
+        t_grid = np.linspace(0, float(t[-1]) * 1.05, 300)
+        for i, pr in enumerate(parametric_results):
+            s_fit = np.array([pr["survival_fn"](ti) for ti in t_grid])
+            label = pr["distribution"].capitalize()
+            if "rank" in pr:
+                label += f" (AIC rank {pr['rank']})"
+            ax.plot(
+                t_grid, s_fit,
+                linewidth=1.8,
+                color=colors[i % len(colors)],
+                linestyle="--",
+                label=label,
+            )
+
+    median = km_result.get("median_survival")
+    if median is not None:
+        ax.axvline(median, color="gray", linestyle=":", linewidth=1.2)
+        ax.annotate(
+            f"median = {median:.1f}",
+            xy=(median, 0.5),
+            xytext=(median * 1.05, 0.55),
+            fontsize=10,
+            color="gray",
+        )
+
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Survival probability  S(t)")
+    ax.set_ylim(0, 1.05)
+    ax.set_xlim(left=0)
+    n_ev = km_result.get("n_events", "")
+    n_ce = km_result.get("n_censored", "")
+    ax.set_title(
+        f"Survival curve  (events = {n_ev}, censored = {n_ce})", loc="left"
+    )
+    ax.legend(frameon=False)
+
+    if created:
+        fig.tight_layout()
+    return fig, ax
+
+
 if __name__ == "__main__":
     # Example usage
 
