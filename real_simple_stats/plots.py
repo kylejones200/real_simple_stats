@@ -480,6 +480,145 @@ def plot_survival_curve(
     return fig, ax
 
 
+def plot_variogram(
+    variogram_result,
+    fit_result=None,
+    ax=None,
+):
+    """Plot an experimental variogram with an optional fitted model overlay.
+
+    Args:
+        variogram_result: Dict from ``real_simple_stats.compute_variogram``.
+        fit_result: Optional dict from ``real_simple_stats.fit_variogram``.
+            If provided, the fitted model curve is overlaid.
+        ax: Existing Axes, or None to create a new figure.
+
+    Returns:
+        (fig, ax)
+
+    Example:
+        >>> from real_simple_stats import compute_variogram
+        >>> import numpy as np
+        >>> rng = np.random.default_rng(0)
+        >>> x, y = rng.uniform(0,100,60), rng.uniform(0,100,60)
+        >>> v = np.sin(x/20) + rng.normal(0, 0.5, 60)
+        >>> r = compute_variogram(x, y, v)
+        >>> fig, ax = plot_variogram(r)
+    """
+    set_minimalist_style()
+    created = ax is None
+    if created:
+        fig, ax = plt.subplots(figsize=(7, 4))
+    else:
+        fig = ax.figure
+
+    lags = variogram_result["lags"]
+    gamma = variogram_result["gamma"]
+    n_pairs = variogram_result.get("n_pairs")
+    total_var = variogram_result.get("total_variance")
+
+    sizes = (np.asarray(n_pairs) / max(np.asarray(n_pairs).max(), 1) * 120 + 20
+             if n_pairs is not None else 60)
+    ax.scatter(lags, gamma, s=sizes, color="black", alpha=0.7, zorder=3,
+               label="Experimental")
+
+    if total_var is not None:
+        ax.axhline(total_var, color="#5E81AC", linestyle=":", linewidth=1.2,
+                   label=f"Total variance = {total_var:.2f}")
+
+    if fit_result is not None:
+        h_grid = np.linspace(0, float(np.max(lags)) * 1.05, 200)
+        g_fit = np.array([fit_result["model_fn"](h) for h in h_grid])
+        label = (
+            f"{fit_result['model'].capitalize()}  "
+            f"(nugget={fit_result['nugget']:.2f}, "
+            f"sill={fit_result['sill']:.2f}, "
+            f"range={fit_result['range_param']:.1f})"
+        )
+        ax.plot(h_grid, g_fit, color="#BF616A", linewidth=2, label=label)
+
+    ax.set_xlabel("Lag distance  h")
+    ax.set_ylabel("Semivariance  γ(h)")
+    ax.set_title("Variogram", loc="left")
+    ax.set_xlim(left=0)
+    ax.set_ylim(bottom=0)
+    ax.legend(frameon=False, fontsize=9)
+
+    if created:
+        fig.tight_layout()
+    return fig, ax
+
+
+def plot_correlation_matrix(
+    data,
+    labels=None,
+    title="Correlation Matrix",
+    ax=None,
+):
+    """Plot a correlation matrix as an annotated heatmap (pure matplotlib).
+
+    Args:
+        data: 2-D array-like of shape (n_observations, n_variables), or a
+            pre-computed (n_variables, n_variables) correlation matrix
+            (values in [−1, 1]).
+        labels: Variable names.  Defaults to "V1", "V2", …
+        title: Plot title.
+        ax: Existing Axes, or None to create one.
+
+    Returns:
+        (fig, ax)
+
+    Example:
+        >>> import numpy as np
+        >>> rng = np.random.default_rng(0)
+        >>> X = rng.normal(size=(100, 4))
+        >>> fig, ax = plot_correlation_matrix(X, labels=["A","B","C","D"])
+    """
+    X = np.asarray(data, dtype=float)
+    if X.ndim != 2:
+        raise ValueError("data must be 2-D.")
+
+    # If square with values in [-1, 1], treat as correlation matrix directly
+    n, m = X.shape
+    if n == m and np.all(np.abs(X) <= 1.0 + 1e-6):
+        corr = X
+    else:
+        corr = np.corrcoef(X, rowvar=False)
+        m = corr.shape[0]
+
+    if labels is None:
+        labels = [f"V{i+1}" for i in range(m)]
+
+    set_minimalist_style()
+    created = ax is None
+    if created:
+        size = max(4, m * 0.7)
+        fig, ax = plt.subplots(figsize=(size, size))
+    else:
+        fig = ax.figure
+
+    im = ax.imshow(corr, cmap="RdBu_r", vmin=-1, vmax=1, aspect="auto")
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+
+    ax.set_xticks(range(m))
+    ax.set_yticks(range(m))
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=9)
+    ax.set_yticklabels(labels, fontsize=9)
+
+    for i in range(m):
+        for j in range(m):
+            val = corr[i, j]
+            color = "white" if abs(val) > 0.6 else "black"
+            ax.text(j, i, f"{val:.2f}", ha="center", va="center",
+                    fontsize=8, color=color)
+
+    ax.set_title(title, loc="left")
+
+    if created:
+        fig.tight_layout()
+    return fig, ax
+
+
 if __name__ == "__main__":
     # Example usage
 
