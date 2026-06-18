@@ -59,4 +59,5 @@ from .verbose_stats import *  # noqa: F403, F401
 # Methods from Python for Business Analytics
 from .causal_inference import *  # noqa: F403, F401
 from .market_basket import *  # noqa: F403, F401
+from .spatial_stats import *  # noqa: F403, F401
 from .survival import *  # noqa: F403, F401

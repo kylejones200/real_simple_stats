@@ -331,6 +331,299 @@ def difference(data: list[float], lag: int = 1, order: int = 1) -> list[float]:
     return result
 
 
+def mean_absolute_scaled_error(
+    actual: list[float],
+    forecast: list[float],
+) -> float:
+    """Compute the Mean Absolute Scaled Error (MASE).
+
+    Scales forecast errors against a naïve one-step-ahead forecast (predict
+    today = yesterday).  MASE < 1 means the model beats the naïve baseline;
+    MASE > 1 means it doesn't.
+
+    MASE is scale-independent and works on a single series — unlike percentage
+    errors it handles zero values, and unlike MSE it doesn't overweight outliers.
+
+    Args:
+        actual: Array of true values (length n).
+        forecast: Array of predicted values (length n).
+
+    Returns:
+        MASE value (float).  Lower is better; 1.0 = naïve baseline.
+
+    Raises:
+        ValueError: If arrays have different lengths or fewer than 2 elements.
+
+    Example:
+        >>> actual   = [10, 12, 14, 16, 18]
+        >>> forecast = [10, 12, 14, 16, 18]   # perfect forecast
+        >>> mean_absolute_scaled_error(actual, forecast)
+        0.0
+    """
+    a = np.asarray(actual, dtype=float)
+    f = np.asarray(forecast, dtype=float)
+    if len(a) != len(f):
+        raise ValueError("actual and forecast must have the same length.")
+    if len(a) < 2:
+        raise ValueError("Need at least 2 observations.")
+
+    mae_forecast = float(np.mean(np.abs(a - f)))
+    mae_naive = float(np.mean(np.abs(np.diff(a))))
+    if mae_naive == 0:
+        return 0.0 if mae_forecast == 0 else float("inf")
+    return mae_forecast / mae_naive
+
+
+def exponential_smoothing(
+    data: list[float],
+    alpha: float,
+) -> list[float]:
+    """Simple Exponential Smoothing (SES) — level only.
+
+    Each smoothed value is a weighted average of the current observation and
+    the previous smoothed value:
+
+        s_t = α · x_t + (1 − α) · s_{t-1}
+
+    Small α gives a smoother series (longer memory); α=1 returns the raw data.
+
+    Args:
+        data: Time series values.
+        alpha: Smoothing factor in (0, 1].
+
+    Returns:
+        List of smoothed values (same length as data).
+
+    Example:
+        >>> s = exponential_smoothing([1, 3, 5, 7, 9], alpha=0.3)
+        >>> len(s) == 5 and s[0] == 1.0
+        True
+    """
+    if not 0 < alpha <= 1:
+        raise ValueError("alpha must be in (0, 1].")
+    if len(data) == 0:
+        return []
+
+    result = [float(data[0])]
+    for x in data[1:]:
+        result.append(alpha * float(x) + (1.0 - alpha) * result[-1])
+    return result
+
+
+def double_exponential_smoothing(
+    data: list[float],
+    alpha: float,
+    beta: float,
+) -> dict[str, list[float]]:
+    """Holt's Double Exponential Smoothing — level + trend.
+
+    Extends SES with a trend component so the method can follow a linear
+    trajectory.  The level and trend are updated together:
+
+        l_t = α · x_t + (1 − α) · (l_{t-1} + b_{t-1})
+        b_t = β · (l_t − l_{t-1}) + (1 − β) · b_{t-1}
+        ŷ_{t+h} = l_t + h · b_t
+
+    Args:
+        data: Time series values (length ≥ 2).
+        alpha: Level smoothing factor in (0, 1).
+        beta: Trend smoothing factor in (0, 1).
+
+    Returns:
+        dict with keys:
+            smoothed: In-sample fitted values.
+            level: Level component at each time step.
+            trend: Trend component at each time step.
+
+    Example:
+        >>> r = double_exponential_smoothing([1, 3, 5, 7, 9], alpha=0.8, beta=0.2)
+        >>> len(r["smoothed"]) == 5
+        True
+    """
+    if not 0 < alpha < 1:
+        raise ValueError("alpha must be in (0, 1).")
+    if not 0 < beta < 1:
+        raise ValueError("beta must be in (0, 1).")
+    if len(data) < 2:
+        raise ValueError("Need at least 2 observations.")
+
+    n = len(data)
+    level = [float(data[0])]
+    trend = [float(data[1]) - float(data[0])]
+    smoothed = [level[0]]
+
+    for i in range(1, n):
+        x = float(data[i])
+        l_prev, b_prev = level[-1], trend[-1]
+        l = alpha * x + (1.0 - alpha) * (l_prev + b_prev)
+        b = beta * (l - l_prev) + (1.0 - beta) * b_prev
+        level.append(l)
+        trend.append(b)
+        smoothed.append(l)
+
+    return {"smoothed": smoothed, "level": level, "trend": trend}
+
+
+def rolling_statistics(
+    data: list[float],
+    window: int,
+) -> dict[str, list[float]]:
+    """Compute rolling window statistics for a time series.
+
+    Each output value at position t uses observations in [t-window+1, t]
+    (past values only — no future leakage).  Positions before the first
+    full window use all available data (``min_periods=1`` behaviour).
+
+    Args:
+        data: Time series values.
+        window: Rolling window size (number of periods).
+
+    Returns:
+        dict with keys:
+            mean: Rolling mean.
+            std: Rolling standard deviation (ddof=1, or 0 for single-element windows).
+            minimum: Rolling minimum.
+            maximum: Rolling maximum.
+            expanding_mean: Expanding (cumulative) mean.
+
+    Raises:
+        ValueError: If window < 1 or data is empty.
+
+    Example:
+        >>> r = rolling_statistics([1, 2, 3, 4, 5], window=3)
+        >>> r["mean"]
+        [1.0, 1.5, 2.0, 3.0, 4.0]
+    """
+    if window < 1:
+        raise ValueError("window must be at least 1.")
+    if len(data) == 0:
+        raise ValueError("data must not be empty.")
+
+    x = np.asarray(data, dtype=float)
+    n = len(x)
+    roll_mean, roll_std, roll_min, roll_max, exp_mean = [], [], [], [], []
+
+    running_sum = 0.0
+    for i in range(n):
+        lo = max(0, i - window + 1)
+        window_vals = x[lo : i + 1]
+        roll_mean.append(float(window_vals.mean()))
+        roll_std.append(float(window_vals.std(ddof=1)) if len(window_vals) > 1 else 0.0)
+        roll_min.append(float(window_vals.min()))
+        roll_max.append(float(window_vals.max()))
+        running_sum += x[i]
+        exp_mean.append(running_sum / (i + 1))
+
+    return {
+        "mean": roll_mean,
+        "std": roll_std,
+        "minimum": roll_min,
+        "maximum": roll_max,
+        "expanding_mean": exp_mean,
+    }
+
+
+def detect_change_points(
+    data: list[float],
+    n_breaks: int = 1,
+    min_size: int = 5,
+) -> dict[str, list]:
+    """Detect change points in a time series via binary segmentation.
+
+    Finds the n_breaks positions where the series mean shifts most, using a
+    greedy binary segmentation algorithm: at each step, split the current
+    segment at the point that maximises the reduction in within-segment
+    variance.
+
+    Args:
+        data: Time series values (length ≥ 2 * min_size).
+        n_breaks: Number of change points to find (default 1).
+        min_size: Minimum segment length on either side of a break (default 5).
+
+    Returns:
+        dict with keys:
+            change_points: Indices (0-based) of the detected change points.
+                A change point at index k means the break is *between*
+                positions k-1 and k.
+            segment_means: Mean of each segment defined by the change points.
+            rss_reduction: Total variance reduction achieved (higher = stronger
+                evidence of a real break).
+
+    Raises:
+        ValueError: If data is too short for the requested breaks and min_size.
+
+    Example:
+        >>> data = [1.0] * 20 + [5.0] * 20
+        >>> r = detect_change_points(data, n_breaks=1)
+        >>> r["change_points"]
+        [20]
+    """
+    x = np.asarray(data, dtype=float)
+    n = len(x)
+    if n < 2 * min_size:
+        raise ValueError(
+            f"Data too short ({n}) for min_size={min_size}. "
+            f"Need at least {2 * min_size} observations."
+        )
+
+    def _best_split(seg: np.ndarray) -> tuple[int, float]:
+        """Return the best split index within seg and its variance reduction."""
+        m = len(seg)
+        best_idx, best_gain = min_size, -np.inf
+        total_var = float(np.var(seg, ddof=0) * m)
+        for k in range(min_size, m - min_size + 1):
+            left, right = seg[:k], seg[k:]
+            reduced = (
+                float(np.var(left, ddof=0) * len(left))
+                + float(np.var(right, ddof=0) * len(right))
+            )
+            gain = total_var - reduced
+            if gain > best_gain:
+                best_gain, best_idx = gain, k
+        return best_idx, best_gain
+
+    # Greedy binary segmentation
+    # Each segment is tracked as (global_start, global_end)
+    segments: list[tuple[int, int]] = [(0, n)]
+    change_points: list[int] = []
+    total_rss_reduction = 0.0
+
+    for _ in range(n_breaks):
+        best_global: tuple[int, float, tuple[int, int]] | None = None
+        for start, end in segments:
+            seg = x[start:end]
+            if len(seg) < 2 * min_size:
+                continue
+            local_idx, gain = _best_split(seg)
+            if best_global is None or gain > best_global[1]:
+                best_global = (start + local_idx, gain, (start, end))
+
+        if best_global is None:
+            break
+
+        cp, gain, (start, end) = best_global
+        change_points.append(cp)
+        total_rss_reduction += gain
+        segments.remove((start, end))
+        segments.extend([(start, cp), (cp, end)])
+        segments.sort()
+
+    change_points.sort()
+
+    # Segment means
+    boundaries = [0] + change_points + [n]
+    segment_means = [
+        float(x[boundaries[i] : boundaries[i + 1]].mean())
+        for i in range(len(boundaries) - 1)
+    ]
+
+    return {
+        "change_points": change_points,
+        "segment_means": segment_means,
+        "rss_reduction": float(total_rss_reduction),
+    }
+
+
 __all__ = [
     "moving_average",
     "autocorrelation",
@@ -339,4 +632,9 @@ __all__ = [
     "detrend",
     "seasonal_decompose",
     "difference",
+    "mean_absolute_scaled_error",
+    "exponential_smoothing",
+    "double_exponential_smoothing",
+    "rolling_statistics",
+    "detect_change_points",
 ]
