@@ -777,7 +777,258 @@ alpha_corrected = 0.05 / 3
 
 ---
 
-## 📞 Still Have Questions?
+---
+
+## Causal Inference
+
+### Q: When should I use difference-in-differences vs. regression discontinuity?
+
+**A:** They answer the same broad question ("did X cause Y?") but require different data structures.
+
+| Method | You need | Assumption |
+|---|---|---|
+| DiD | Pre/post measurements + a control group that didn't receive the treatment | Parallel trends: absent treatment, both groups would have changed at the same rate |
+| RDD | A numerical score used to assign treatment (e.g. test cutoff, income threshold) | Local continuity: potential outcomes are smooth through the cutoff |
+| Synthetic control | Multiple control units, long pre-treatment history, no single comparable control | Donor units span the same covariate space as the treated unit |
+| Panel FE | Repeated observations per entity over time | Treatment is uncorrelated with unobserved time-invariant entity characteristics |
+
+Use DiD when you have a natural "before vs. after" event and a control group (e.g. minimum wage law in one state, not another). Use RDD when assignment was determined by a cutoff score — e.g., students above 65 get tutoring, below 65 don't.
+
+```python
+import real_simple_stats as rss
+
+# DiD
+r = rss.difference_in_differences(outcome, post, treated)
+result = rss.difference_in_differences_explained(outcome, post, treated)
+print(result)   # prints parallel trends caveat and next steps
+
+# RDD
+r = rss.regression_discontinuity(outcome, running_var, cutoff=65)
+r["effect"]     # local average treatment effect at the cutoff
+```
+
+---
+
+### Q: What is the parallel trends assumption, and how do I check it?
+
+**A:** The parallel trends assumption says: *absent treatment, the treated and control groups would have changed at the same rate.* It's the core identifying assumption of DiD — without it, the DiD estimate is biased.
+
+You cannot test it in the post-treatment period (that's the period you're trying to study). But you can partially validate it with **pre-treatment trend tests**:
+
+1. Plot the outcome for both groups in the pre-treatment period. If the lines run roughly parallel, the assumption is more credible.
+2. Run a DiD regression using only the pre-treatment periods to check whether there's a spurious "effect" before the intervention — there shouldn't be.
+3. Be especially cautious when treated and control groups differ on observable baseline characteristics.
+
+The `difference_in_differences_explained` function prints a specific caveat about this and suggests next steps.
+
+---
+
+### Q: How do I interpret a synthetic control result?
+
+**A:** The synthetic control creates a weighted average of control units that closely matches the treated unit during the pre-treatment period. After the intervention, the gap between the treated unit and its synthetic counterfactual is the estimated treatment effect.
+
+```python
+r = rss.synthetic_control(y_treated, Y_controls, n_pre=30)
+r["weights"]         # float array, one per donor unit; sums to ~1
+r["effect"]          # post-treatment gap at each time step
+r["pre_fit_mse"]     # how well the synthetic control matched pre-treatment
+```
+
+Key checks:
+- `pre_fit_mse` should be small — if the synthetic control doesn't fit pre-treatment well, the post-treatment comparison is unreliable.
+- Inspect `weights` — if one donor has weight ≈ 1 and all others ≈ 0, you've essentially just used that one unit as a control; consider whether that's appropriate.
+- Inference is done via permutation (run the same analysis on each control unit as if it were treated). This library returns the point estimate; formal permutation p-values require the user to iterate.
+
+---
+
+## Survival Analysis
+
+### Q: What is right-censoring, and why does it matter?
+
+**A:** A censored observation is one where the event had not yet occurred when the study ended (or the subject dropped out). For example, in a customer churn study, a customer who is still active at the end of your observation window is censored — you know they survived *at least* that long, but not when (or if) they'll eventually churn.
+
+If you ignore censored observations and only analyse customers who did churn, you introduce survivor bias — your median churn time will be far too short. Kaplan-Meier and parametric survival models handle censoring correctly by removing censored observations from the risk set at their last known time without contributing to the hazard estimate.
+
+```python
+durations      = [2, 3, 5, 7, 11, 4, 8, 10, 6, 14]
+event_observed = [1, 1, 1, 1,  0, 1, 0,  1, 1,  0]  # 0 = censored
+
+r = rss.kaplan_meier(durations, event_observed)
+r["median_survival"]   # time where S(t) = 0.5
+r["n_censored"]        # 3 in this example
+```
+
+---
+
+### Q: When should I use Kaplan-Meier vs. a parametric survival model?
+
+**A:**
+
+| | Kaplan-Meier | Parametric (Weibull, etc.) |
+|---|---|---|
+| **Assumptions** | None — fully non-parametric | Distributional form (shape of hazard) |
+| **Extrapolation** | Not reliable beyond last event | Can extrapolate into the future |
+| **Interpretation** | Empirical S(t) at each observed time | Smooth curve with interpretable parameters |
+| **Best for** | First look, small samples, comparing groups | Forecasting future survival, fitting a hazard model |
+
+Always start with Kaplan-Meier. Then use `compare_survival_models` to find the best-fitting parametric family (Exponential, Weibull, Lognormal, Log-logistic) if you need to extrapolate beyond your observation window.
+
+```python
+# Step 1: non-parametric description
+result = rss.kaplan_meier_explained(durations, event_observed)
+print(result)
+
+# Step 2: find best parametric fit
+ranked = rss.compare_survival_models(durations, event_observed)
+ranked[0]["distribution"]   # "weibull" or "lognormal" etc.
+ranked[0]["aic"]            # lower is better
+ranked[0]["survival_fn"](t=90)  # probability of surviving to day 90
+```
+
+---
+
+### Q: What does AIC mean in `compare_survival_models`?
+
+**A:** AIC (Akaike Information Criterion) balances goodness of fit against model complexity. Lower AIC = better model. Use it to choose among the four distributions — Exponential (1 parameter), Weibull (2), Lognormal (2), Log-logistic (2).
+
+AIC differences matter more than the absolute value:
+- ΔAIC < 2: models are roughly equivalent; prefer the simpler one (Exponential)
+- ΔAIC 2–10: modest evidence for the better model
+- ΔAIC > 10: strong evidence; use the lower-AIC model
+
+```python
+ranked = rss.compare_survival_models(durations, event_observed)
+for m in ranked:
+    print(f"{m['distribution']:12s}  AIC={m['aic']:.1f}  rank={m['rank']}")
+```
+
+---
+
+## Market Basket Analysis
+
+### Q: What do support, confidence, and lift measure?
+
+**A:** These three metrics describe different aspects of an association rule `A → B`:
+
+| Metric | Formula | Meaning | Good value |
+|---|---|---|---|
+| **Support** | P(A ∩ B) | How often A and B appear together | Depends on data volume; typically > 0.01 |
+| **Confidence** | P(B \| A) | When A is bought, how often is B also bought? | > 0.5 for actionable rules |
+| **Lift** | P(B \| A) / P(B) | Does A increase B's purchase probability vs. baseline? | > 1.0 (lift < 1 = A suppresses B) |
+
+Lift is the most useful for actionability — it tells you whether A and B co-occur *more than chance* would predict. A lift of 3.2 means customers who buy A are 3.2× more likely to also buy B compared to a random customer.
+
+```python
+matrix, items = rss.encode_transactions(transactions)
+itemsets = rss.frequent_itemsets(matrix, items, min_support=0.05)
+rules = rss.association_rules(itemsets, min_confidence=0.4, min_lift=1.5)
+
+for r in sorted(rules, key=lambda x: x["lift"], reverse=True)[:5]:
+    print(f"{r['antecedent']} → {r['consequent']}")
+    print(f"  support={r['support']:.3f}  confidence={r['confidence']:.3f}  lift={r['lift']:.2f}")
+```
+
+---
+
+### Q: How many transactions do I need for reliable association rules?
+
+**A:** As a rough guide:
+- `min_support = 0.01` means an itemset must appear in at least 1% of transactions
+- For that to represent ≥ 10 transactions (the practical minimum for a reliable count), you need at least 1,000 transactions
+- With sparse data (many unique items, few items per basket), prefer higher `min_support` thresholds
+
+If you have fewer than ~500 transactions, consider raising `min_support` to 0.05–0.10 to avoid spurious rules driven by a handful of co-occurrences. Rules with very high confidence but low support (e.g. `{A, B} → C`, support = 0.002, confidence = 0.95) usually reflect a handful of transactions and shouldn't drive business decisions without validation.
+
+---
+
+### Q: What's the difference between `frequent_itemsets` and `association_rules`?
+
+**A:** They're two steps in the Apriori pipeline:
+
+1. `frequent_itemsets` finds sets of items that appear together frequently (above `min_support`). Output: `[{"itemset": {"milk", "bread"}, "support": 0.4}, ...]`
+2. `association_rules` takes those itemsets and derives directional rules (`A → B`) filtered by `min_confidence` and `min_lift`. Output: `[{"antecedent": {"milk"}, "consequent": {"bread"}, "confidence": 0.8, "lift": 2.1}, ...]`
+
+You always run `frequent_itemsets` first. `association_rules` needs the itemset list as input.
+
+---
+
+## Spatial Statistics
+
+### Q: How do I choose a distance threshold for Moran's I?
+
+**A:** The distance threshold defines who is a "neighbour" — it directly controls the result. There is no universally correct choice; it depends on the spatial process you're trying to measure.
+
+Practical guidance:
+- **Domain knowledge first**: if you're studying disease spread and the transmission radius is ~2 km, use that.
+- **Vary and compare**: compute Moran's I at several thresholds (e.g. 5th, 10th, 25th percentile of all pairwise distances). If clustering only appears at one specific threshold, it may be an artefact.
+- **Rule of thumb**: each observation should have at least 2–4 neighbours on average at your chosen threshold.
+
+```python
+import numpy as np
+from scipy.spatial.distance import cdist
+
+coords = np.column_stack([x, y])
+dists = cdist(coords, coords)
+
+# Check: how many neighbours at distance d?
+d = 20
+avg_neighbors = (dists < d).sum(axis=1).mean() - 1
+print(f"Average neighbours at d={d}: {avg_neighbors:.1f}")
+
+r = rss.morans_i(x, y, values, distance_threshold=d)
+```
+
+Using `distance_threshold=None` builds a fully global weight matrix (all pairs) — often appropriate for small datasets or when spatial structure is expected at all scales.
+
+---
+
+### Q: What is a variogram, and when do I need one?
+
+**A:** Moran's I gives a single number summarising spatial autocorrelation across the entire study area. A variogram goes further: it shows *how* spatial autocorrelation changes with distance — specifically, when it effectively disappears.
+
+The three key parameters of a fitted variogram model are:
+- **Nugget** (γ at h=0): measurement error or variation at distances smaller than your minimum sampling distance.
+- **Sill** (γ as h→∞): total variance in the data; the variogram plateaus here.
+- **Range**: the distance at which the variogram reaches the sill — beyond this, points are spatially uncorrelated.
+
+```python
+# Step 1: compute the experimental variogram
+vario = rss.compute_variogram(x, y, values, n_lags=15)
+
+# Step 2: fit a model to the experimental variogram
+fit = rss.fit_variogram(vario["lags"], vario["gamma"], model="spherical")
+print(f"Range: {fit['range_param']:.1f}  Sill: {fit['sill']:.3f}  Nugget: {fit['nugget']:.3f}")
+print(f"RMSE: {fit['rmse']:.4f}")
+
+# Step 3: predict semivariance at a new distance
+fit["model_fn"](15.0)   # γ at h=15
+```
+
+Use a variogram when you need to understand the scale of spatial structure, compare multiple fields, or prepare for kriging interpolation.
+
+---
+
+### Q: Which variogram model should I use — spherical, exponential, or Gaussian?
+
+**A:** All three are valid; choose by fit quality (RMSE) and by the shape of your experimental variogram:
+
+| Model | Behaviour near origin | Practical implication |
+|---|---|---|
+| **Spherical** | Linear near h=0 | Abrupt transition from correlated to uncorrelated; common in geology |
+| **Exponential** | Linear near h=0 (slower approach to sill) | Never fully reaches sill; correlated at all distances |
+| **Gaussian** | Parabolic near h=0 (smooth) | Very smooth spatial variation; often soil or atmospheric data |
+
+```python
+for model in ("spherical", "exponential", "gaussian"):
+    fit = rss.fit_variogram(vario["lags"], vario["gamma"], model=model)
+    print(f"{model:12s}  RMSE={fit['rmse']:.4f}")
+```
+
+Start with spherical (it's the most commonly appropriate). Switch to exponential if the variogram doesn't fully plateau, or Gaussian if the data is very smooth.
+
+---
+
+## Still Have Questions?
 
 - **GitHub Issues**: [Ask a question](https://github.com/kylejones200/real_simple_stats/issues)
 - **Documentation**: [Full docs](https://real-simple-stats.readthedocs.io/)

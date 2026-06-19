@@ -776,7 +776,137 @@ $$\bar{X} \sim N\left(\mu, \frac{\sigma^2}{n}\right) \text{ (approximately, for 
 
 ---
 
+---
+
+## Causal Inference
+
+### Difference-in-Differences
+
+The DiD model is estimated via OLS with a post × treated interaction term:
+
+$$y_{it} = \beta_0 + \beta_1 \cdot \text{Post}_t + \beta_2 \cdot \text{Treated}_i + \beta_3 \cdot (\text{Post}_t \times \text{Treated}_i) + \varepsilon_{it}$$
+
+**β₃ is the DiD estimator** — the extra change in the treated group relative to the control group:
+
+$$\hat{\tau}_{DiD} = \beta_3 = (\bar{y}_{treated,post} - \bar{y}_{treated,pre}) - (\bar{y}_{control,post} - \bar{y}_{control,pre})$$
+
+Standard error and t-statistic follow from OLS with (n − 4) residual degrees of freedom.
+
+**Code**: `rss.difference_in_differences(outcome, post, treated)`
+
+---
+
+## Survival Analysis
+
+### Kaplan-Meier Estimator
+
+Let $t_1 < t_2 < \cdots < t_k$ be the ordered distinct event times. At each time $t_i$:
+
+- $d_i$ = number of events (deaths/churn)
+- $n_i$ = number at risk just before $t_i$
+
+The survival probability is updated multiplicatively:
+
+$$\hat{S}(t) = \prod_{t_i \leq t} \left(1 - \frac{d_i}{n_i}\right)$$
+
+**Greenwood's variance formula:**
+
+$$\widehat{\text{Var}}[\hat{S}(t)] = \hat{S}(t)^2 \sum_{t_i \leq t} \frac{d_i}{n_i(n_i - d_i)}$$
+
+A pointwise $(1 - \alpha)$ confidence interval is:
+
+$$\hat{S}(t) \pm z_{1-\alpha/2} \cdot \hat{S}(t) \sqrt{\sum_{t_i \leq t} \frac{d_i}{n_i(n_i - d_i)}}$$
+
+**Code**: `rss.kaplan_meier(durations, event_observed)`
+
+---
+
+### Parametric Survival — AIC Model Selection
+
+For each candidate distribution, parameters are estimated by maximum likelihood. The Akaike Information Criterion:
+
+$$AIC = -2 \ln \hat{\mathcal{L}} + 2k$$
+
+where $\hat{\mathcal{L}}$ is the maximised log-likelihood and $k$ is the number of parameters. Lower AIC indicates a better balance of fit and parsimony.
+
+**Code**: `rss.compare_survival_models(durations, event_observed)`
+
+---
+
+## Market Basket Analysis
+
+For an association rule $A \Rightarrow B$ derived from $N$ transactions:
+
+$$\text{support}(A \cup B) = \frac{|\{t : A \cup B \subseteq t\}|}{N}$$
+
+$$\text{confidence}(A \Rightarrow B) = \frac{\text{support}(A \cup B)}{\text{support}(A)} = P(B \mid A)$$
+
+$$\text{lift}(A \Rightarrow B) = \frac{\text{confidence}(A \Rightarrow B)}{\text{support}(B)} = \frac{P(A \cap B)}{P(A) \cdot P(B)}$$
+
+- **lift > 1**: A and B co-occur more than independence predicts (positive association)
+- **lift = 1**: A and B are statistically independent
+- **lift < 1**: A and B co-occur less than independence predicts (substitutes)
+
+**Code**: `rss.frequent_itemsets(matrix, items, min_support=0.05)` then `rss.association_rules(itemsets, min_confidence=0.5)`
+
+---
+
+## Spatial Statistics
+
+### Moran's I
+
+Let $\{z_i\}_{i=1}^{n}$ be mean-centred values ($z_i = x_i - \bar{x}$) and $w_{ij}$ be the spatial weight between locations $i$ and $j$ (1 if within the distance threshold, 0 otherwise):
+
+$$I = \frac{n}{\sum_i \sum_j w_{ij}} \cdot \frac{\sum_i \sum_j w_{ij} z_i z_j}{\sum_i z_i^2}$$
+
+Under the null hypothesis of spatial randomness, the expected value is:
+
+$$E[I] = -\frac{1}{n - 1}$$
+
+The variance and z-score under the normality assumption are computed from the moments of the weight matrix; the two-sided p-value follows from the standard normal:
+
+$$z = \frac{I - E[I]}{\sqrt{\text{Var}[I]}}$$
+
+**Code**: `rss.morans_i(x, y, values, distance_threshold=d)`
+
+---
+
+### Experimental Variogram
+
+The experimental (empirical) semivariance at lag $h$ is:
+
+$$\hat{\gamma}(h) = \frac{1}{2|N(h)|} \sum_{(i,j) \in N(h)} \left[z(s_i) - z(s_j)\right]^2$$
+
+where $N(h) = \{(i,j) : \|s_i - s_j\| \approx h\}$ is the set of point pairs separated by lag $h$.
+
+**Code**: `rss.compute_variogram(x, y, values, n_lags=15)`
+
+---
+
+### Variogram Models
+
+All three models are parameterised by nugget ($c_0$), sill ($c_0 + c$), and range ($a$):
+
+**Spherical** (reaches sill at distance $a$):
+
+$$\gamma(h) = \begin{cases} c_0 + c\left[\frac{3h}{2a} - \frac{1}{2}\left(\frac{h}{a}\right)^3\right] & h \leq a \\ c_0 + c & h > a \end{cases}$$
+
+**Exponential** (asymptotically approaches sill):
+
+$$\gamma(h) = c_0 + c\left[1 - \exp\!\left(-\frac{h}{a}\right)\right]$$
+
+**Gaussian** (smooth near origin):
+
+$$\gamma(h) = c_0 + c\left[1 - \exp\!\left(-\frac{h^2}{a^2}\right)\right]$$
+
+Models are fit by minimising the weighted sum of squared residuals using `scipy.optimize.curve_fit`.
+
+**Code**: `rss.fit_variogram(lags, gamma, model="spherical")`
+
+---
+
 **See also:**
-- [API Comparison](API_COMPARISON.md) - Function lookup
-- [Interactive Examples](INTERACTIVE_EXAMPLES.md) - Try it yourself
-- [FAQ](FAQ.md) - Common questions
+- [CAUSAL_INFERENCE_GUIDE.md](CAUSAL_INFERENCE_GUIDE.md) — worked examples and assumptions
+- [SURVIVAL_ANALYSIS_GUIDE.md](SURVIVAL_ANALYSIS_GUIDE.md) — censoring, KM, model selection
+- [SPATIAL_STATS_GUIDE.md](SPATIAL_STATS_GUIDE.md) — Moran's I, variogram concepts
+- [FAQ.md](FAQ.md) - Common questions

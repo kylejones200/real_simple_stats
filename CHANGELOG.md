@@ -5,6 +5,88 @@ All notable changes to Real Simple Stats will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-06-19
+
+### Added
+
+- **Self-explaining results for six new tests** — each wraps the underlying function and returns an `ExplainedResult` carrying an intuition section, plain-English interpretation, assumption check, misconception guard (caveats), and concrete next steps. All six attach a signature visualization via `result.plot()`:
+  - `one_way_anova_explained` — box plots of each group + η² narrative
+  - `chi_square_independence_explained` — observed vs. expected bar chart + Cramér's V
+  - `difference_in_differences_explained` — 2×2 DiD diagram with counterfactual line
+  - `kaplan_meier_explained` — step-function survival curve with Greenwood CI
+  - `morans_i_explained` — spatial scatter coloured by value
+  - `detect_change_points_explained` — time series with break lines and segment means
+
+- 60 new tests for the explained wrappers (structural, numeric, plot-output checks).
+
+- `docs/WHICH_TEST.md` — statistical decision guide mapping problem type to the right `rss` function.
+- `docs/CAUSAL_INFERENCE_GUIDE.md` — deep dive on DiD, RDD, synthetic control, panel FE.
+- `docs/SURVIVAL_ANALYSIS_GUIDE.md` — censoring, KM vs. parametric, AIC model selection.
+- `docs/SPATIAL_STATS_GUIDE.md` — Moran's I, variogram (sill/range/nugget), model families.
+
+### Changed
+
+- README.md rewritten to lead with the ExplainedResult feature and cover all modules.
+- `docs/WHAT_CAN_STATISTICS_DO.md` rewritten — removed outdated "limitations" section that incorrectly said the library lacked causal inference and spatial statistics.
+- `docs/FAQ.md` extended with four new sections (causal inference, survival, market basket, spatial stats).
+- `docs/MATHEMATICAL_FORMULAS.md` extended with formulas for DiD, KM, market basket, Moran's I, and variograms.
+- `QUICK_REFERENCE.md` rewritten to cover all current modules.
+
+### Stats
+
+- 763 tests total, all passing.
+
+---
+
+## [0.4.0] - 2026-06-16
+
+### Added
+
+- **Causal inference module** (`causal_inference.py`) — four quasi-experimental estimators:
+  - `difference_in_differences` — OLS with post×treated interaction (β₃ = DiD estimator)
+  - `regression_discontinuity` — local polynomial estimation at a threshold cutoff
+  - `synthetic_control` — SLSQP optimisation of non-negative donor weights summing to 1
+  - `panel_fixed_effects` — within-entity demeaning (equivalent to entity fixed effects)
+
+- **Survival analysis module** (`survival.py`) — three functions:
+  - `kaplan_meier` — non-parametric step-function S(t) with Greenwood confidence intervals; handles right-censored data
+  - `fit_parametric_survival` — MLE fit for Exponential, Weibull, Lognormal, Log-logistic; returns `survival_fn` callable
+  - `compare_survival_models` — fits all four distributions and returns AIC-ranked list
+
+- **Market basket analysis module** (`market_basket.py`) — three functions:
+  - `encode_transactions` — convert list-of-lists to binary transaction matrix
+  - `frequent_itemsets` — Apriori itemset mining (support threshold, max_length)
+  - `association_rules` — confidence + lift rules from frequent itemsets
+
+- **Spatial statistics module** (`spatial_stats.py`) — six functions:
+  - `morans_i` — global spatial autocorrelation with z-score and p-value under normality
+  - `compute_variogram` — experimental semivariance by lag distance bins
+  - `fit_variogram` — scipy `curve_fit` for spherical, exponential, Gaussian models
+  - `variogram_spherical`, `variogram_exponential`, `variogram_gaussian` — model callables
+
+- **Time series additions** (`time_series.py`):
+  - `mean_absolute_scaled_error` — MASE: scale-independent forecast accuracy
+  - `exponential_smoothing` — simple SES (level only), α ∈ (0, 1]
+  - `double_exponential_smoothing` — Holt's method (level + trend)
+  - `rolling_statistics` — rolling mean, std, min, max, expanding mean
+  - `detect_change_points` — binary segmentation; returns break indices + segment means
+
+- **Hypothesis testing additions** (`hypothesis_testing.py`):
+  - `one_way_anova` — one-way ANOVA with η² effect size
+  - `chi_square_independence` — chi-square test with Cramér's V
+
+- Visualisations in `plots.py`: `plot_survival_curve`, `plot_variogram`, `plot_correlation_matrix`.
+
+- 30 new tests for causal inference, 22 for survival, 23 for market basket, 31 for spatial stats, 37 for time-series additions, 34 for hypothesis-testing additions.
+
+- Example scripts: `examples/causal_inference_demo.py`, `examples/survival_demo.py`, `examples/market_basket_demo.py`.
+
+### Stats
+
+- 703 tests total at end of v0.4.0 (prior to explained-wrappers work in v0.4.1).
+
+---
+
 ## [0.3.2] - 2026-03-21
 
 ### Fixed

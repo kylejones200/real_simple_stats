@@ -1,4 +1,4 @@
-# Self-Explaining Results
+# Self-Explaining Results — All Seven Tests
 
 Most statistics libraries hand you a number and walk away. A learner who runs a
 t-test gets `t` and `p` — and is stranded at the exact spot where statistics
@@ -130,3 +130,120 @@ Two visualizations in `plots.py` exist to *teach a concept*, not decorate data:
   rate, not any single interval.
 
 Run `python examples/explained_t_test_demo.py` to see all of it together.
+
+---
+
+## All seven explained functions
+
+| Function | Test | `result.plot()` shows |
+|---|---|---|
+| `one_sample_t_test_explained` | One-sample t-test | p-value as shaded tail area under H₀ distribution |
+| `one_way_anova_explained` | One-way ANOVA | Box plots of each group with grand mean overlay |
+| `chi_square_independence_explained` | Chi-square independence | Observed vs. expected count bar chart |
+| `difference_in_differences_explained` | Difference-in-differences | 2×2 DiD line diagram with counterfactual |
+| `kaplan_meier_explained` | Kaplan-Meier survival | Step-function curve with Greenwood CI |
+| `morans_i_explained` | Moran's I spatial autocorrelation | Spatial scatter coloured by value |
+| `detect_change_points_explained` | Binary segmentation change points | Time series with break lines and segment means |
+
+### When to use explained vs. raw
+
+**Use `_explained`** when:
+- You are teaching, presenting, or writing a report
+- You are working in a Jupyter notebook and want the `_repr_markdown_()` rendering
+- You want the misconception guard printed alongside the result (the **WHAT THIS DOES NOT MEAN** section)
+- You are exploring unfamiliar data and want concrete next-step suggestions
+
+**Use the raw function** when:
+- You are inside a pipeline and only need the numeric output
+- You are running thousands of permutations or bootstrap iterations (the narrative adds no value in a loop)
+- You have already understood the test and just want the dict
+
+```python
+# Pipeline (raw)
+results = [rss.one_way_anova(g1, g2, g3) for g1, g2, g3 in group_triples]
+p_values = [r["p_value"] for r in results]
+
+# Teaching / exploration (explained)
+result = rss.one_way_anova_explained(control, treatment_a, treatment_b)
+print(result)       # full narrative
+result.plot()       # box plots
+result.f_stat       # still works as data
+```
+
+---
+
+## Second canonical example: one_way_anova_explained
+
+The ANOVA case shows the pattern when the result carries both a "which groups differ?" ambiguity and an effect size that tells you *how much* of the variance the grouping explains.
+
+```python
+import real_simple_stats as rss
+import numpy as np
+
+rng = np.random.default_rng(0)
+control  = rng.normal(50, 8, 40)
+dose_low = rng.normal(56, 8, 40)
+dose_hi  = rng.normal(65, 8, 40)
+
+result = rss.one_way_anova_explained(control, dose_low, dose_hi)
+print(result)
+```
+
+Output:
+
+```
+=== One-Way ANOVA ===
+
+QUESTION
+  Do any of these 3 groups have a meaningfully different mean, or are the
+  observed differences just random sampling variation?
+
+RESULT
+  f_stat                108.2
+  p_value               < 0.0001
+  df_between            2
+  df_within             117
+  eta_squared           0.6493
+  reject_null           yes
+  n_groups              3
+  n_total               120
+  decision              Reject H₀
+
+WHAT THE TEST IS DOING
+  ANOVA answers 'is the signal bigger than the noise?' by partitioning total
+  variance into two buckets. Between-group variance measures how much the 3
+  group means deviate from the grand mean — the signal. Within-group variance
+  measures how much individuals scatter inside their own group — the noise.
+  The F statistic is their ratio: F = between / within. Here
+  F(2, 117) = 108.2, giving p < 0.0001. η² (0.6493) is the fraction of
+  total variance explained by group membership.
+
+ASSUMPTIONS
+  ANOVA requires (1) independent observations, (2) approximately normal
+  distributions within each group — the CLT provides some robustness with
+  n=120 total — and (3) roughly equal variances across groups
+  (homoscedasticity). Unequal variances inflate the Type I error rate;
+  Welch's ANOVA is more robust when variances differ.
+
+INTERPRETATION
+  At α = 0.05, the omnibus F-test is significant (p < 0.0001). We reject the
+  null that all 3 means are equal. Group means: Group 1 (n=40): 50.0, Group 2
+  (n=40): 56.3, Group 3 (n=40): 65.2. η² = 0.649 (large effect): group
+  membership explains 64.9% of the outcome variance.
+
+WHAT THIS DOES *NOT* MEAN
+  • A significant F only says *some* group differs — not which ones. You need
+    post-hoc tests to identify the specific contrasts.
+  • η² benchmarks (Cohen 1988): 0.01 small, 0.06 medium, 0.14 large. Your
+    η² = 0.649 is large. With large samples even trivial differences reach
+    significance.
+  • ANOVA compares means only. Two groups can have equal means but very
+    different spreads or shapes — always look at the distributions.
+
+NEXT STEPS
+  → Run post-hoc pairwise tests (Tukey's HSD or Bonferroni correction) to
+    find which specific group pairs differ.
+  → Verify equal variance: the largest group SD should not exceed ~2× the
+    smallest.
+  → Call result.plot() to see box plots of each group.
+```
