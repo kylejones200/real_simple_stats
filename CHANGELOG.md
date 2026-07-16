@@ -5,7 +5,12 @@ All notable changes to Real Simple Stats will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.1] - 2026-06-19
+## [0.4.1] - 2026-07-16
+
+### Fixed
+
+- **Packaging**: explicit setuptools package discovery (`include = ["real_simple_stats*"]`) — the top-level `app/` directory (React web app) broke flat-layout auto-discovery, making the package unbuildable and failing CI since 2026-06-19. `app/` is excluded from wheels and sdists.
+- **Publish workflow**: repaired the never-exercised PyPI pipeline — deprecated `actions/upload-artifact@v3`/`download-artifact@v3` bumped to v4, and the quality gate now matches `ci.yml` policy (Python 3.12 per `.python-version`, blocking pytest, non-blocking ruff/mypy; the old matrix installed on Python 3.8–3.11, which `requires-python >=3.12` made impossible).
 
 ### Added
 

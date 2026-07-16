@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "real_simple_stats"
-version = "0.3.2"
+version = "0.4.1"
 description = "Educational Python statistics library covering basic through advanced statistical concepts"
 authors = [
     { name = "Kyle Jones", email = "kylejones@american.edu" }
@@ -57,6 +57,9 @@ Repository = "https://github.com/kylejones200/real_simple_stats.git"
 
 [project.scripts]
 rss-calc = "real_simple_stats.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["real_simple_stats*"]
 
 [tool.black]
 line-length = 88
