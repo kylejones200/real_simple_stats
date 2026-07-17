@@ -66,7 +66,7 @@ def encode_transactions(
     n_tx = len(basket_sets)
     n_items = len(items)
 
-    matrix = np.zeros((n_tx, n_items), dtype=bool)
+    matrix: np.ndarray = np.zeros((n_tx, n_items), dtype=bool)
     for row, basket in enumerate(basket_sets):
         for item in basket:
             matrix[row, item_idx[item]] = True
@@ -141,11 +141,11 @@ def frequent_itemsets(
                 new_frequent.append(fs)
         prev_frequent = new_frequent
 
-    result = [
+    result: list[dict[str, Any]] = [
         {"itemset": itemset, "support": sup}
         for itemset, sup in supports.items()
     ]
-    result.sort(key=lambda r: r["support"], reverse=True)
+    result.sort(key=lambda r: float(r["support"]), reverse=True)
     return result
 
 

@@ -176,9 +176,9 @@ def morans_i(
         >>> r["moran_i"] > 0  # expect positive autocorrelation
         True
     """
-    x_ = np.asarray(x, dtype=float)
-    y_ = np.asarray(y, dtype=float)
-    v = np.asarray(values, dtype=float)
+    x_: np.ndarray = np.asarray(x, dtype=float)
+    y_: np.ndarray = np.asarray(y, dtype=float)
+    v: np.ndarray = np.asarray(values, dtype=float)
     n = len(v)
     if not (len(x_) == len(y_) == n):
         raise ValueError("x, y, and values must have the same length.")
@@ -207,13 +207,12 @@ def morans_i(
     if denominator == 0:
         raise ValueError("All values are identical; Moran's I is undefined.")
 
-    I = (n / W_sum) * (numerator / denominator)
+    moran_I = (n / W_sum) * (numerator / denominator)
     E_I = -1.0 / (n - 1)
 
     # Variance under normality assumption (Moran 1950)
     S1 = 0.5 * float(np.sum((W + W.T) ** 2))
     S2 = float(np.sum((W.sum(axis=1) + W.sum(axis=0)) ** 2))
-    n2 = n * n
     m2 = float(np.sum(z**2)) / n
     m4 = float(np.sum(z**4)) / n
     b2 = m4 / (m2**2) if m2 > 0 else 0.0
@@ -223,19 +222,19 @@ def morans_i(
     C = (n - 1) * (n - 2) * (n - 3) * W_sum**2
     var_I = max((A - B) / C - E_I**2, 1e-12)
 
-    z_score = (I - E_I) / math.sqrt(var_I)
+    z_score = (moran_I - E_I) / math.sqrt(var_I)
     from scipy.stats import norm as _norm
     p_value = float(2 * _norm.sf(abs(z_score)))
 
-    if I > 0.1:
+    if moran_I > 0.1:
         interp = "Positive spatial autocorrelation — similar values cluster together."
-    elif I < -0.1:
+    elif moran_I < -0.1:
         interp = "Negative spatial autocorrelation — dissimilar values are neighbours."
     else:
         interp = "No strong spatial autocorrelation detected."
 
     return {
-        "moran_i": float(I),
+        "moran_i": float(moran_I),
         "expected_i": float(E_I),
         "variance_i": float(var_I),
         "z_score": float(z_score),
@@ -285,9 +284,9 @@ def compute_variogram(
         >>> len(r["lags"]) == 10
         True
     """
-    x_ = np.asarray(x, dtype=float)
-    y_ = np.asarray(y, dtype=float)
-    v = np.asarray(values, dtype=float)
+    x_: np.ndarray = np.asarray(x, dtype=float)
+    y_: np.ndarray = np.asarray(y, dtype=float)
+    v: np.ndarray = np.asarray(values, dtype=float)
     n = len(v)
     if not (len(x_) == len(y_) == n):
         raise ValueError("x, y, and values must have the same length.")
@@ -311,7 +310,7 @@ def compute_variogram(
     lag_centers = (bins[:-1] + bins[1:]) / 2.0
 
     gamma = np.zeros(n_lags)
-    n_pairs = np.zeros(n_lags, dtype=int)
+    n_pairs: np.ndarray = np.zeros(n_lags, dtype=int)
 
     for i in range(n_lags):
         mask = (distances >= bins[i]) & (distances < bins[i + 1])
@@ -374,8 +373,8 @@ def fit_variogram(
             f"Unknown model {model!r}. Choose from: {', '.join(_VARIOGRAM_MODELS)}."
         )
 
-    h = np.asarray(lags, dtype=float)
-    g = np.asarray(gamma, dtype=float)
+    h: np.ndarray = np.asarray(lags, dtype=float)
+    g: np.ndarray = np.asarray(gamma, dtype=float)
 
     # Use only bins that have pairs (non-zero bins)
     valid = g > 0

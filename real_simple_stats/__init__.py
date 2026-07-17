@@ -35,6 +35,9 @@ except PackageNotFoundError:  # When running from source without installed metad
 from .assumptions import *  # noqa: F403, F401, E402
 from .bayesian_stats import *  # noqa: F403, F401
 from .binomial_distributions import *  # noqa: F403, F401
+
+# Methods from Python for Business Analytics
+from .causal_inference import *  # noqa: F403, F401
 from .chi_square_utils import *  # noqa: F403, F401
 from .descriptive_statistics import *  # noqa: F403, F401
 from .effect_sizes import *  # noqa: F403, F401
@@ -42,6 +45,7 @@ from .explain import *  # noqa: F403, F401
 from .glossary import GLOSSARY, lookup  # noqa: F401
 from .hypothesis_testing import *  # noqa: F403, F401
 from .linear_regression_utils import *  # noqa: F403, F401
+from .market_basket import *  # noqa: F403, F401
 from .monte_carlo import *  # noqa: F403, F401
 from .multivariate import *  # noqa: F403, F401
 from .normal_distributions import *  # noqa: F403, F401
@@ -51,13 +55,9 @@ from .probability_distributions import *  # noqa: F403, F401
 from .probability_utils import *  # noqa: F403, F401
 from .resampling import *  # noqa: F403, F401
 from .sampling_and_intervals import *  # noqa: F403, F401
+from .spatial_stats import *  # noqa: F403, F401
+from .survival import *  # noqa: F403, F401
 
 # Advanced statistical methods (new in v0.3.0)
 from .time_series import *  # noqa: F403, F401
 from .verbose_stats import *  # noqa: F403, F401
-
-# Methods from Python for Business Analytics
-from .causal_inference import *  # noqa: F403, F401
-from .market_basket import *  # noqa: F403, F401
-from .spatial_stats import *  # noqa: F403, F401
-from .survival import *  # noqa: F403, F401

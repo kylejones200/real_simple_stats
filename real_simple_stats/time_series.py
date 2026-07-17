@@ -4,6 +4,8 @@ This module provides functions for analyzing time series data including
 moving averages, autocorrelation, and trend analysis.
 """
 
+from collections.abc import Sequence
+
 import numpy as np
 from scipy import stats
 
@@ -455,11 +457,11 @@ def double_exponential_smoothing(
     for i in range(1, n):
         x = float(data[i])
         l_prev, b_prev = level[-1], trend[-1]
-        l = alpha * x + (1.0 - alpha) * (l_prev + b_prev)
-        b = beta * (l - l_prev) + (1.0 - beta) * b_prev
-        level.append(l)
+        lvl = alpha * x + (1.0 - alpha) * (l_prev + b_prev)
+        b = beta * (lvl - l_prev) + (1.0 - beta) * b_prev
+        level.append(lvl)
         trend.append(b)
-        smoothed.append(l)
+        smoothed.append(lvl)
 
     return {"smoothed": smoothed, "level": level, "trend": trend}
 
@@ -524,7 +526,7 @@ def rolling_statistics(
 
 
 def detect_change_points(
-    data: list[float],
+    data: Sequence[float],
     n_breaks: int = 1,
     min_size: int = 5,
 ) -> dict[str, list]:

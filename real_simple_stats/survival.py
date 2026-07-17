@@ -24,8 +24,10 @@ from scipy.stats import (
     expon,
     fisk,
     lognorm,
-    norm as norm_dist,
     weibull_min,
+)
+from scipy.stats import (
+    norm as norm_dist,
 )
 
 __all__ = [
@@ -83,8 +85,8 @@ def kaplan_meier(
         >>> r["n_events"]
         6
     """
-    t = np.asarray(durations, dtype=float)
-    e = np.asarray(event_observed, dtype=int)
+    t: np.ndarray = np.asarray(durations, dtype=float)
+    e: np.ndarray = np.asarray(event_observed, dtype=int)
     n = len(t)
     if len(e) != n:
         raise ValueError("durations and event_observed must have the same length.")
@@ -189,8 +191,8 @@ def fit_parametric_survival(
             f"Choose from: {', '.join(_DISTRIBUTIONS)}."
         )
 
-    t = np.asarray(durations, dtype=float)
-    e = np.asarray(event_observed, dtype=int)
+    t: np.ndarray = np.asarray(durations, dtype=float)
+    e: np.ndarray = np.asarray(event_observed, dtype=int)
     t_obs = t[e == 1]
 
     if len(t_obs) < 3:
