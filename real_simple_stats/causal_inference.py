@@ -19,7 +19,6 @@ from typing import Any
 
 import numpy as np
 from scipy.optimize import minimize
-from scipy.stats import norm as norm_dist
 from scipy.stats import t as t_dist
 
 __all__ = [
@@ -39,7 +38,7 @@ def _ols(
     X: np.ndarray, y: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, float]:
     """OLS via lstsq. Returns (beta, se, sigma)."""
-    n, k = X.shape
+    n, k = int(X.shape[0]), int(X.shape[1])
     beta, _, _, _ = np.linalg.lstsq(X, y, rcond=None)
     resid = y - X @ beta
     df = max(n - k, 1)
@@ -97,9 +96,9 @@ def difference_in_differences(
         >>> round(r["did_estimate"], 1)
         5.0
     """
-    y = np.asarray(outcome, dtype=float)
-    post_ = np.asarray(post, dtype=float)
-    treated_ = np.asarray(treated, dtype=float)
+    y: np.ndarray = np.asarray(outcome, dtype=float)
+    post_: np.ndarray = np.asarray(post, dtype=float)
+    treated_: np.ndarray = np.asarray(treated, dtype=float)
     n = len(y)
     if not (len(post_) == len(treated_) == n):
         raise ValueError("outcome, post, and treated must have the same length.")
@@ -179,8 +178,8 @@ def regression_discontinuity(
         >>> 2.0 < r["effect"] < 4.0
         True
     """
-    y = np.asarray(outcome, dtype=float)
-    x = np.asarray(running_var, dtype=float)
+    y: np.ndarray = np.asarray(outcome, dtype=float)
+    x: np.ndarray = np.asarray(running_var, dtype=float)
     n_all = len(y)
     if len(x) != n_all:
         raise ValueError("outcome and running_var must have the same length.")
@@ -278,8 +277,8 @@ def synthetic_control(
         >>> r["ate_post"] > 1.0
         True
     """
-    y = np.asarray(y_treated, dtype=float)
-    Y = np.asarray(Y_controls, dtype=float)
+    y: np.ndarray = np.asarray(y_treated, dtype=float)
+    Y: np.ndarray = np.asarray(Y_controls, dtype=float)
     T = len(y)
     if Y.ndim == 1:
         Y = Y.reshape(T, 1)
@@ -365,12 +364,12 @@ def panel_fixed_effects(
         >>> abs(r["coefficients"][0] - 2.0) < 0.5
         True
     """
-    y = np.asarray(outcome, dtype=float)
-    X = np.asarray(predictors, dtype=float)
+    y: np.ndarray = np.asarray(outcome, dtype=float)
+    X: np.ndarray = np.asarray(predictors, dtype=float)
     if X.ndim == 1:
         X = X.reshape(-1, 1)
     entities = np.asarray(entity)
-    n, k = X.shape
+    n, k = int(X.shape[0]), int(X.shape[1])
 
     if not (len(y) == n == len(entities)):
         raise ValueError(

@@ -9,7 +9,6 @@ from real_simple_stats.market_basket import (
     frequent_itemsets,
 )
 
-
 # ---------------------------------------------------------------------------
 # encode_transactions
 # ---------------------------------------------------------------------------
@@ -31,10 +30,10 @@ class TestEncodeTransactions:
         baskets = [["A", "B"], ["B", "C"]]
         mat, items = encode_transactions(baskets)
         idx = {item: i for i, item in enumerate(items)}
-        assert mat[0, idx["A"]] == True
-        assert mat[0, idx["B"]] == True
-        assert mat[0, idx["C"]] == False
-        assert mat[1, idx["A"]] == False
+        assert mat[0, idx["A"]]
+        assert mat[0, idx["B"]]
+        assert not mat[0, idx["C"]]
+        assert not mat[1, idx["A"]]
 
     def test_duplicates_within_basket_ignored(self):
         baskets = [["A", "A", "B"]]
@@ -150,7 +149,6 @@ class TestAssociationRules:
             assert r["confidence"] >= threshold - 1e-9
 
     def test_lift_filter(self):
-        rules = self._make_rules(min_confidence=0.3)
         rules_lift = association_rules(
             [{"itemset": frozenset(["A", "B"]), "support": 0.4},
              {"itemset": frozenset(["A"]), "support": 0.5},

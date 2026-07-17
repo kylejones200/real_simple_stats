@@ -10,7 +10,6 @@ from real_simple_stats.causal_inference import (
     synthetic_control,
 )
 
-
 # ---------------------------------------------------------------------------
 # Difference-in-Differences
 # ---------------------------------------------------------------------------

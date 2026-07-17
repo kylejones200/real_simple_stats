@@ -124,7 +124,7 @@ def one_way_anova(
     """
     if len(groups) < 2:
         raise ValueError("Need at least 2 groups.")
-    arrays = [np.asarray(g, dtype=float) for g in groups]
+    arrays: list[np.ndarray] = [np.asarray(g, dtype=float) for g in groups]
     for i, a in enumerate(arrays):
         if len(a) < 2:
             raise ValueError(f"Group {i} has fewer than 2 observations.")
@@ -202,7 +202,7 @@ def chi_square_independence(
         >>> 0 <= r["cramers_v"] <= 1
         True
     """
-    obs = np.asarray(observed, dtype=float)
+    obs: np.ndarray = np.asarray(observed, dtype=float)
     if obs.ndim != 2 or obs.shape[0] < 2 or obs.shape[1] < 2:
         raise ValueError("observed must be a 2-D array with at least 2 rows and 2 columns.")
 

@@ -531,9 +531,9 @@ def one_way_anova_explained(
     alpha:
         Significance threshold (default 0.05).
     """
-    import numpy as np
 
-    from .hypothesis_testing import one_way_anova
+    # mypy false positive: the __init__ star-import cycle hides this name (it exists)
+    from .hypothesis_testing import one_way_anova  # type: ignore[attr-defined]
 
     r = one_way_anova(*groups, alpha=alpha)
     n_groups = r["n_groups"]
@@ -594,7 +594,7 @@ def one_way_anova_explained(
     }
 
     caveats = [
-        f"A significant F only says *some* group differs — not which ones. "
+        "A significant F only says *some* group differs — not which ones. "
         "You need post-hoc tests to identify the specific contrasts.",
         f"η² benchmarks (Cohen 1988): 0.01 small, 0.06 medium, 0.14 large. "
         f"Your η² = {eta2:.3f} is {_eta2_label(eta2)}. "
@@ -644,7 +644,7 @@ def one_way_anova_explained(
         else:
             fig = ax.figure
         labels = [f"Group {i + 1}\n(n={_group_ns[i]})" for i in range(_n_groups)]
-        bp = ax.boxplot(
+        ax.boxplot(
             [a.tolist() for a in _arrays],
             tick_labels=labels,
             patch_artist=True,
@@ -711,9 +711,11 @@ def chi_square_independence_explained(
     alpha:
         Significance threshold (default 0.05).
     """
-    import numpy as np
 
-    from .hypothesis_testing import chi_square_independence
+    # mypy false positive: the __init__ star-import cycle hides this name (it exists)
+    from .hypothesis_testing import (  # type: ignore[attr-defined]
+        chi_square_independence,
+    )
 
     r = chi_square_independence(observed, alpha=alpha)
     chi2 = r["chi2"]
@@ -833,7 +835,6 @@ def chi_square_independence_explained(
         else:
             fig = ax.figure
 
-        x = _np_array(list(range(_n_rows * _n_cols)))
         width = 0.4
         pos = _np_array(list(range(_n_rows * _n_cols)), dtype=float)
         obs_flat = _obs.flatten()
@@ -900,7 +901,6 @@ def difference_in_differences_explained(
     alpha:
         Significance threshold (default 0.05).
     """
-    import numpy as np
 
     from .causal_inference import difference_in_differences
 
@@ -986,7 +986,7 @@ def difference_in_differences_explained(
         "The confidence interval captures statistical uncertainty about β₃ — it "
         "does NOT capture violations of parallel trends, which are the bigger "
         "threat to validity.",
-        f"DiD identifies the *Average Treatment Effect on the Treated* (ATT). "
+        "DiD identifies the *Average Treatment Effect on the Treated* (ATT). "
         "It does not tell you what would happen if a different population were "
         "treated, or what the dose-response looks like.",
     ]
@@ -1219,12 +1219,11 @@ def morans_i_explained(
         If given, only pairs within this distance are neighbours.
         None uses all pairs.
     """
-    import numpy as np
 
     from .spatial_stats import morans_i
 
     r = morans_i(x, y, values, distance_threshold=distance_threshold)
-    I = r["moran_i"]
+    moran_I = r["moran_i"]
     E_I = r["expected_i"]
     z = r["z_score"]
     p = r["p_value"]
@@ -1251,28 +1250,28 @@ def morans_i_explained(
         "— a checkerboard dispersion pattern. "
         f"Under the null hypothesis of spatial randomness, E[I] = −1/(n−1) = "
         f"{E_I:.4f} (approximately 0). "
-        f"Here I = {I:.4f}, z = {z:.3f}, p = {_fmt_p(p)}."
+        f"Here I = {moran_I:.4f}, z = {z:.3f}, p = {_fmt_p(p)}."
     )
 
     if significant:
-        if I > E_I:
+        if moran_I > E_I:
             interpretation = (
                 f"p = {_fmt_p(p)}: the spatial pattern is significantly clustered "
-                f"(I = {I:.4f} > E[I] = {E_I:.4f}). "
+                f"(I = {moran_I:.4f} > E[I] = {E_I:.4f}). "
                 "Similar values are closer to each other than chance would predict. "
                 f"{interp}"
             )
         else:
             interpretation = (
                 f"p = {_fmt_p(p)}: the spatial pattern shows significant dispersion "
-                f"(I = {I:.4f} < E[I] = {E_I:.4f}). "
+                f"(I = {moran_I:.4f} < E[I] = {E_I:.4f}). "
                 "Dissimilar values tend to be neighbours more than chance predicts. "
                 f"{interp}"
             )
     else:
         interpretation = (
             f"p = {_fmt_p(p)}: no significant departure from spatial randomness "
-            f"(I = {I:.4f}, E[I] = {E_I:.4f}). "
+            f"(I = {moran_I:.4f}, E[I] = {E_I:.4f}). "
             "The data are consistent with values being randomly distributed "
             "across space. This does NOT mean no spatial structure exists — "
             "global Moran's I may miss local clusters."
@@ -1308,7 +1307,7 @@ def morans_i_explained(
         "Compute a variogram to characterise how spatial autocorrelation "
         "decays with distance — see compute_variogram() and fit_variogram().",
     ]
-    if significant and I > E_I:
+    if significant and moran_I > E_I:
         next_steps_list.append(
             "Investigate local cluster structure with LISA statistics "
             "(Anselin's local Moran's I) to find hotspot and coldspot regions."
@@ -1322,7 +1321,7 @@ def morans_i_explained(
     _x = _np_array(x)
     _y_coord = _np_array(y)
     _vals = _np_array(values)
-    _I = I
+    _I = moran_I
     _p_str = _fmt_p(p)
 
     def _plot(**kwargs: Any) -> Any:
@@ -1351,7 +1350,7 @@ def morans_i_explained(
         title="Moran's I — Global Spatial Autocorrelation",
         question=question,
         values={
-            "moran_i": I,
+            "moran_i": moran_I,
             "expected_i": E_I,
             "z_score": z,
             "p_value": p,
@@ -1392,7 +1391,6 @@ def detect_change_points_explained(
     min_size:
         Minimum segment length on either side of a break (default 5).
     """
-    import numpy as np
 
     from .time_series import detect_change_points
 

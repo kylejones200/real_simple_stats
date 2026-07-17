@@ -12,7 +12,6 @@ from real_simple_stats.spatial_stats import (
     variogram_spherical,
 )
 
-
 # ---------------------------------------------------------------------------
 # Variogram model functions
 # ---------------------------------------------------------------------------
