@@ -13,4 +13,5 @@ pub mod regression;
 pub mod resample;
 pub mod rng;
 pub mod simulate;
+pub mod spatial;
 pub mod special;

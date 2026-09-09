@@ -153,7 +153,8 @@ def fit_parametric_survival(
     Returns:
         dict with keys:
             distribution: Name of the fitted distribution.
-            params: Fitted scipy distribution parameters (shape, loc, scale, …).
+            params: Fitted parameters as (shape, loc, scale), or (loc, scale)
+                for the exponential. Location is always 0.
             aic: Akaike Information Criterion (lower = better fit).
             bic: Bayesian Information Criterion.
             n_fit: Number of observed events used in the fit.

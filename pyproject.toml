@@ -4,15 +4,15 @@ build-backend = "maturin"
 
 [project]
 name = "real_simple_stats"
-version = "0.4.1"
-description = "Educational Python statistics library covering basic through advanced statistical concepts"
+version = "0.5.0"
+description = "Educational Python statistics library with a native Rust backend - no NumPy or SciPy required"
 authors = [
     { name = "Kyle Jones", email = "kylejones@american.edu" }
 ]
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT"}
-keywords = ["statistics", "education", "probability", "hypothesis-testing", "regression", "data-analysis"]
+keywords = ["statistics", "education", "probability", "hypothesis-testing", "regression", "data-analysis", "rust"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Education",
@@ -21,13 +21,12 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Education"
+    "Topic :: Education",
+    "Programming Language :: Rust"
 ]
-dependencies = [
-    "numpy>=1.20.0",
-    "scipy>=1.7.0",
-    "matplotlib>=3.3.0"
-]
+# No runtime dependencies. All numerics live in the bundled Rust extension
+# (real_simple_stats._rss); plotting is optional and pulls in matplotlib.
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
@@ -53,7 +52,11 @@ docs = [
     "nbsphinx"
 ]
 plots = [
-    "plotsmith>=0.2.0"
+    "matplotlib>=3.3.0",
+    "plotsmith>=0.2.0",
+]
+pandas = [
+    "pandas>=1.3.0",
 ]
 
 [project.urls]

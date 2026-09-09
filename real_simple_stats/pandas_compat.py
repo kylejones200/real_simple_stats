@@ -117,7 +117,7 @@ def five_number_summary(data: Union[Sequence[float], "pd.Series"]) -> dict:
 def one_sample_t_test(data: Union[Sequence[float], "pd.Series"], mu: float) -> tuple:
     """Perform one-sample t-test, accepting pandas Series.
 
-    Delegates to hypothesis_testing.t_score and scipy.stats for the p-value.
+    Delegates to hypothesis_testing.t_score and the native backend for the p-value.
     """
     from . import _rss
 
@@ -140,7 +140,7 @@ def two_sample_t_test(
 ) -> tuple:
     """Perform two-sample t-test, accepting pandas Series.
 
-    Delegates to scipy.stats.ttest_ind for independent samples.
+    Delegates to the native two-sample t test for independent samples.
     """
     from . import _rss
 

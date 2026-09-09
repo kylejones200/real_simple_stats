@@ -7,6 +7,7 @@ use rss_core::fit as ft;
 use rss_core::linalg as la;
 use rss_core::rng as rrng;
 use rss_core::simulate as sim;
+use rss_core::spatial as sp2;
 use rss_core::optimize as opt;
 use rss_core::regression as reg;
 use rss_core::resample as rsmp;
@@ -388,7 +389,9 @@ fn linregress(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>) -> PyR
 fn ols(rows: usize, cols: usize, data: Vec<f64>, y: Vec<f64>)
     -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, f64, f64, f64, f64, Vec<f64>)> {
     let f = reg::ols(&mat(rows, cols, data)?, &y).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err("OLS requires more rows than columns")
+        pyo3::exceptions::PyValueError::new_err(
+            "OLS requires at least as many rows as columns",
+        )
     })?;
     Ok((f.coefficients, f.std_errors, f.t_values, f.p_values, f.residuals,
         f.r_squared, f.adj_r_squared, f.df_resid, f.sigma2, f.cov))
@@ -630,6 +633,26 @@ fn fit_survival(py: Python<'_>, name: &str, data: &Bound<'_, PyAny>) -> PyResult
     Ok((r.shape.unwrap_or(f64::NAN), r.scale, r.log_likelihood))
 }
 
+#[pyfunction]
+#[pyo3(signature = (x, y, values, threshold=None))]
+fn morans_i(x: Vec<f64>, y: Vec<f64>, values: Vec<f64>, threshold: Option<f64>)
+    -> PyResult<(f64, f64, f64, f64, f64)> {
+    match sp2::morans_i(&x, &y, &values, threshold) {
+        Ok(r) => Ok((r.moran_i, r.expected_i, r.variance_i, r.z_score, r.p_value)),
+        Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e)),
+    }
+}
+
+#[pyfunction]
+#[pyo3(signature = (x, y, values, n_lags, max_lag=None))]
+fn variogram(x: Vec<f64>, y: Vec<f64>, values: Vec<f64>, n_lags: usize, max_lag: Option<f64>)
+    -> PyResult<(Vec<f64>, Vec<f64>, Vec<usize>, f64, f64)> {
+    match sp2::variogram(&x, &y, &values, n_lags, max_lag) {
+        Ok(r) => Ok((r.lags, r.gamma, r.n_pairs, r.max_lag, r.total_variance)),
+        Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e)),
+    }
+}
+
 #[pymodule]
 fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ln_gamma, m)?)?;
@@ -749,5 +772,7 @@ fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(gbm_paths, m)?)?;
     m.add_function(wrap_pyfunction!(uniform_box, m)?)?;
     m.add_function(wrap_pyfunction!(fit_survival, m)?)?;
+    m.add_function(wrap_pyfunction!(morans_i, m)?)?;
+    m.add_function(wrap_pyfunction!(variogram, m)?)?;
     Ok(())
 }

@@ -6,8 +6,9 @@ moving averages, autocorrelation, and trend analysis.
 
 from collections.abc import Sequence
 
-import numpy as np
-from scipy import stats
+import math
+
+from . import _rss
 
 
 def moving_average(
@@ -68,13 +69,14 @@ def _exponential_moving_average(data: list[float], window_size: int) -> list[flo
 
 def _weighted_moving_average(data: list[float], window_size: int) -> list[float]:
     """Calculate weighted moving average (WMA)."""
-    weights = np.arange(1, window_size + 1)
-    weights = weights / weights.sum()
+    raw_weights = list(range(1, window_size + 1))
+    total = sum(raw_weights)
+    weights = [w / total for w in raw_weights]
 
     result = []
     for i in range(len(data) - window_size + 1):
         window = data[i : i + window_size]
-        result.append(np.dot(window, weights))
+        result.append(sum(v * w for v, w in zip(window, weights)))
 
     return result
 
@@ -106,9 +108,9 @@ def autocorrelation(data: list[float], max_lag: int = None) -> list[float]:
     elif max_lag < 0 or max_lag >= len(data):
         raise ValueError(f"max_lag must be between 0 and {len(data) - 1}")
 
-    data_array = np.array(data)
-    mean = np.mean(data_array)
-    var = np.var(data_array)
+    data_array = [float(v) for v in data]
+    mean = _rss.mean(data_array)
+    var = _rss.variance(data_array, 0)
 
     if var == 0:
         return [1.0] + [0.0] * max_lag
@@ -118,7 +120,10 @@ def autocorrelation(data: list[float], max_lag: int = None) -> list[float]:
         if lag == 0:
             acf.append(1.0)
         else:
-            numerator = np.sum((data_array[:-lag] - mean) * (data_array[lag:] - mean))
+            numerator = sum(
+                (a - mean) * (b - mean)
+                for a, b in zip(data_array[:-lag], data_array[lag:])
+            )
             denominator = len(data_array) * var
             acf.append(numerator / denominator)
 
@@ -192,10 +197,10 @@ def linear_trend(data: list[float]) -> tuple[float, float, float]:
     if len(data) < 2:
         raise ValueError("Data must contain at least 2 values")
 
-    x = np.arange(len(data))
-    y = np.array(data)
+    x = [float(i) for i in range(len(data))]
+    y = [float(v) for v in data]
 
-    slope, intercept, r_value, _, _ = stats.linregress(x, y)
+    slope, intercept, r_value, _p, _se, _ise = _rss.linregress(x, y)
     r_squared = r_value**2
 
     return float(slope), float(intercept), float(r_squared)
@@ -225,12 +230,10 @@ def detrend(data: list[float], method: str = "linear") -> list[float]:
 
     if method == "linear":
         slope, intercept, _ = linear_trend(data)
-        x = np.arange(len(data))
-        trend = slope * x + intercept
-        return (np.array(data) - trend).tolist()
+        return [float(v) - (slope * i + intercept) for i, v in enumerate(data)]
     elif method == "mean":
-        mean = np.mean(data)
-        return (np.array(data) - mean).tolist()
+        mean = _rss.mean(data)
+        return [float(v) - mean for v in data]
     else:
         raise ValueError(f"Unknown method: {method}")
 
@@ -267,32 +270,33 @@ def seasonal_decompose(
 
     for i in range(len(data)):
         if i < half_period or i >= len(data) - half_period:
-            trend.append(np.nan)
+            trend.append(math.nan)
         else:
             window = data[i - half_period : i + half_period + 1]
-            trend.append(np.mean(window))
+            trend.append(_rss.mean(window))
 
-    # Calculate seasonal component
-    detrended = np.array(data) - np.array(trend)
-    seasonal_avg = np.zeros(period)
+    # Seasonal component: average the detrended values within each phase,
+    # skipping the NaN pads at either end of the trend.
+    detrended = [float(v) - t for v, t in zip(data, trend)]
+    seasonal_avg = [0.0] * period
 
     for i in range(period):
         season_values = [
             detrended[j]
             for j in range(i, len(data), period)
-            if not np.isnan(detrended[j])
+            if not math.isnan(detrended[j])
         ]
         if season_values:
-            seasonal_avg[i] = np.mean(season_values)
+            seasonal_avg[i] = _rss.mean(season_values)
 
-    # Center seasonal component
-    seasonal_avg -= np.mean(seasonal_avg)
+    # Center the seasonal component so it sums to zero.
+    offset = _rss.mean(seasonal_avg)
+    seasonal_avg = [v - offset for v in seasonal_avg]
 
-    # Repeat seasonal pattern
     seasonal = [seasonal_avg[i % period] for i in range(len(data))]
-
-    # Calculate residual
-    residual = (np.array(data) - np.array(trend) - np.array(seasonal)).tolist()
+    residual = [
+        float(v) - t - s_i for v, t, s_i in zip(data, trend, seasonal)
+    ]
 
     return trend, seasonal, residual
 
@@ -362,15 +366,15 @@ def mean_absolute_scaled_error(
         >>> mean_absolute_scaled_error(actual, forecast)
         0.0
     """
-    a = np.asarray(actual, dtype=float)
-    f = np.asarray(forecast, dtype=float)
+    a = [float(v) for v in actual]
+    f = [float(v) for v in forecast]
     if len(a) != len(f):
         raise ValueError("actual and forecast must have the same length.")
     if len(a) < 2:
         raise ValueError("Need at least 2 observations.")
 
-    mae_forecast = float(np.mean(np.abs(a - f)))
-    mae_naive = float(np.mean(np.abs(np.diff(a))))
+    mae_forecast = _rss.mean([abs(ai - fi) for ai, fi in zip(a, f)])
+    mae_naive = _rss.mean([abs(b - x) for x, b in zip(a, a[1:])])
     if mae_naive == 0:
         return 0.0 if mae_forecast == 0 else float("inf")
     return mae_forecast / mae_naive
@@ -501,7 +505,7 @@ def rolling_statistics(
     if len(data) == 0:
         raise ValueError("data must not be empty.")
 
-    x = np.asarray(data, dtype=float)
+    x = [float(v) for v in data]
     n = len(x)
     roll_mean, roll_std, roll_min, roll_max, exp_mean = [], [], [], [], []
 
@@ -509,10 +513,10 @@ def rolling_statistics(
     for i in range(n):
         lo = max(0, i - window + 1)
         window_vals = x[lo : i + 1]
-        roll_mean.append(float(window_vals.mean()))
-        roll_std.append(float(window_vals.std(ddof=1)) if len(window_vals) > 1 else 0.0)
-        roll_min.append(float(window_vals.min()))
-        roll_max.append(float(window_vals.max()))
+        roll_mean.append(_rss.mean(window_vals))
+        roll_std.append(_rss.std_dev(window_vals, 1) if len(window_vals) > 1 else 0.0)
+        roll_min.append(min(window_vals))
+        roll_max.append(max(window_vals))
         running_sum += x[i]
         exp_mean.append(running_sum / (i + 1))
 
@@ -560,7 +564,7 @@ def detect_change_points(
         >>> r["change_points"]
         [20]
     """
-    x = np.asarray(data, dtype=float)
+    x = [float(v) for v in data]
     n = len(x)
     if n < 2 * min_size:
         raise ValueError(
@@ -568,16 +572,16 @@ def detect_change_points(
             f"Need at least {2 * min_size} observations."
         )
 
-    def _best_split(seg: np.ndarray) -> tuple[int, float]:
+    def _best_split(seg: list[float]) -> tuple[int, float]:
         """Return the best split index within seg and its variance reduction."""
         m = len(seg)
-        best_idx, best_gain = min_size, -np.inf
-        total_var = float(np.var(seg, ddof=0) * m)
+        best_idx, best_gain = min_size, -math.inf
+        total_var = _rss.variance(seg, 0) * m
         for k in range(min_size, m - min_size + 1):
             left, right = seg[:k], seg[k:]
             reduced = (
-                float(np.var(left, ddof=0) * len(left))
-                + float(np.var(right, ddof=0) * len(right))
+                _rss.variance(left, 0) * len(left)
+                + _rss.variance(right, 0) * len(right)
             )
             gain = total_var - reduced
             if gain > best_gain:
@@ -615,7 +619,7 @@ def detect_change_points(
     # Segment means
     boundaries = [0] + change_points + [n]
     segment_means = [
-        float(x[boundaries[i] : boundaries[i + 1]].mean())
+        _rss.mean(x[boundaries[i] : boundaries[i + 1]])
         for i in range(len(boundaries) - 1)
     ]
 

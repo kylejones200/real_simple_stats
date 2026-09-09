@@ -154,12 +154,12 @@ class TestSyntheticControl:
     def test_weights_sum_to_one(self):
         y, Y_ctrl, n_pre = self._make_data()
         r = synthetic_control(y, Y_ctrl, n_pre=n_pre)
-        assert r["weights"].sum() == pytest.approx(1.0, abs=1e-6)
+        assert sum(r["weights"]) == pytest.approx(1.0, abs=1e-6)
 
     def test_weights_non_negative(self):
         y, Y_ctrl, n_pre = self._make_data()
         r = synthetic_control(y, Y_ctrl, n_pre=n_pre)
-        assert np.all(r["weights"] >= -1e-9)
+        assert all(w >= -1e-9 for w in r["weights"])
 
     def test_pre_rmse_small_with_good_donors(self):
         rng = np.random.default_rng(0)

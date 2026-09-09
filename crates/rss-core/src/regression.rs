@@ -90,7 +90,9 @@ pub struct OlsFit {
 pub fn ols(x: &Matrix, y: &[f64]) -> Option<OlsFit> {
     let n = x.rows;
     let k = x.cols;
-    if y.len() != n || n <= k {
+    // n == k is permitted: the fit is exact (zero residual) and the degrees of
+    // freedom are floored at 1 below, matching numpy.linalg.lstsq behaviour.
+    if y.len() != n || n < k {
         return None;
     }
     let beta = lstsq(x, y)?;
@@ -106,7 +108,7 @@ pub fn ols(x: &Matrix, y: &[f64]) -> Option<OlsFit> {
     let ss_res: f64 = resid.iter().map(|r| r * r).sum();
     let my = ds::mean(y);
     let ss_tot: f64 = y.iter().map(|v| (v - my) * (v - my)).sum();
-    let df = (n - k) as f64;
+    let df = ((n - k) as f64).max(1.0);
     let sigma2 = ss_res / df;
 
     // cov(beta) = sigma^2 (X'X)^-1, via pinv so rank-deficient designs degrade
