@@ -3,34 +3,40 @@ mod arr;
 use arr::{with_slice, with_two_slices, Arr};
 use pyo3::prelude::*;
 use rss_core::descriptive as ds;
+use rss_core::dist as d;
 use rss_core::fit as ft;
 use rss_core::linalg as la;
-use rss_core::rng as rrng;
-use rss_core::simulate as sim;
-use rss_core::spatial as sp2;
+use rss_core::noncentral as nc;
 use rss_core::optimize as opt;
 use rss_core::regression as reg;
 use rss_core::resample as rsmp;
-use rss_core::dist as d;
-use rss_core::noncentral as nc;
+use rss_core::rng as rrng;
+use rss_core::simulate as sim;
+use rss_core::spatial as sp2;
 use rss_core::special as sp;
 
 macro_rules! wrap1 {
     ($name:ident, $path:path) => {
         #[pyfunction]
-        fn $name(x: f64) -> f64 { $path(x) }
+        fn $name(x: f64) -> f64 {
+            $path(x)
+        }
     };
 }
 macro_rules! wrap2 {
     ($name:ident, $path:path) => {
         #[pyfunction]
-        fn $name(a: f64, b: f64) -> f64 { $path(a, b) }
+        fn $name(a: f64, b: f64) -> f64 {
+            $path(a, b)
+        }
     };
 }
 macro_rules! wrap3 {
     ($name:ident, $path:path) => {
         #[pyfunction]
-        fn $name(a: f64, b: f64, c: f64) -> f64 { $path(a, b, c) }
+        fn $name(a: f64, b: f64, c: f64) -> f64 {
+            $path(a, b, c)
+        }
     };
 }
 
@@ -50,123 +56,238 @@ wrap3!(betainc, sp::betainc);
 wrap3!(betaincinv, sp::betaincinv);
 
 #[pyfunction]
-fn normal_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::normal_pdf(a0, a1, a2) }
+fn normal_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::normal_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn normal_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::normal_cdf(a0, a1, a2) }
+fn normal_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::normal_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn normal_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::normal_sf(a0, a1, a2) }
+fn normal_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::normal_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn normal_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::normal_ppf(a0, a1, a2) }
+fn normal_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::normal_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn t_pdf(a0: f64, a1: f64) -> f64 { d::t_pdf(a0, a1) }
+fn t_pdf(a0: f64, a1: f64) -> f64 {
+    d::t_pdf(a0, a1)
+}
 #[pyfunction]
-fn t_cdf(a0: f64, a1: f64) -> f64 { d::t_cdf(a0, a1) }
+fn t_cdf(a0: f64, a1: f64) -> f64 {
+    d::t_cdf(a0, a1)
+}
 #[pyfunction]
-fn t_sf(a0: f64, a1: f64) -> f64 { d::t_sf(a0, a1) }
+fn t_sf(a0: f64, a1: f64) -> f64 {
+    d::t_sf(a0, a1)
+}
 #[pyfunction]
-fn t_ppf(a0: f64, a1: f64) -> f64 { d::t_ppf(a0, a1) }
+fn t_ppf(a0: f64, a1: f64) -> f64 {
+    d::t_ppf(a0, a1)
+}
 #[pyfunction]
-fn chi2_pdf(a0: f64, a1: f64) -> f64 { d::chi2_pdf(a0, a1) }
+fn chi2_pdf(a0: f64, a1: f64) -> f64 {
+    d::chi2_pdf(a0, a1)
+}
 #[pyfunction]
-fn chi2_cdf(a0: f64, a1: f64) -> f64 { d::chi2_cdf(a0, a1) }
+fn chi2_cdf(a0: f64, a1: f64) -> f64 {
+    d::chi2_cdf(a0, a1)
+}
 #[pyfunction]
-fn chi2_sf(a0: f64, a1: f64) -> f64 { d::chi2_sf(a0, a1) }
+fn chi2_sf(a0: f64, a1: f64) -> f64 {
+    d::chi2_sf(a0, a1)
+}
 #[pyfunction]
-fn chi2_ppf(a0: f64, a1: f64) -> f64 { d::chi2_ppf(a0, a1) }
+fn chi2_ppf(a0: f64, a1: f64) -> f64 {
+    d::chi2_ppf(a0, a1)
+}
 #[pyfunction]
-fn chi2_isf(a0: f64, a1: f64) -> f64 { d::chi2_isf(a0, a1) }
+fn chi2_isf(a0: f64, a1: f64) -> f64 {
+    d::chi2_isf(a0, a1)
+}
 #[pyfunction]
-fn f_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::f_pdf(a0, a1, a2) }
+fn f_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::f_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn f_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::f_cdf(a0, a1, a2) }
+fn f_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::f_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn f_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::f_sf(a0, a1, a2) }
+fn f_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::f_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn f_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::f_ppf(a0, a1, a2) }
+fn f_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::f_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn gamma_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::gamma_pdf(a0, a1, a2) }
+fn gamma_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::gamma_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn gamma_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::gamma_cdf(a0, a1, a2) }
+fn gamma_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::gamma_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn gamma_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::gamma_sf(a0, a1, a2) }
+fn gamma_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::gamma_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn gamma_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::gamma_ppf(a0, a1, a2) }
+fn gamma_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::gamma_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn beta_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::beta_pdf(a0, a1, a2) }
+fn beta_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::beta_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn beta_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::beta_cdf(a0, a1, a2) }
+fn beta_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::beta_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn beta_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::beta_sf(a0, a1, a2) }
+fn beta_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::beta_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn beta_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::beta_ppf(a0, a1, a2) }
+fn beta_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::beta_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn expon_pdf(a0: f64, a1: f64) -> f64 { d::expon_pdf(a0, a1) }
+fn expon_pdf(a0: f64, a1: f64) -> f64 {
+    d::expon_pdf(a0, a1)
+}
 #[pyfunction]
-fn expon_cdf(a0: f64, a1: f64) -> f64 { d::expon_cdf(a0, a1) }
+fn expon_cdf(a0: f64, a1: f64) -> f64 {
+    d::expon_cdf(a0, a1)
+}
 #[pyfunction]
-fn expon_sf(a0: f64, a1: f64) -> f64 { d::expon_sf(a0, a1) }
+fn expon_sf(a0: f64, a1: f64) -> f64 {
+    d::expon_sf(a0, a1)
+}
 #[pyfunction]
-fn expon_ppf(a0: f64, a1: f64) -> f64 { d::expon_ppf(a0, a1) }
+fn expon_ppf(a0: f64, a1: f64) -> f64 {
+    d::expon_ppf(a0, a1)
+}
 #[pyfunction]
-fn lognorm_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::lognorm_pdf(a0, a1, a2) }
+fn lognorm_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::lognorm_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn lognorm_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::lognorm_cdf(a0, a1, a2) }
+fn lognorm_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::lognorm_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn lognorm_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::lognorm_sf(a0, a1, a2) }
+fn lognorm_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::lognorm_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn lognorm_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::lognorm_ppf(a0, a1, a2) }
+fn lognorm_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::lognorm_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn weibull_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::weibull_pdf(a0, a1, a2) }
+fn weibull_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::weibull_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn weibull_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::weibull_cdf(a0, a1, a2) }
+fn weibull_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::weibull_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn weibull_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::weibull_sf(a0, a1, a2) }
+fn weibull_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::weibull_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn weibull_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::weibull_ppf(a0, a1, a2) }
+fn weibull_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::weibull_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn fisk_pdf(a0: f64, a1: f64, a2: f64) -> f64 { d::fisk_pdf(a0, a1, a2) }
+fn fisk_pdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::fisk_pdf(a0, a1, a2)
+}
 #[pyfunction]
-fn fisk_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::fisk_cdf(a0, a1, a2) }
+fn fisk_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::fisk_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn fisk_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::fisk_sf(a0, a1, a2) }
+fn fisk_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::fisk_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn fisk_ppf(a0: f64, a1: f64, a2: f64) -> f64 { d::fisk_ppf(a0, a1, a2) }
+fn fisk_ppf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::fisk_ppf(a0, a1, a2)
+}
 #[pyfunction]
-fn binom_pmf(a0: f64, a1: f64, a2: f64) -> f64 { d::binom_pmf(a0, a1, a2) }
+fn binom_pmf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::binom_pmf(a0, a1, a2)
+}
 #[pyfunction]
-fn binom_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::binom_cdf(a0, a1, a2) }
+fn binom_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::binom_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn binom_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::binom_sf(a0, a1, a2) }
+fn binom_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::binom_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn poisson_pmf(a0: f64, a1: f64) -> f64 { d::poisson_pmf(a0, a1) }
+fn poisson_pmf(a0: f64, a1: f64) -> f64 {
+    d::poisson_pmf(a0, a1)
+}
 #[pyfunction]
-fn poisson_cdf(a0: f64, a1: f64) -> f64 { d::poisson_cdf(a0, a1) }
+fn poisson_cdf(a0: f64, a1: f64) -> f64 {
+    d::poisson_cdf(a0, a1)
+}
 #[pyfunction]
-fn poisson_sf(a0: f64, a1: f64) -> f64 { d::poisson_sf(a0, a1) }
+fn poisson_sf(a0: f64, a1: f64) -> f64 {
+    d::poisson_sf(a0, a1)
+}
 #[pyfunction]
-fn geom_pmf(a0: f64, a1: f64) -> f64 { d::geom_pmf(a0, a1) }
+fn geom_pmf(a0: f64, a1: f64) -> f64 {
+    d::geom_pmf(a0, a1)
+}
 #[pyfunction]
-fn geom_cdf(a0: f64, a1: f64) -> f64 { d::geom_cdf(a0, a1) }
+fn geom_cdf(a0: f64, a1: f64) -> f64 {
+    d::geom_cdf(a0, a1)
+}
 #[pyfunction]
-fn geom_sf(a0: f64, a1: f64) -> f64 { d::geom_sf(a0, a1) }
+fn geom_sf(a0: f64, a1: f64) -> f64 {
+    d::geom_sf(a0, a1)
+}
 #[pyfunction]
-fn nbinom_pmf(a0: f64, a1: f64, a2: f64) -> f64 { d::nbinom_pmf(a0, a1, a2) }
+fn nbinom_pmf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::nbinom_pmf(a0, a1, a2)
+}
 #[pyfunction]
-fn nbinom_cdf(a0: f64, a1: f64, a2: f64) -> f64 { d::nbinom_cdf(a0, a1, a2) }
+fn nbinom_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::nbinom_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn nbinom_sf(a0: f64, a1: f64, a2: f64) -> f64 { d::nbinom_sf(a0, a1, a2) }
+fn nbinom_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    d::nbinom_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn nct_cdf(a0: f64, a1: f64, a2: f64) -> f64 { nc::nct_cdf(a0, a1, a2) }
+fn nct_cdf(a0: f64, a1: f64, a2: f64) -> f64 {
+    nc::nct_cdf(a0, a1, a2)
+}
 #[pyfunction]
-fn nct_sf(a0: f64, a1: f64, a2: f64) -> f64 { nc::nct_sf(a0, a1, a2) }
+fn nct_sf(a0: f64, a1: f64, a2: f64) -> f64 {
+    nc::nct_sf(a0, a1, a2)
+}
 #[pyfunction]
-fn ncf_cdf(a0: f64, a1: f64, a2: f64, a3: f64) -> f64 { nc::ncf_cdf(a0, a1, a2, a3) }
+fn ncf_cdf(a0: f64, a1: f64, a2: f64, a3: f64) -> f64 {
+    nc::ncf_cdf(a0, a1, a2, a3)
+}
 #[pyfunction]
-fn ncf_sf(a0: f64, a1: f64, a2: f64, a3: f64) -> f64 { nc::ncf_sf(a0, a1, a2, a3) }
+fn ncf_sf(a0: f64, a1: f64, a2: f64, a3: f64) -> f64 {
+    nc::ncf_sf(a0, a1, a2, a3)
+}
 
 #[pyfunction]
-fn shapiro_wilk(data: Vec<f64>) -> (f64, f64) { nc::shapiro_wilk(&data) }
-
+fn shapiro_wilk(data: Vec<f64>) -> (f64, f64) {
+    nc::shapiro_wilk(&data)
+}
 
 // ------------------------------------------------------- descriptive stats --
 
@@ -208,12 +329,19 @@ fn quantile(py: Python<'_>, x: &Bound<'_, PyAny>, q: f64) -> PyResult<f64> {
 fn quantiles(py: Python<'_>, x: &Bound<'_, PyAny>, qs: Vec<f64>) -> PyResult<Vec<f64>> {
     with_slice(py, x, |s| {
         let sorted = ds::sorted_copy(s);
-        qs.iter().map(|&q| ds::quantile_linear_sorted(&sorted, q)).collect()
+        qs.iter()
+            .map(|&q| ds::quantile_linear_sorted(&sorted, q))
+            .collect()
     })
 }
 #[pyfunction]
-fn five_number_summary(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<Option<(f64, f64, f64, f64, f64)>> {
-    with_slice(py, x, |s| ds::five_number_summary(s).map(|f| (f.min, f.q1, f.median, f.q3, f.max)))
+fn five_number_summary(
+    py: Python<'_>,
+    x: &Bound<'_, PyAny>,
+) -> PyResult<Option<(f64, f64, f64, f64, f64)>> {
+    with_slice(py, x, |s| {
+        ds::five_number_summary(s).map(|f| (f.min, f.q1, f.median, f.q3, f.max))
+    })
 }
 #[pyfunction]
 fn skewness(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
@@ -233,7 +361,12 @@ fn sorted_copy(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<Vec<f64>> {
 }
 #[pyfunction]
 #[pyo3(signature = (x, y, ddof=1))]
-fn covariance(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>, ddof: usize) -> PyResult<f64> {
+fn covariance(
+    py: Python<'_>,
+    x: &Bound<'_, PyAny>,
+    y: &Bound<'_, PyAny>,
+    ddof: usize,
+) -> PyResult<f64> {
     with_two_slices(py, x, y, |a, b| ds::covariance(a, b, ddof))
 }
 #[pyfunction]
@@ -246,7 +379,6 @@ fn pearson_r(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>) -> PyRe
 fn is_zero_copy(x: &Bound<'_, PyAny>) -> PyResult<bool> {
     Ok(Arr::from_py(x)?.is_zero_copy())
 }
-
 
 // ------------------------------------------------------------- resampling --
 
@@ -313,9 +445,10 @@ fn permutation_pvalue(
     observed: f64,
     alternative: &str,
 ) -> PyResult<f64> {
-    with_slice(py, dist, |s| rsmp::permutation_pvalue(s, observed, alternative))
+    with_slice(py, dist, |s| {
+        rsmp::permutation_pvalue(s, observed, alternative)
+    })
 }
-
 
 // -------------------------------------------------- linalg / regression ----
 
@@ -332,16 +465,30 @@ fn singular() -> PyErr {
 
 #[pyfunction]
 fn mat_inv(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<Vec<f64>> {
-    la::inv(&mat(rows, cols, data)?).map(|m| m.data).ok_or_else(singular)
+    la::inv(&mat(rows, cols, data)?)
+        .map(|m| m.data)
+        .ok_or_else(singular)
 }
 #[pyfunction]
 #[pyo3(signature = (rows, cols, data, rcond=1e-15))]
-fn mat_pinv(rows: usize, cols: usize, data: Vec<f64>, rcond: f64) -> PyResult<(usize, usize, Vec<f64>)> {
+fn mat_pinv(
+    rows: usize,
+    cols: usize,
+    data: Vec<f64>,
+    rcond: f64,
+) -> PyResult<(usize, usize, Vec<f64>)> {
     let m = la::pinv(&mat(rows, cols, data)?, rcond);
     Ok((m.rows, m.cols, m.data))
 }
 #[pyfunction]
-fn mat_matmul(ar: usize, ac: usize, a: Vec<f64>, br: usize, bc: usize, b: Vec<f64>) -> PyResult<(usize, usize, Vec<f64>)> {
+fn mat_matmul(
+    ar: usize,
+    ac: usize,
+    a: Vec<f64>,
+    br: usize,
+    bc: usize,
+    b: Vec<f64>,
+) -> PyResult<(usize, usize, Vec<f64>)> {
     let m = la::matmul(&mat(ar, ac, a)?, &mat(br, bc, b)?)
         .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("shape mismatch in matmul"))?;
     Ok((m.rows, m.cols, m.data))
@@ -358,13 +505,19 @@ fn mat_eigh(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<(Vec<f64>, Vec
     Ok((v, vecs.data))
 }
 #[pyfunction]
-fn mat_svd(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>, usize, usize, usize, usize)> {
+fn mat_svd(
+    rows: usize,
+    cols: usize,
+    data: Vec<f64>,
+) -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>, usize, usize, usize, usize)> {
     let (u, s, vt) = la::svd(&mat(rows, cols, data)?);
     Ok((u.data, s, vt.data, u.rows, u.cols, vt.rows, vt.cols))
 }
 #[pyfunction]
 fn mat_sqrtm_spd(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<Vec<f64>> {
-    la::sqrtm_spd(&mat(rows, cols, data)?).map(|m| m.data).ok_or_else(singular)
+    la::sqrtm_spd(&mat(rows, cols, data)?)
+        .map(|m| m.data)
+        .ok_or_else(singular)
 }
 #[pyfunction]
 #[pyo3(signature = (rows, cols, data, ddof=1))]
@@ -377,24 +530,59 @@ fn mat_corr(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<Vec<f64>> {
 }
 
 #[pyfunction]
-fn linregress(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>) -> PyResult<(f64, f64, f64, f64, f64, f64)> {
-    let r = with_two_slices(py, x, y, reg::linregress)?
-        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("linregress needs >= 2 distinct x values"))?;
-    Ok((r.slope, r.intercept, r.rvalue, r.pvalue, r.stderr, r.intercept_stderr))
+fn linregress(
+    py: Python<'_>,
+    x: &Bound<'_, PyAny>,
+    y: &Bound<'_, PyAny>,
+) -> PyResult<(f64, f64, f64, f64, f64, f64)> {
+    let r = with_two_slices(py, x, y, reg::linregress)?.ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err("linregress needs >= 2 distinct x values")
+    })?;
+    Ok((
+        r.slope,
+        r.intercept,
+        r.rvalue,
+        r.pvalue,
+        r.stderr,
+        r.intercept_stderr,
+    ))
 }
 
 /// OLS. Returns a flat tuple; the Python layer reshapes it into a dict.
 #[allow(clippy::type_complexity)]
 #[pyfunction]
-fn ols(rows: usize, cols: usize, data: Vec<f64>, y: Vec<f64>)
-    -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, f64, f64, f64, f64, Vec<f64>)> {
+fn ols(
+    rows: usize,
+    cols: usize,
+    data: Vec<f64>,
+    y: Vec<f64>,
+) -> PyResult<(
+    Vec<f64>,
+    Vec<f64>,
+    Vec<f64>,
+    Vec<f64>,
+    Vec<f64>,
+    f64,
+    f64,
+    f64,
+    f64,
+    Vec<f64>,
+)> {
     let f = reg::ols(&mat(rows, cols, data)?, &y).ok_or_else(|| {
-        pyo3::exceptions::PyValueError::new_err(
-            "OLS requires at least as many rows as columns",
-        )
+        pyo3::exceptions::PyValueError::new_err("OLS requires at least as many rows as columns")
     })?;
-    Ok((f.coefficients, f.std_errors, f.t_values, f.p_values, f.residuals,
-        f.r_squared, f.adj_r_squared, f.df_resid, f.sigma2, f.cov))
+    Ok((
+        f.coefficients,
+        f.std_errors,
+        f.t_values,
+        f.p_values,
+        f.residuals,
+        f.r_squared,
+        f.adj_r_squared,
+        f.df_resid,
+        f.sigma2,
+        f.cov,
+    ))
 }
 
 #[pyfunction]
@@ -403,7 +591,12 @@ fn ttest_1samp(py: Python<'_>, x: &Bound<'_, PyAny>, mu: f64) -> PyResult<(f64, 
 }
 #[pyfunction]
 #[pyo3(signature = (a, b, equal_var=true))]
-fn ttest_ind(py: Python<'_>, a: &Bound<'_, PyAny>, b: &Bound<'_, PyAny>, equal_var: bool) -> PyResult<(f64, f64)> {
+fn ttest_ind(
+    py: Python<'_>,
+    a: &Bound<'_, PyAny>,
+    b: &Bound<'_, PyAny>,
+    equal_var: bool,
+) -> PyResult<(f64, f64)> {
     let xa = Arr::from_py(a)?;
     let xb = Arr::from_py(b)?;
     Ok(reg::ttest_ind(xa.as_slice(py), xb.as_slice(py), equal_var))
@@ -418,8 +611,12 @@ fn f_oneway(groups: Vec<Vec<f64>>) -> (f64, f64) {
 }
 #[pyfunction]
 #[pyo3(signature = (rows, cols, data, correction=true))]
-fn chi2_contingency(rows: usize, cols: usize, data: Vec<f64>, correction: bool)
-    -> PyResult<(f64, f64, f64, Vec<f64>)> {
+fn chi2_contingency(
+    rows: usize,
+    cols: usize,
+    data: Vec<f64>,
+    correction: bool,
+) -> PyResult<(f64, f64, f64, Vec<f64>)> {
     Ok(reg::chi2_contingency(&mat(rows, cols, data)?, correction))
 }
 
@@ -427,7 +624,14 @@ fn chi2_contingency(rows: usize, cols: usize, data: Vec<f64>, correction: bool)
 
 #[pyfunction]
 #[pyo3(signature = (f, a, b, xtol=1e-12, max_iter=200))]
-fn brentq(py: Python<'_>, f: PyObject, a: f64, b: f64, xtol: f64, max_iter: usize) -> PyResult<f64> {
+fn brentq(
+    py: Python<'_>,
+    f: PyObject,
+    a: f64,
+    b: f64,
+    xtol: f64,
+    max_iter: usize,
+) -> PyResult<f64> {
     let mut err: Option<PyErr> = None;
     let root = opt::brentq(
         |x| match f.call1(py, (x,)).and_then(|v| v.extract::<f64>(py)) {
@@ -439,7 +643,10 @@ fn brentq(py: Python<'_>, f: PyObject, a: f64, b: f64, xtol: f64, max_iter: usiz
                 f64::NAN
             }
         },
-        a, b, xtol, max_iter,
+        a,
+        b,
+        xtol,
+        max_iter,
     );
     if let Some(e) = err {
         return Err(e);
@@ -453,39 +660,61 @@ fn brentq(py: Python<'_>, f: PyObject, a: f64, b: f64, xtol: f64, max_iter: usiz
 
 #[pyfunction]
 #[pyo3(signature = (f, p0, lower, upper, n_resid, max_iter=200))]
-fn curve_fit_lm(py: Python<'_>, f: PyObject, p0: Vec<f64>, lower: Vec<f64>, upper: Vec<f64>,
-                n_resid: usize, max_iter: usize) -> PyResult<Vec<f64>> {
+fn curve_fit_lm(
+    py: Python<'_>,
+    f: PyObject,
+    p0: Vec<f64>,
+    lower: Vec<f64>,
+    upper: Vec<f64>,
+    n_resid: usize,
+    max_iter: usize,
+) -> PyResult<Vec<f64>> {
     let mut err: Option<PyErr> = None;
     let out = opt::levenberg_marquardt(
-        |p: &[f64], out: &mut [f64]| {
-            match f.call1(py, (p.to_vec(),)).and_then(|v| v.extract::<Vec<f64>>(py)) {
-                Ok(v) if v.len() == out.len() => out.copy_from_slice(&v),
-                Ok(v) => {
-                    if err.is_none() {
-                        err = Some(pyo3::exceptions::PyValueError::new_err(format!(
-                            "residual function returned {} values, expected {}", v.len(), out.len()
-                        )));
-                    }
-                    out.fill(f64::NAN);
+        |p: &[f64], out: &mut [f64]| match f
+            .call1(py, (p.to_vec(),))
+            .and_then(|v| v.extract::<Vec<f64>>(py))
+        {
+            Ok(v) if v.len() == out.len() => out.copy_from_slice(&v),
+            Ok(v) => {
+                if err.is_none() {
+                    err = Some(pyo3::exceptions::PyValueError::new_err(format!(
+                        "residual function returned {} values, expected {}",
+                        v.len(),
+                        out.len()
+                    )));
                 }
-                Err(e) => {
-                    if err.is_none() { err = Some(e); }
-                    out.fill(f64::NAN);
+                out.fill(f64::NAN);
+            }
+            Err(e) => {
+                if err.is_none() {
+                    err = Some(e);
                 }
+                out.fill(f64::NAN);
             }
         },
-        &p0, &lower, &upper, n_resid, max_iter,
+        &p0,
+        &lower,
+        &upper,
+        n_resid,
+        max_iter,
     );
-    if let Some(e) = err { return Err(e); }
+    if let Some(e) = err {
+        return Err(e);
+    }
     Ok(out)
 }
 
 #[pyfunction]
 #[pyo3(signature = (y, columns, max_iter=20000, tol=1e-14))]
-fn simplex_least_squares(y: Vec<f64>, columns: Vec<Vec<f64>>, max_iter: usize, tol: f64) -> Vec<f64> {
+fn simplex_least_squares(
+    y: Vec<f64>,
+    columns: Vec<Vec<f64>>,
+    max_iter: usize,
+    tol: f64,
+) -> Vec<f64> {
     opt::simplex_least_squares(&y, &columns, max_iter, tol)
 }
-
 
 // ------------------------------------------------------------------- rng ---
 
@@ -597,12 +826,27 @@ impl PyRng {
 }
 
 #[pyfunction]
-fn gbm_paths(py: Python<'_>, s0: f64, mu: f64, sigma: f64, t: f64, n_steps: usize, n_sims: usize, seed: u64) -> Vec<f64> {
+fn gbm_paths(
+    py: Python<'_>,
+    s0: f64,
+    mu: f64,
+    sigma: f64,
+    t: f64,
+    n_steps: usize,
+    n_sims: usize,
+    seed: u64,
+) -> Vec<f64> {
     py.allow_threads(|| sim::gbm_paths(s0, mu, sigma, t, n_steps, n_sims, seed))
 }
 
 #[pyfunction]
-fn uniform_box(py: Python<'_>, lower: Vec<f64>, upper: Vec<f64>, n_samples: usize, seed: u64) -> Vec<f64> {
+fn uniform_box(
+    py: Python<'_>,
+    lower: Vec<f64>,
+    upper: Vec<f64>,
+    n_samples: usize,
+    seed: u64,
+) -> Vec<f64> {
     py.allow_threads(|| sim::uniform_box(&lower, &upper, n_samples, seed))
 }
 
@@ -635,8 +879,12 @@ fn fit_survival(py: Python<'_>, name: &str, data: &Bound<'_, PyAny>) -> PyResult
 
 #[pyfunction]
 #[pyo3(signature = (x, y, values, threshold=None))]
-fn morans_i(x: Vec<f64>, y: Vec<f64>, values: Vec<f64>, threshold: Option<f64>)
-    -> PyResult<(f64, f64, f64, f64, f64)> {
+fn morans_i(
+    x: Vec<f64>,
+    y: Vec<f64>,
+    values: Vec<f64>,
+    threshold: Option<f64>,
+) -> PyResult<(f64, f64, f64, f64, f64)> {
     match sp2::morans_i(&x, &y, &values, threshold) {
         Ok(r) => Ok((r.moran_i, r.expected_i, r.variance_i, r.z_score, r.p_value)),
         Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e)),
@@ -645,8 +893,13 @@ fn morans_i(x: Vec<f64>, y: Vec<f64>, values: Vec<f64>, threshold: Option<f64>)
 
 #[pyfunction]
 #[pyo3(signature = (x, y, values, n_lags, max_lag=None))]
-fn variogram(x: Vec<f64>, y: Vec<f64>, values: Vec<f64>, n_lags: usize, max_lag: Option<f64>)
-    -> PyResult<(Vec<f64>, Vec<f64>, Vec<usize>, f64, f64)> {
+fn variogram(
+    x: Vec<f64>,
+    y: Vec<f64>,
+    values: Vec<f64>,
+    n_lags: usize,
+    max_lag: Option<f64>,
+) -> PyResult<(Vec<f64>, Vec<f64>, Vec<usize>, f64, f64)> {
     match sp2::variogram(&x, &y, &values, n_lags, max_lag) {
         Ok(r) => Ok((r.lags, r.gamma, r.n_pairs, r.max_lag, r.total_variance)),
         Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e)),

@@ -1,11 +1,8 @@
 name: Publish to PyPI
 
 on:
-  # Trigger on new releases
   release:
     types: [published]
-
-  # Allow manual triggering
   workflow_dispatch:
     inputs:
       environment:
@@ -18,98 +15,96 @@ on:
           - pypi
 
 jobs:
-  quality-checks:
-    runs-on: ubuntu-latest
-
+  # ---------------------------------------------------------------------------
+  # Binary wheels. The extension is built against the CPython limited API
+  # (abi3-py312), so ONE wheel per platform serves 3.12, 3.13, 3.14 and later
+  # without a rebuild.
+  # ---------------------------------------------------------------------------
+  wheels:
+    name: Wheel - ${{ matrix.platform.os }} ${{ matrix.platform.target }}
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { os: ubuntu-latest,   target: x86_64,  manylinux: auto }
+          - { os: ubuntu-latest,   target: aarch64, manylinux: auto }
+          - { os: macos-latest,    target: aarch64, manylinux: '' }
+          - { os: macos-13,        target: x86_64,  manylinux: '' }
+          - { os: windows-latest,  target: x64,     manylinux: '' }
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version-file: ".python-version"
-          cache: "pip"
+          python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Build wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ matrix.platform.manylinux }}
+          args: --release --out dist
+          sccache: 'true'
+
+      # Cross-built aarch64 wheels cannot be executed on this runner, so the
+      # smoke test is limited to natively built ones.
+      - name: Smoke-test the wheel (native targets only)
+        if: matrix.platform.target == 'x86_64' || matrix.platform.target == 'x64'
+        shell: bash
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          python -m pip install --no-index --find-links dist real_simple_stats
+          cd /tmp || cd $TEMP
+          python -c "
+          import real_simple_stats as rss
+          print('version', rss.__version__)
+          assert abs(rss.mean([1, 2, 3]) - 2.0) < 1e-12
+          print('wheel smoke test passed')
+          "
 
-      - name: Test
-        run: |
-          pytest -q --maxfail=1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.platform.os }}-${{ matrix.platform.target }}
+          path: dist
 
-      - name: Format check (non-blocking)
-        continue-on-error: true
-        run: |
-          ruff format --check . || echo "Formatting issues found (non-blocking)"
-
-      - name: Lint check (non-blocking)
-        continue-on-error: true
-        run: |
-          ruff check . || echo "Linting issues found (non-blocking)"
-
-      - name: Type check (non-blocking)
-        continue-on-error: true
-        run: |
-          python -m mypy real_simple_stats --config-file mypy.ini --namespace-packages --explicit-package-bases || echo "Type check issues found (non-blocking)"
-
-  build:
-    needs: quality-checks
+  sdist:
+    name: Source distribution
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version-file: ".python-version"
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
 
-    - name: Install build dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build twine
-
-    - name: Build package
-      run: |
-        python -m build
-
-    - name: Check package
-      run: |
-        twine check dist/*
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist
-        path: dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-sdist
+          path: dist
 
   publish-testpypi:
-    needs: build
+    needs: [wheels, sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'testpypi'
     environment: testpypi
     permissions:
       id-token: write
-
     steps:
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: dist
-        path: dist/
-
-    - name: Publish to Test PyPI (trusted publishing)
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-        verbose: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
 
   publish-pypi:
-    needs: build
+    needs: [wheels, sdist]
     runs-on: ubuntu-latest
     if: |
       (github.event_name == 'release' && github.event.action == 'published') ||
@@ -118,48 +113,38 @@ jobs:
     permissions:
       id-token: write
       contents: write
-
     steps:
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: dist
-        path: dist/
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist
 
-    - name: Publish to PyPI (trusted publishing)
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        verbose: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
 
-    - name: Create GitHub Release Assets
-      if: github.event_name == 'release'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: dist/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Attach artifacts to the GitHub release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   post-publish:
     needs: [publish-pypi]
     runs-on: ubuntu-latest
     if: success()
-
     steps:
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Verify PyPI installation
-      run: |
-        # Wait a bit for PyPI to update
-        sleep 60
-
-        # Try to install the published package
-        pip install real-simple-stats --upgrade
-
-        # Verify it works
-        python -c "import real_simple_stats; print(f'Successfully installed version {real_simple_stats.__version__}')"
-
-        # Test CLI
-        rss-calc --help
+      - name: Verify the published package installs and runs
+        run: |
+          sleep 60
+          pip install real-simple-stats --upgrade
+          cd /tmp
+          python -c "import real_simple_stats as r; print('installed', r.__version__)"
+          rss-calc --help

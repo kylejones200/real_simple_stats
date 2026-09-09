@@ -21,7 +21,11 @@ pub fn fit_exponential(t: &[f64]) -> FitResult {
     let n = t.len() as f64;
     // sum ln f = -n ln(scale) - sum(t)/scale
     let ll = -n * scale.ln() - ds::sum(t) / scale;
-    FitResult { shape: None, scale, log_likelihood: ll }
+    FitResult {
+        shape: None,
+        scale,
+        log_likelihood: ll,
+    }
 }
 
 /// Lognormal MLE: normal MLE on log-durations (population sd, as SciPy uses).
@@ -32,10 +36,15 @@ pub fn fit_lognormal(t: &[f64]) -> FitResult {
     let n = t.len() as f64;
     // sum ln f = -sum ln(t) - n ln(s) - n/2 ln(2 pi) - sum((ln t - mu)^2)/(2 s^2)
     let ss: f64 = logs.iter().map(|l| (l - mu) * (l - mu)).sum();
-    let ll = -logs.iter().sum::<f64>() - n * s.ln()
+    let ll = -logs.iter().sum::<f64>()
+        - n * s.ln()
         - 0.5 * n * (2.0 * std::f64::consts::PI).ln()
         - ss / (2.0 * s * s);
-    FitResult { shape: Some(s), scale: mu.exp(), log_likelihood: ll }
+    FitResult {
+        shape: Some(s),
+        scale: mu.exp(),
+        log_likelihood: ll,
+    }
 }
 
 /// Weibull MLE. The shape solves
@@ -74,10 +83,13 @@ pub fn fit_weibull(t: &[f64]) -> FitResult {
     let scale = (t.iter().map(|v| v.powf(c)).sum::<f64>() / n).powf(1.0 / c);
 
     // sum ln f = n ln(c) - n c ln(scale) + (c-1) sum ln t - sum (t/scale)^c
-    let ll = n * c.ln() - n * c * scale.ln()
-        + (c - 1.0) * t.iter().map(|v| v.ln()).sum::<f64>()
+    let ll = n * c.ln() - n * c * scale.ln() + (c - 1.0) * t.iter().map(|v| v.ln()).sum::<f64>()
         - t.iter().map(|v| (v / scale).powf(c)).sum::<f64>();
-    FitResult { shape: Some(c), scale, log_likelihood: ll }
+    FitResult {
+        shape: Some(c),
+        scale,
+        log_likelihood: ll,
+    }
 }
 
 /// Log-logistic (Fisk) MLE.
@@ -115,5 +127,9 @@ pub fn fit_loglogistic(t: &[f64]) -> FitResult {
     let ll_logistic = -neg_ll(&[mu, s]);
     // Change of variables ln T = Y contributes -sum ln t to the density in t.
     let ll = ll_logistic - logs.iter().sum::<f64>();
-    FitResult { shape: Some(1.0 / s), scale: mu.exp(), log_likelihood: ll }
+    FitResult {
+        shape: Some(1.0 / s),
+        scale: mu.exp(),
+        log_likelihood: ll,
+    }
 }

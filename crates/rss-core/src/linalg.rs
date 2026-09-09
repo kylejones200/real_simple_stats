@@ -22,7 +22,11 @@ impl Matrix {
         Some(Matrix { rows, cols, data })
     }
     pub fn zeros(rows: usize, cols: usize) -> Matrix {
-        Matrix { rows, cols, data: vec![0.0; rows * cols] }
+        Matrix {
+            rows,
+            cols,
+            data: vec![0.0; rows * cols],
+        }
     }
     #[inline]
     pub fn at(&self, r: usize, c: usize) -> f64 {
@@ -135,14 +139,9 @@ pub fn lstsq(a: &Matrix, b: &[f64]) -> Option<Vec<f64>> {
     }
     // Rank-deficient or underdetermined: minimum-norm solution.
     let p = pinv(a, 1e-15);
-    let mut sol = vec![0.0; a.cols];
-    for i in 0..a.cols {
-        let mut acc = 0.0;
-        for j in 0..a.rows {
-            acc += p.at(i, j) * b[j];
-        }
-        sol[i] = acc;
-    }
+    let sol: Vec<f64> = (0..a.cols)
+        .map(|i| (0..a.rows).map(|j| p.at(i, j) * b[j]).sum())
+        .collect();
     Some(sol)
 }
 
@@ -181,8 +180,14 @@ pub fn eigh(a: &Matrix) -> Option<(Vec<f64>, Matrix)> {
 pub fn svd(a: &Matrix) -> (Matrix, Vec<f64>, Matrix) {
     let m = a.to_faer();
     let d = m.svd();
-    let s: Vec<f64> = (0..d.s_diagonal().nrows()).map(|i| d.s_diagonal()[i]).collect();
-    (Matrix::from_faer(d.u()), s, Matrix::from_faer(d.v().transpose()))
+    let s: Vec<f64> = (0..d.s_diagonal().nrows())
+        .map(|i| d.s_diagonal()[i])
+        .collect();
+    (
+        Matrix::from_faer(d.u()),
+        s,
+        Matrix::from_faer(d.v().transpose()),
+    )
 }
 
 /// Principal square root of a symmetric positive semi-definite matrix.
@@ -193,13 +198,18 @@ pub fn svd(a: &Matrix) -> (Matrix, Vec<f64>, Matrix) {
 pub fn sqrtm_spd(a: &Matrix) -> Option<Matrix> {
     let (vals, vecs) = eigh(a)?;
     let n = a.rows;
+    // V diag(sqrt(lambda)) V^T. Take the square roots once up front rather
+    // than n^2 times inside the accumulation. Negative eigenvalues are
+    // round-off on a semi-definite matrix, so they clamp to zero.
+    let roots: Vec<f64> = vals.iter().map(|v| v.max(0.0).sqrt()).collect();
     let mut out = Matrix::zeros(n, n);
     for i in 0..n {
         for j in 0..n {
-            let mut acc = 0.0;
-            for k in 0..n {
-                acc += vecs.at(i, k) * vals[k].max(0.0).sqrt() * vecs.at(j, k);
-            }
+            let acc = roots
+                .iter()
+                .enumerate()
+                .map(|(k, r)| vecs.at(i, k) * r * vecs.at(j, k))
+                .sum();
             out.set(i, j, acc);
         }
     }
@@ -237,7 +247,15 @@ pub fn corr_matrix(x: &Matrix) -> Matrix {
     for i in 0..p {
         for j in 0..p {
             let d = sd[i] * sd[j];
-            r.set(i, j, if d > 0.0 { (c.at(i, j) / d).clamp(-1.0, 1.0) } else { f64::NAN });
+            r.set(
+                i,
+                j,
+                if d > 0.0 {
+                    (c.at(i, j) / d).clamp(-1.0, 1.0)
+                } else {
+                    f64::NAN
+                },
+            );
         }
     }
     r

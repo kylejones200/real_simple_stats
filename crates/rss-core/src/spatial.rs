@@ -69,7 +69,12 @@ pub fn morans_i(
 
     let numerator: f64 = (0..n)
         .into_par_iter()
-        .map(|i| (0..n).filter(|&j| within(i, j)).map(|j| z[i] * z[j]).sum::<f64>())
+        .map(|i| {
+            (0..n)
+                .filter(|&j| within(i, j))
+                .map(|j| z[i] * z[j])
+                .sum::<f64>()
+        })
         .sum();
     let denominator: f64 = z.iter().map(|v| v * v).sum();
     if denominator == 0.0 {
@@ -188,7 +193,13 @@ pub fn variogram(
 
     let lags: Vec<f64> = (0..n_lags).map(|i| (i as f64 + 0.5) * width).collect();
     let gamma: Vec<f64> = (0..n_lags)
-        .map(|i| if counts[i] > 0 { 0.5 * sums[i] / counts[i] as f64 } else { 0.0 })
+        .map(|i| {
+            if counts[i] > 0 {
+                0.5 * sums[i] / counts[i] as f64
+            } else {
+                0.0
+            }
+        })
         .collect();
 
     Ok(VariogramResult {

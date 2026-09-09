@@ -181,14 +181,32 @@ pub fn five_number_summary(x: &[f64]) -> Option<FiveNumber> {
     let s = sorted_copy(x);
     if n == 1 {
         let v = s[0];
-        return Some(FiveNumber { min: v, q1: v, median: v, q3: v, max: v });
+        return Some(FiveNumber {
+            min: v,
+            q1: v,
+            median: v,
+            q3: v,
+            max: v,
+        });
     }
     let med = median_sorted(&s);
     if n == 2 {
-        return Some(FiveNumber { min: s[0], q1: s[0], median: med, q3: s[1], max: s[1] });
+        return Some(FiveNumber {
+            min: s[0],
+            q1: s[0],
+            median: med,
+            q3: s[1],
+            max: s[1],
+        });
     }
     if n == 3 {
-        return Some(FiveNumber { min: s[0], q1: s[0], median: med, q3: s[2], max: s[2] });
+        return Some(FiveNumber {
+            min: s[0],
+            q1: s[0],
+            median: med,
+            q3: s[2],
+            max: s[2],
+        });
     }
     let mid = n / 2;
     let lower = &s[..mid];

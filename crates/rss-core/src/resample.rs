@@ -71,8 +71,9 @@ pub fn median_inplace(buf: &mut [f64]) -> f64 {
 }
 
 fn select_nth(buf: &mut [f64], k: usize) -> &mut f64 {
-    let (_, nth, _) =
-        buf.select_nth_unstable_by(k, |a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let (_, nth, _) = buf.select_nth_unstable_by(k, |a, b| {
+        a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal)
+    });
     nth
 }
 
@@ -152,10 +153,7 @@ pub fn permutation_pvalue(dist: &[f64], observed: f64, alternative: &str) -> f64
     let count = match alternative {
         "greater" => dist.iter().filter(|&&v| v >= observed).count(),
         "less" => dist.iter().filter(|&&v| v <= observed).count(),
-        _ => dist
-            .iter()
-            .filter(|&&v| v.abs() >= observed.abs())
-            .count(),
+        _ => dist.iter().filter(|&&v| v.abs() >= observed.abs()).count(),
     } as f64;
     (count + 1.0) / (n + 1.0)
 }

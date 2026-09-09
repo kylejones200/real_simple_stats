@@ -97,14 +97,9 @@ pub fn ols(x: &Matrix, y: &[f64]) -> Option<OlsFit> {
     }
     let beta = lstsq(x, y)?;
 
-    let mut resid = vec![0.0; n];
-    for i in 0..n {
-        let mut fit = 0.0;
-        for j in 0..k {
-            fit += x.at(i, j) * beta[j];
-        }
-        resid[i] = y[i] - fit;
-    }
+    let resid: Vec<f64> = (0..n)
+        .map(|i| y[i] - (0..k).map(|j| x.at(i, j) * beta[j]).sum::<f64>())
+        .collect();
     let ss_res: f64 = resid.iter().map(|r| r * r).sum();
     let my = ds::mean(y);
     let ss_tot: f64 = y.iter().map(|v| (v - my) * (v - my)).sum();
@@ -126,7 +121,11 @@ pub fn ols(x: &Matrix, y: &[f64]) -> Option<OlsFit> {
             cov[a * k + b] = sigma2 * xtx_inv.at(a, b);
         }
         se[a] = cov[a * k + a].max(0.0).sqrt();
-        tv[a] = if se[a] > 0.0 { beta[a] / se[a] } else { f64::NAN };
+        tv[a] = if se[a] > 0.0 {
+            beta[a] / se[a]
+        } else {
+            f64::NAN
+        };
         pv[a] = if se[a] > 0.0 {
             2.0 * dist::t_sf(tv[a].abs(), df)
         } else {
@@ -134,7 +133,11 @@ pub fn ols(x: &Matrix, y: &[f64]) -> Option<OlsFit> {
         };
     }
 
-    let r2 = if ss_tot > 0.0 { 1.0 - ss_res / ss_tot } else { f64::NAN };
+    let r2 = if ss_tot > 0.0 {
+        1.0 - ss_res / ss_tot
+    } else {
+        f64::NAN
+    };
     let adj = if ss_tot > 0.0 && n > k {
         1.0 - (1.0 - r2) * (n as f64 - 1.0) / df
     } else {
@@ -187,8 +190,8 @@ pub fn ttest_ind(a: &[f64], b: &[f64], equal_var: bool) -> (f64, f64) {
     } else {
         // Welch-Satterthwaite degrees of freedom.
         let se2 = va / na + vb / nb;
-        let df = se2 * se2
-            / ((va / na) * (va / na) / (na - 1.0) + (vb / nb) * (vb / nb) / (nb - 1.0));
+        let df =
+            se2 * se2 / ((va / na) * (va / na) / (na - 1.0) + (vb / nb) * (vb / nb) / (nb - 1.0));
         ((ma - mb) / se2.sqrt(), df)
     };
     (t, 2.0 * dist::t_sf(t.abs(), df))
@@ -238,8 +241,12 @@ pub fn f_oneway(groups: &[Vec<f64>]) -> (f64, f64) {
 pub fn chi2_contingency(table: &Matrix, correction: bool) -> (f64, f64, f64, Vec<f64>) {
     let (r, c) = (table.rows, table.cols);
     let total: f64 = table.data.iter().sum();
-    let row_sums: Vec<f64> = (0..r).map(|i| (0..c).map(|j| table.at(i, j)).sum()).collect();
-    let col_sums: Vec<f64> = (0..c).map(|j| (0..r).map(|i| table.at(i, j)).sum()).collect();
+    let row_sums: Vec<f64> = (0..r)
+        .map(|i| (0..c).map(|j| table.at(i, j)).sum())
+        .collect();
+    let col_sums: Vec<f64> = (0..c)
+        .map(|j| (0..r).map(|i| table.at(i, j)).sum())
+        .collect();
 
     let mut expected = vec![0.0; r * c];
     let mut chi2 = 0.0;

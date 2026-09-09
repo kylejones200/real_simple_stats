@@ -372,7 +372,11 @@ where
     simplex.push(x0.to_vec());
     for i in 0..n {
         let mut v = x0.to_vec();
-        v[i] += if v[i].abs() > 1e-12 { step * v[i].abs() } else { step };
+        v[i] += if v[i].abs() > 1e-12 {
+            step * v[i].abs()
+        } else {
+            step
+        };
         simplex.push(v);
     }
     let mut fx: Vec<f64> = simplex.iter().map(|v| f(v)).collect();
@@ -380,7 +384,11 @@ where
     for _ in 0..max_iter {
         // Order vertices best -> worst.
         let mut idx: Vec<usize> = (0..=n).collect();
-        idx.sort_by(|&a, &b| fx[a].partial_cmp(&fx[b]).unwrap_or(std::cmp::Ordering::Equal));
+        idx.sort_by(|&a, &b| {
+            fx[a]
+                .partial_cmp(&fx[b])
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
         let simplex_sorted: Vec<Vec<f64>> = idx.iter().map(|&i| simplex[i].clone()).collect();
         let fx_sorted: Vec<f64> = idx.iter().map(|&i| fx[i]).collect();
         simplex = simplex_sorted;
@@ -398,13 +406,16 @@ where
             }
         }
 
-        let reflect: Vec<f64> = (0..n).map(|j| centroid[j] + (centroid[j] - simplex[n][j])).collect();
+        let reflect: Vec<f64> = (0..n)
+            .map(|j| centroid[j] + (centroid[j] - simplex[n][j]))
+            .collect();
         let f_reflect = f(&reflect);
 
         if f_reflect < fx[0] {
             // Expand.
-            let expand: Vec<f64> =
-                (0..n).map(|j| centroid[j] + 2.0 * (centroid[j] - simplex[n][j])).collect();
+            let expand: Vec<f64> = (0..n)
+                .map(|j| centroid[j] + 2.0 * (centroid[j] - simplex[n][j]))
+                .collect();
             let f_expand = f(&expand);
             if f_expand < f_reflect {
                 simplex[n] = expand;
@@ -418,17 +429,20 @@ where
             fx[n] = f_reflect;
         } else {
             // Contract.
-            let contract: Vec<f64> =
-                (0..n).map(|j| centroid[j] + 0.5 * (simplex[n][j] - centroid[j])).collect();
+            let contract: Vec<f64> = (0..n)
+                .map(|j| centroid[j] + 0.5 * (simplex[n][j] - centroid[j]))
+                .collect();
             let f_contract = f(&contract);
             if f_contract < fx[n] {
                 simplex[n] = contract;
                 fx[n] = f_contract;
             } else {
-                // Shrink toward the best vertex.
+                // Shrink toward the best vertex. `simplex[0]` is cloned first
+                // so the loop is not borrowing it while mutating `simplex[i]`.
+                let best = simplex[0].clone();
                 for i in 1..=n {
-                    for j in 0..n {
-                        simplex[i][j] = simplex[0][j] + 0.5 * (simplex[i][j] - simplex[0][j]);
+                    for (j, b) in best.iter().enumerate() {
+                        simplex[i][j] = b + 0.5 * (simplex[i][j] - b);
                     }
                     fx[i] = f(&simplex[i]);
                 }
@@ -437,7 +451,11 @@ where
     }
 
     let best = (0..=n)
-        .min_by(|&a, &b| fx[a].partial_cmp(&fx[b]).unwrap_or(std::cmp::Ordering::Equal))
+        .min_by(|&a, &b| {
+            fx[a]
+                .partial_cmp(&fx[b])
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
         .unwrap_or(0);
     simplex[best].clone()
 }

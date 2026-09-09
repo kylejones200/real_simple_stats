@@ -101,9 +101,13 @@ pub fn ncf_cdf(f: f64, dfn: f64, dfd: f64, nc: f64) -> f64 {
 
     // Outward from the mode in both directions until the weights stop mattering.
     for dir in [0i64, 1i64] {
-        let mut j = if dir == 0 { jmode as i64 } else { jmode as i64 - 1 };
+        let mut j = if dir == 0 {
+            jmode as i64
+        } else {
+            jmode as i64 - 1
+        };
         loop {
-            if j < 0 || j > 1_000_000 {
+            if !(0..=1_000_000).contains(&j) {
                 break;
             }
             let jf = j as f64;
@@ -170,13 +174,22 @@ pub fn shapiro_wilk(data: &[f64]) -> (f64, f64) {
         let rsn = 1.0 / nf.sqrt();
 
         // Royston's polynomial corrections for the one or two extreme weights.
-        let c1 = poly_asc(rsn, &[0.0, 0.221_157, -0.147_981, -2.071_190, 4.434_685, -2.706_056]);
+        let c1 = poly_asc(
+            rsn,
+            &[
+                0.0, 0.221_157, -0.147_981, -2.071_190, 4.434_685, -2.706_056,
+            ],
+        );
         let a0 = c1 - m[0] / ssumm2;
 
         let (i1, fac);
         if n > 5 {
-            let c2 =
-                poly_asc(rsn, &[0.0, 0.042_981, -0.293_762, -1.752_461, 5.682_633, -3.582_633]);
+            let c2 = poly_asc(
+                rsn,
+                &[
+                    0.0, 0.042_981, -0.293_762, -1.752_461, 5.682_633, -3.582_633,
+                ],
+            );
             let a1 = c2 - m[1] / ssumm2;
             fac = ((summ2 - 2.0 * m[0] * m[0] - 2.0 * m[1] * m[1])
                 / (1.0 - 2.0 * a0 * a0 - 2.0 * a1 * a1))
@@ -207,15 +220,15 @@ pub fn shapiro_wilk(data: &[f64]) -> (f64, f64) {
         (pi6 * (w.sqrt().asin() - stqr)).clamp(0.0, 1.0)
     } else if n <= 11 {
         let gma = poly_asc(nf, &[-2.273, 0.459]);
-        let mu = poly_asc(nf, &[0.5440, -0.39978, 0.025_054, -6.714e-4]);
-        let sigma = poly_asc(nf, &[1.3822, -0.77857, 0.062_767, -0.002_0322]).exp();
+        let mu = poly_asc(nf, &[0.5440, -0.39978, 0.025054, -6.714e-4]);
+        let sigma = poly_asc(nf, &[1.3822, -0.77857, 0.062767, -0.0020322]).exp();
         // NOTE: the argument is gma - ln(1-w), not gma - w.
         let y = -(gma - (-w).ln_1p()).ln();
         norm_sf((y - mu) / sigma).clamp(0.0, 1.0)
     } else {
         let ln_n = nf.ln();
-        let mu = poly_asc(ln_n, &[-1.5861, -0.31082, -0.083_751, 0.003_8915]);
-        let sigma = poly_asc(ln_n, &[-0.4803, -0.082_676, 0.003_0302]).exp();
+        let mu = poly_asc(ln_n, &[-1.5861, -0.31082, -0.083751, 0.0038915]);
+        let sigma = poly_asc(ln_n, &[-0.4803, -0.082676, 0.0030302]).exp();
         let y = (-w).ln_1p();
         norm_sf((y - mu) / sigma).clamp(0.0, 1.0)
     };

@@ -54,12 +54,16 @@ pub struct Sampler {
 
 impl Sampler {
     pub fn new(seed: u64) -> Sampler {
-        Sampler { rng: Pcg64::seed_from_u64(seed) }
+        Sampler {
+            rng: Pcg64::seed_from_u64(seed),
+        }
     }
 
     /// Seed from entropy, for when the caller passes no seed.
     pub fn from_entropy() -> Sampler {
-        Sampler { rng: Pcg64::from_entropy() }
+        Sampler {
+            rng: Pcg64::from_entropy(),
+        }
     }
 
     pub fn uniform01(&mut self) -> f64 {
