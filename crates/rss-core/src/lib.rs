@@ -3,4 +3,6 @@
 //! No Python, no BLAS, no SciPy. Everything here operates on plain `&[f64]`
 //! slices so the Python binding layer can hand over buffers zero-copy.
 
+pub mod dist;
+pub mod noncentral;
 pub mod special;
