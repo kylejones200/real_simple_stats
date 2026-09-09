@@ -264,13 +264,27 @@ def _fmt_p(p: float) -> str:
     return f"{p:.4f}"
 
 
-def _np_array(obj: Any, dtype: Any = float) -> Any:
-    # No NumPy at runtime: return a plain nested list of floats.
+def _as_numbers(obj: Any, dtype: Any = float) -> Any:
+    """Coerce a scalar, sequence, or nested sequence to plain Python numbers.
+
+    The library has no runtime NumPy dependency, but callers may well still
+    have NumPy and pass arrays, so this accepts anything iterable -- including
+    ndarrays and their scalar types -- and returns lists. Note the deliberate
+    avoidance of truthiness tests (``if obj``) and of ``isinstance(obj, list)``:
+    a NumPy array raises on the former and fails the latter.
+    """
     if isinstance(obj, (int, float)):
         return dtype(obj)
-    if obj and isinstance(next(iter(obj), None), (list, tuple)):
-        return [[dtype(v) for v in row] for row in obj]
-    return [dtype(v) for v in obj]
+    try:
+        items = list(obj)
+    except TypeError:
+        return dtype(obj)
+    if len(items) > 0:
+        first = items[0]
+        # A nested sequence: anything iterable that is not a string or scalar.
+        if not isinstance(first, (str, bytes, int, float)) and hasattr(first, "__iter__"):
+            return [[dtype(v) for v in row] for row in items]
+    return [dtype(v) for v in items]
 
 
 def _cohens_d_magnitude(d: float) -> str:
@@ -628,8 +642,8 @@ def one_way_anova_explained(
             "your hypothesized effect size."
         )
 
-    _arrays = [_np_array(g) for g in groups]
-    _grand_mean = float(sum(a.sum() for a in _arrays) / n_total)
+    _arrays = [_as_numbers(g) for g in groups]
+    _grand_mean = float(sum(sum(a) for a in _arrays) / n_total)
     _means = means
     _group_ns = group_ns
     _n_groups = n_groups
@@ -649,7 +663,7 @@ def one_way_anova_explained(
             fig = ax.figure
         labels = [f"Group {i + 1}\n(n={_group_ns[i]})" for i in range(_n_groups)]
         ax.boxplot(
-            [a.tolist() for a in _arrays],
+            _arrays,
             tick_labels=labels,
             patch_artist=True,
             boxprops=dict(facecolor="#e8e8e8", color="#444444"),
@@ -730,9 +744,9 @@ def chi_square_independence_explained(
     low_cells = r["low_expected_cells"]
     expected = r["expected"]
 
-    obs = _np_array(observed)
-    n = float(obs.sum())
-    n_rows, n_cols = obs.shape
+    obs = _as_numbers(observed)
+    n = float(sum(v for row in obs for v in row))
+    n_rows, n_cols = len(obs), len(obs[0]) if obs else 0
 
     decision = "Reject H₀ (variables are associated)" if reject else "Fail to reject H₀ (no detected association)"
 
@@ -840,12 +854,19 @@ def chi_square_independence_explained(
             fig = ax.figure
 
         width = 0.4
-        pos = _np_array(list(range(_n_rows * _n_cols)), dtype=float)
-        # Both are now plain nested lists (no NumPy at runtime).
+        # Plain lists throughout, so the bar offsets are built explicitly
+        # rather than by broadcasting a scalar over an array.
+        pos = [float(i) for i in range(_n_rows * _n_cols)]
         obs_flat = [v for row in _obs for v in row]
         exp_flat = [v for row in _exp for v in row]
-        ax.bar(pos - width / 2, obs_flat, width=width, label="Observed", color="#444444")
-        ax.bar(pos + width / 2, exp_flat, width=width, label="Expected", color="#aaaaaa")
+        ax.bar(
+            [p - width / 2 for p in pos], obs_flat,
+            width=width, label="Observed", color="#444444",
+        )
+        ax.bar(
+            [p + width / 2 for p in pos], exp_flat,
+            width=width, label="Expected", color="#aaaaaa",
+        )
         cell_labels = [
             f"r{r}c{c}" for r in range(1, _n_rows + 1) for c in range(1, _n_cols + 1)
         ]
@@ -917,13 +938,17 @@ def difference_in_differences_explained(
     ci = r["ci"]
     reject = r["reject_null"]
 
-    y = _np_array(outcome)
-    post_ = _np_array(post)
-    treated_ = _np_array(treated)
+    y = _as_numbers(outcome)
+    post_ = _as_numbers(post)
+    treated_ = _as_numbers(treated)
 
     def _cell_mean(p_val: int, t_val: int) -> float:
-        mask = (post_ == p_val) & (treated_ == t_val)
-        return float(y[mask].mean()) if mask.any() else float("nan")
+        cell = [
+            yi
+            for yi, pi, ti in zip(y, post_, treated_)
+            if pi == p_val and ti == t_val
+        ]
+        return sum(cell) / len(cell) if cell else float("nan")
 
     ctrl_pre = _cell_mean(0, 0)
     ctrl_post = _cell_mean(1, 0)
@@ -1323,9 +1348,9 @@ def morans_i_explained(
         "observed I to the permutation distribution."
     )
 
-    _x = _np_array(x)
-    _y_coord = _np_array(y)
-    _vals = _np_array(values)
+    _x = _as_numbers(x)
+    _y_coord = _as_numbers(y)
+    _vals = _as_numbers(values)
     _I = moran_I
     _p_str = _fmt_p(p)
 
@@ -1405,7 +1430,7 @@ def detect_change_points_explained(
     rss_red = r["rss_reduction"]
     found = len(cps)
 
-    x = _np_array(data)
+    x = _as_numbers(data)
     n = len(x)
 
     question = (
