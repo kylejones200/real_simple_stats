@@ -1,12 +1,26 @@
 """Plotting utilities for Real Simple Stats.
 
-Uses PlotSmith when available (pip install real-simple-stats[plots]),
-otherwise falls back to matplotlib.
+This is the one optional corner of the library. Everything else runs with no
+dependencies at all; drawing requires matplotlib, which brings NumPy with it::
+
+    pip install "real-simple-stats[plots]"
+
+PlotSmith is used for histograms when it is present, matplotlib otherwise.
 """
 
-import numpy as np
-
 from . import _rss
+
+try:
+    import matplotlib.pyplot as plt
+    import numpy as np
+except ImportError as exc:  # pragma: no cover - exercised only without the extra
+    # Without this, calling .plot() on a result reports "No module named
+    # 'numpy'", which tells a beginner nothing about what to do next.
+    raise ImportError(
+        "Plotting requires matplotlib, which is not installed. "
+        'Install it with:  pip install "real-simple-stats[plots]"\n'
+        "Every other part of real_simple_stats works without it."
+    ) from exc
 
 try:
     from plotsmith import plot_histogram as _plot_histogram
@@ -14,8 +28,6 @@ try:
     PLOTSMITH_AVAILABLE = True
 except ImportError:
     PLOTSMITH_AVAILABLE = False
-
-import matplotlib.pyplot as plt
 
 
 def set_minimalist_style():

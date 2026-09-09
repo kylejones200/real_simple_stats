@@ -52,7 +52,10 @@ docs = [
     "nbsphinx"
 ]
 plots = [
+    # matplotlib already requires numpy, but the plotting module imports it
+    # directly, so it is declared here rather than relied on transitively.
     "matplotlib>=3.3.0",
+    "numpy>=1.20.0",
     "plotsmith>=0.2.0",
 ]
 pandas = [

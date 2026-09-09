@@ -5,9 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/kylejones200/real_simple_stats/workflows/CI/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
 
-**A statistics library that teaches while it computes.**
+**A statistics library that teaches while it computes — with a Rust core underneath.**
 
 Most libraries hand you a number and walk away. Real Simple Stats hands you the number *and* explains what it means, what assumptions it rests on, what it does not license you to claim, and what to do next.
+
+Since 0.5.0 every numeric routine runs in a bundled Rust extension. The library has **no runtime dependencies at all** — no NumPy, no SciPy — installs as a single wheel, and imports in about 13 ms instead of 470 ms.
 
 ---
 
@@ -77,7 +79,50 @@ Every explained function works this way. The numbers are still accessible as pla
 pip install real-simple-stats
 ```
 
-**Requirements**: Python 3.12+, NumPy, SciPy, Matplotlib. No pandas, statsmodels, or scikit-learn required.
+**Requirements**: Python 3.12+. That is the whole list — the statistics engine is a
+compiled Rust extension shipped inside the wheel, so there is nothing else to install
+and nothing to conflict with.
+
+```bash
+pip install "real-simple-stats[plots]"   # adds matplotlib for the .plot() methods
+pip install "real-simple-stats[pandas]"  # adds the pandas helpers
+```
+
+Wheels are published for Linux (x86_64, aarch64), macOS (Apple silicon and Intel), and
+Windows (x64). They are built against the CPython limited API, so one wheel per platform
+covers Python 3.12, 3.13, 3.14 and later. Installing from source instead needs a Rust
+toolchain (`rustup`), and takes a couple of minutes to compile.
+
+### Speed
+
+You do not have to do anything to get the fast path — lists work fine. But the backend can
+read any contiguous `float64` buffer *without copying it*, so if your data is already in a
+`numpy` array, an `array.array('d')`, or a `memoryview`, hand that over and skip the
+unboxing entirely:
+
+```python
+import array, real_simple_stats as rss
+
+data = array.array("d", my_million_floats)
+rss.sample_std_dev(data)     # ~0.15 ms
+rss.sample_std_dev(list(data))  # ~3.7 ms — still 15x faster than 0.4.x
+```
+
+Measured on an M-series Mac, one million values, against the pure-Python 0.4.x
+implementations:
+
+| Operation | 0.4.x | 0.5.0 (list) | 0.5.0 (buffer) |
+|---|---:|---:|---:|
+| `sample_std_dev` | 54.6 ms | 3.7 ms | **0.15 ms** |
+| `five_number_summary` | 165.9 ms | — | **3.8 ms** |
+| `median` | 136.1 ms | — | **3.9 ms** |
+| `bootstrap` (10,000 iterations) | 261.6 ms | **2.1 ms** | — |
+| `permutation_test` (10,000 permutations) | 738.7 ms | **5.9 ms** | — |
+| `import real_simple_stats` | 470 ms | **13 ms** | — |
+
+Resampling runs in parallel across cores, and stays reproducible while doing so: passing
+`random_seed` gives the same answer regardless of how many threads the work is spread
+over, because each iteration draws from its own derived stream rather than a shared one.
 
 ---
 
@@ -126,9 +171,9 @@ Every `ExplainedResult` carries:
 
 ```python
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng   # the bundled generator; no NumPy needed
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 g1 = rng.normal(0, 1, 40)
 g2 = rng.normal(2, 1, 40)
 g3 = rng.normal(4, 1, 40)
@@ -365,12 +410,13 @@ for rule in rules:
 Measure and model spatial autocorrelation — do similar values cluster together in space?
 
 ```python
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 x = rng.uniform(0, 100, 80)
 y = rng.uniform(0, 100, 80)
-values = np.sin(x / 20) + rng.normal(0, 0.3, 80)   # spatially structured
+import math
+values = [math.sin(xi / 20) + e for xi, e in zip(x, rng.normal(0, 0.3, 80))]
 
 # Moran's I — global spatial autocorrelation
 r = rss.morans_i(x, y, values, distance_threshold=20)
@@ -486,28 +532,29 @@ bf = rss.bayes_factor(likelihood_h1=0.8, likelihood_h0=0.2)
 
 ```python
 data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+group1, group2 = [1, 2, 3, 4, 5], [4, 5, 6, 7, 8]
 
-# Bootstrap confidence interval
-result = rss.bootstrap(data, np.mean, n_iterations=1000, confidence_level=0.95)
+# Bootstrap confidence interval. Naming the statistic keeps the whole
+# resample inside Rust and runs it across every core.
+result = rss.bootstrap(data, "mean", n_iterations=1000, confidence_level=0.95)
 result["statistic"]           # bootstrap estimate
 result["confidence_interval"] # (lower, upper)
 
+# "mean", "median", "std", "var", "min", "max" and "sum" take the fast path.
+# Any other callable still works, it just runs in Python:
+rss.bootstrap(data, lambda v: max(v) - min(v), n_iterations=1000)
+
 # Bootstrap hypothesis test
-result = rss.bootstrap_hypothesis_test(
-    group1, group2,
-    test_statistic=lambda x, y: np.mean(x) - np.mean(y),
-    n_iterations=1000
-)
+result = rss.bootstrap_hypothesis_test(group1, group2, "mean", n_iterations=1000)
 
 # Permutation test
 result = rss.permutation_test(
-    group1, group2,
-    test_statistic=lambda x, y: np.mean(x) - np.mean(y),
+    group1, group2, "mean",
     n_permutations=1000, alternative="two-sided"
 )
 
 # Jackknife
-result = rss.jackknife(data, np.mean)
+result = rss.jackknife(data, "mean")
 result["bias"]
 result["std_error"]
 

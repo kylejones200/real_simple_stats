@@ -4,37 +4,85 @@ Thank you for your interest in contributing! This guide focuses on actionable st
 
 ## 1) Getting Started
 
-- Clone and install (development mode):
+Since 0.5.0 the numerics live in a Rust extension, so a Rust toolchain is
+required to build from source. Install one from [rustup.rs](https://rustup.rs)
+if you do not have it.
+
 ```bash
 pip install --upgrade pip
-pip install -e ".[dev]"
+pip install -e ".[dev]"          # compiles the extension via maturin
 ```
-- Project requires Python 3.8+.
-- Main package code lives in `real_simple_stats/`.
-- Tests live in `tests/`.
+
+That first build takes a couple of minutes. After editing any Rust source you
+must rebuild before Python sees the change:
+
+```bash
+maturin develop --release        # rebuild and reinstall in place
+```
+
+Use `--release` rather than a debug build. Measured on this project, a debug
+build runs the kernels roughly 3x to 14x slower depending on the operation
+(14x for `std_dev` over 200,000 values, 3x for a 2,000-iteration bootstrap),
+which is enough to make the parity suite tedious.
+
+- Requires Python 3.12+ and Rust 1.78+.
+- Python package code lives in `real_simple_stats/`.
+- Rust code lives in `crates/`:
+  - `rss-core` — the numerics. Pure Rust, no Python linkage, so it can be
+    tested on its own with `cargo test -p rss-core`.
+  - `rss-py` — the PyO3 bindings. Only built, never `cargo test`ed, because
+    linking the extension needs a Python host.
+- Tests live in `tests/`; `tests/parity/` holds the numerical accuracy gates.
+
+### Where to put a change
+
+New numeric work belongs in `rss-core`, exposed through `rss-py`, and wrapped
+in Python only for argument handling, validation, and the teaching layer
+(docstrings, `explain.py`, the CLI). Keep the explanatory prose in Python — it
+is the point of the library, and Rust would only make it harder to edit.
 
 ## 2) Quality: Lint, Type-Check, Test
 
-- Format check (Black):
+Python:
 ```bash
-black --check --diff real_simple_stats/ tests/
+ruff format --check .            # formatting
+ruff check .                     # lint
+mypy real_simple_stats/          # types
+pytest -q                        # tests
+pytest --cov=real_simple_stats --cov-report=term
 ```
-- Lint (Flake8):
+
+Rust:
 ```bash
-flake8 real_simple_stats/ tests/
-```
-- Type-check (MyPy):
-```bash
-mypy real_simple_stats/
-```
-- Run tests (PyTest):
-```bash
-pytest -v
-# with coverage
-pytest --cov=real_simple_stats --cov-report=term --cov-report=xml
+cargo test -p rss-core --release
+cargo fmt --all -- --check
+cargo clippy -p rss-core --release -- -D warnings
 ```
 
 These same checks run in CI via `.github/workflows/ci.yml`.
+
+### Numerical accuracy gates
+
+`tests/parity/` is the safety net for the Rust backend, and it is worth
+understanding before changing any kernel.
+
+- `test_special_parity.py` checks the special functions against **mpmath at 60
+  digits**, not against SciPy. This matters: SciPy's own `erfc` and `ndtr`
+  carry around 1e-13 relative error in the tails, so validating against SciPy
+  would both cap our accuracy at SciPy's and flag genuine improvements as
+  regressions.
+- `test_dist_parity.py` and `test_linalg_parity.py` use SciPy and NumPy, which
+  are reliable oracles for those (well-conditioned, evaluated in the bulk).
+
+SciPy, NumPy and mpmath are therefore **development dependencies only** — they
+are test oracles, never runtime dependencies. If you add one to
+`[project] dependencies` the CI job that installs the wheel into a bare
+environment will fail, which is exactly what it is there for.
+
+Points where a limit is genuine rather than a defect are documented in the
+tests themselves — for instance, inverting the incomplete beta for
+Beta(0.5, 0.5) as p approaches 1 returns the last representable double below 1,
+and no round trip can recover p from there. SciPy returns bit-identical values.
 
 ## 3) Documentation
 
