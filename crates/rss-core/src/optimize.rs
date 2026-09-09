@@ -354,3 +354,90 @@ pub fn simplex_least_squares(y: &[f64], x: &[Vec<f64>], max_iter: usize, tol: f6
     }
     w
 }
+
+/// Nelder-Mead simplex minimisation for low-dimensional unconstrained problems.
+///
+/// Derivative-free, which suits maximum-likelihood fits where the gradient is
+/// awkward and the parameter count is two or three.
+pub fn nelder_mead<F>(mut f: F, x0: &[f64], step: f64, max_iter: usize, tol: f64) -> Vec<f64>
+where
+    F: FnMut(&[f64]) -> f64,
+{
+    let n = x0.len();
+    if n == 0 {
+        return vec![];
+    }
+    // Initial simplex: the start point plus one offset vertex per dimension.
+    let mut simplex: Vec<Vec<f64>> = Vec::with_capacity(n + 1);
+    simplex.push(x0.to_vec());
+    for i in 0..n {
+        let mut v = x0.to_vec();
+        v[i] += if v[i].abs() > 1e-12 { step * v[i].abs() } else { step };
+        simplex.push(v);
+    }
+    let mut fx: Vec<f64> = simplex.iter().map(|v| f(v)).collect();
+
+    for _ in 0..max_iter {
+        // Order vertices best -> worst.
+        let mut idx: Vec<usize> = (0..=n).collect();
+        idx.sort_by(|&a, &b| fx[a].partial_cmp(&fx[b]).unwrap_or(std::cmp::Ordering::Equal));
+        let simplex_sorted: Vec<Vec<f64>> = idx.iter().map(|&i| simplex[i].clone()).collect();
+        let fx_sorted: Vec<f64> = idx.iter().map(|&i| fx[i]).collect();
+        simplex = simplex_sorted;
+        fx = fx_sorted;
+
+        if (fx[n] - fx[0]).abs() <= tol * (fx[0].abs() + tol) {
+            break;
+        }
+
+        // Centroid of all but the worst vertex.
+        let mut centroid = vec![0.0; n];
+        for v in simplex.iter().take(n) {
+            for j in 0..n {
+                centroid[j] += v[j] / n as f64;
+            }
+        }
+
+        let reflect: Vec<f64> = (0..n).map(|j| centroid[j] + (centroid[j] - simplex[n][j])).collect();
+        let f_reflect = f(&reflect);
+
+        if f_reflect < fx[0] {
+            // Expand.
+            let expand: Vec<f64> =
+                (0..n).map(|j| centroid[j] + 2.0 * (centroid[j] - simplex[n][j])).collect();
+            let f_expand = f(&expand);
+            if f_expand < f_reflect {
+                simplex[n] = expand;
+                fx[n] = f_expand;
+            } else {
+                simplex[n] = reflect;
+                fx[n] = f_reflect;
+            }
+        } else if f_reflect < fx[n - 1] {
+            simplex[n] = reflect;
+            fx[n] = f_reflect;
+        } else {
+            // Contract.
+            let contract: Vec<f64> =
+                (0..n).map(|j| centroid[j] + 0.5 * (simplex[n][j] - centroid[j])).collect();
+            let f_contract = f(&contract);
+            if f_contract < fx[n] {
+                simplex[n] = contract;
+                fx[n] = f_contract;
+            } else {
+                // Shrink toward the best vertex.
+                for i in 1..=n {
+                    for j in 0..n {
+                        simplex[i][j] = simplex[0][j] + 0.5 * (simplex[i][j] - simplex[0][j]);
+                    }
+                    fx[i] = f(&simplex[i]);
+                }
+            }
+        }
+    }
+
+    let best = (0..=n)
+        .min_by(|&a, &b| fx[a].partial_cmp(&fx[b]).unwrap_or(std::cmp::Ordering::Equal))
+        .unwrap_or(0);
+    simplex[best].clone()
+}

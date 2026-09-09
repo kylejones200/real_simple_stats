@@ -5,6 +5,7 @@
 
 pub mod descriptive;
 pub mod dist;
+pub mod fit;
 pub mod linalg;
 pub mod noncentral;
 pub mod optimize;

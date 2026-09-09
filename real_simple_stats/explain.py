@@ -265,8 +265,12 @@ def _fmt_p(p: float) -> str:
 
 
 def _np_array(obj: Any, dtype: Any = float) -> Any:
-    import numpy as np
-    return np.asarray(obj, dtype=dtype)
+    # No NumPy at runtime: return a plain nested list of floats.
+    if isinstance(obj, (int, float)):
+        return dtype(obj)
+    if obj and isinstance(next(iter(obj), None), (list, tuple)):
+        return [[dtype(v) for v in row] for row in obj]
+    return [dtype(v) for v in obj]
 
 
 def _cohens_d_magnitude(d: float) -> str:

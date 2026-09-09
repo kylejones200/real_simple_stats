@@ -3,6 +3,7 @@ mod arr;
 use arr::{with_slice, with_two_slices, Arr};
 use pyo3::prelude::*;
 use rss_core::descriptive as ds;
+use rss_core::fit as ft;
 use rss_core::linalg as la;
 use rss_core::rng as rrng;
 use rss_core::simulate as sim;
@@ -602,6 +603,33 @@ fn uniform_box(py: Python<'_>, lower: Vec<f64>, upper: Vec<f64>, n_samples: usiz
     py.allow_threads(|| sim::uniform_box(&lower, &upper, n_samples, seed))
 }
 
+/// MLE fit with location fixed at 0.
+///
+/// Returns `(shape_or_nan, scale, log_likelihood)`; shape is NaN for the
+/// exponential, which has no shape parameter.
+#[pyfunction]
+fn fit_survival(py: Python<'_>, name: &str, data: &Bound<'_, PyAny>) -> PyResult<(f64, f64, f64)> {
+    let a = Arr::from_py(data)?;
+    let t = a.as_slice(py).to_vec();
+    if t.len() < 2 || t.iter().any(|v| !(*v > 0.0)) {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "survival fitting needs at least 2 strictly positive durations",
+        ));
+    }
+    let r = match name {
+        "exponential" => ft::fit_exponential(&t),
+        "weibull" => ft::fit_weibull(&t),
+        "lognormal" => ft::fit_lognormal(&t),
+        "loglogistic" => ft::fit_loglogistic(&t),
+        other => {
+            return Err(pyo3::exceptions::PyValueError::new_err(format!(
+                "unknown distribution {other:?}"
+            )))
+        }
+    };
+    Ok((r.shape.unwrap_or(f64::NAN), r.scale, r.log_likelihood))
+}
+
 #[pymodule]
 fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ln_gamma, m)?)?;
@@ -720,5 +748,6 @@ fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyRng>()?;
     m.add_function(wrap_pyfunction!(gbm_paths, m)?)?;
     m.add_function(wrap_pyfunction!(uniform_box, m)?)?;
+    m.add_function(wrap_pyfunction!(fit_survival, m)?)?;
     Ok(())
 }
