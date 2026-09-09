@@ -3,6 +3,9 @@ mod arr;
 use arr::{with_slice, with_two_slices, Arr};
 use pyo3::prelude::*;
 use rss_core::descriptive as ds;
+use rss_core::linalg as la;
+use rss_core::optimize as opt;
+use rss_core::regression as reg;
 use rss_core::resample as rsmp;
 use rss_core::dist as d;
 use rss_core::noncentral as nc;
@@ -309,6 +312,174 @@ fn permutation_pvalue(
     with_slice(py, dist, |s| rsmp::permutation_pvalue(s, observed, alternative))
 }
 
+
+// -------------------------------------------------- linalg / regression ----
+
+fn mat(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<la::Matrix> {
+    la::Matrix::new(rows, cols, data).ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err(format!(
+            "data length does not match shape {rows}x{cols}"
+        ))
+    })
+}
+fn singular() -> PyErr {
+    pyo3::exceptions::PyValueError::new_err("matrix is singular")
+}
+
+#[pyfunction]
+fn mat_inv(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<Vec<f64>> {
+    la::inv(&mat(rows, cols, data)?).map(|m| m.data).ok_or_else(singular)
+}
+#[pyfunction]
+#[pyo3(signature = (rows, cols, data, rcond=1e-15))]
+fn mat_pinv(rows: usize, cols: usize, data: Vec<f64>, rcond: f64) -> PyResult<(usize, usize, Vec<f64>)> {
+    let m = la::pinv(&mat(rows, cols, data)?, rcond);
+    Ok((m.rows, m.cols, m.data))
+}
+#[pyfunction]
+fn mat_matmul(ar: usize, ac: usize, a: Vec<f64>, br: usize, bc: usize, b: Vec<f64>) -> PyResult<(usize, usize, Vec<f64>)> {
+    let m = la::matmul(&mat(ar, ac, a)?, &mat(br, bc, b)?)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("shape mismatch in matmul"))?;
+    Ok((m.rows, m.cols, m.data))
+}
+#[pyfunction]
+fn mat_lstsq(rows: usize, cols: usize, data: Vec<f64>, y: Vec<f64>) -> PyResult<Vec<f64>> {
+    la::lstsq(&mat(rows, cols, data)?, &y)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("lstsq shape mismatch"))
+}
+#[pyfunction]
+fn mat_eigh(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<(Vec<f64>, Vec<f64>)> {
+    let (v, vecs) = la::eigh(&mat(rows, cols, data)?)
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("eigh requires a square matrix"))?;
+    Ok((v, vecs.data))
+}
+#[pyfunction]
+fn mat_svd(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>, usize, usize, usize, usize)> {
+    let (u, s, vt) = la::svd(&mat(rows, cols, data)?);
+    Ok((u.data, s, vt.data, u.rows, u.cols, vt.rows, vt.cols))
+}
+#[pyfunction]
+fn mat_sqrtm_spd(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<Vec<f64>> {
+    la::sqrtm_spd(&mat(rows, cols, data)?).map(|m| m.data).ok_or_else(singular)
+}
+#[pyfunction]
+#[pyo3(signature = (rows, cols, data, ddof=1))]
+fn mat_cov(rows: usize, cols: usize, data: Vec<f64>, ddof: usize) -> PyResult<Vec<f64>> {
+    Ok(la::cov_matrix(&mat(rows, cols, data)?, ddof).data)
+}
+#[pyfunction]
+fn mat_corr(rows: usize, cols: usize, data: Vec<f64>) -> PyResult<Vec<f64>> {
+    Ok(la::corr_matrix(&mat(rows, cols, data)?).data)
+}
+
+#[pyfunction]
+fn linregress(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>) -> PyResult<(f64, f64, f64, f64, f64, f64)> {
+    let r = with_two_slices(py, x, y, reg::linregress)?
+        .ok_or_else(|| pyo3::exceptions::PyValueError::new_err("linregress needs >= 2 distinct x values"))?;
+    Ok((r.slope, r.intercept, r.rvalue, r.pvalue, r.stderr, r.intercept_stderr))
+}
+
+/// OLS. Returns a flat tuple; the Python layer reshapes it into a dict.
+#[allow(clippy::type_complexity)]
+#[pyfunction]
+fn ols(rows: usize, cols: usize, data: Vec<f64>, y: Vec<f64>)
+    -> PyResult<(Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, f64, f64, f64, f64, Vec<f64>)> {
+    let f = reg::ols(&mat(rows, cols, data)?, &y).ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err("OLS requires more rows than columns")
+    })?;
+    Ok((f.coefficients, f.std_errors, f.t_values, f.p_values, f.residuals,
+        f.r_squared, f.adj_r_squared, f.df_resid, f.sigma2, f.cov))
+}
+
+#[pyfunction]
+fn ttest_1samp(py: Python<'_>, x: &Bound<'_, PyAny>, mu: f64) -> PyResult<(f64, f64)> {
+    with_slice(py, x, |s| reg::ttest_1samp(s, mu))
+}
+#[pyfunction]
+#[pyo3(signature = (a, b, equal_var=true))]
+fn ttest_ind(py: Python<'_>, a: &Bound<'_, PyAny>, b: &Bound<'_, PyAny>, equal_var: bool) -> PyResult<(f64, f64)> {
+    let xa = Arr::from_py(a)?;
+    let xb = Arr::from_py(b)?;
+    Ok(reg::ttest_ind(xa.as_slice(py), xb.as_slice(py), equal_var))
+}
+#[pyfunction]
+fn ttest_rel(py: Python<'_>, a: &Bound<'_, PyAny>, b: &Bound<'_, PyAny>) -> PyResult<(f64, f64)> {
+    with_two_slices(py, a, b, reg::ttest_rel)
+}
+#[pyfunction]
+fn f_oneway(groups: Vec<Vec<f64>>) -> (f64, f64) {
+    reg::f_oneway(&groups)
+}
+#[pyfunction]
+#[pyo3(signature = (rows, cols, data, correction=true))]
+fn chi2_contingency(rows: usize, cols: usize, data: Vec<f64>, correction: bool)
+    -> PyResult<(f64, f64, f64, Vec<f64>)> {
+    Ok(reg::chi2_contingency(&mat(rows, cols, data)?, correction))
+}
+
+// ------------------------------------------------------------- optimize ----
+
+#[pyfunction]
+#[pyo3(signature = (f, a, b, xtol=1e-12, max_iter=200))]
+fn brentq(py: Python<'_>, f: PyObject, a: f64, b: f64, xtol: f64, max_iter: usize) -> PyResult<f64> {
+    let mut err: Option<PyErr> = None;
+    let root = opt::brentq(
+        |x| match f.call1(py, (x,)).and_then(|v| v.extract::<f64>(py)) {
+            Ok(v) => v,
+            Err(e) => {
+                if err.is_none() {
+                    err = Some(e);
+                }
+                f64::NAN
+            }
+        },
+        a, b, xtol, max_iter,
+    );
+    if let Some(e) = err {
+        return Err(e);
+    }
+    root.ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err(format!(
+            "f(a) and f(b) must have opposite signs; got a={a}, b={b}"
+        ))
+    })
+}
+
+#[pyfunction]
+#[pyo3(signature = (f, p0, lower, upper, n_resid, max_iter=200))]
+fn curve_fit_lm(py: Python<'_>, f: PyObject, p0: Vec<f64>, lower: Vec<f64>, upper: Vec<f64>,
+                n_resid: usize, max_iter: usize) -> PyResult<Vec<f64>> {
+    let mut err: Option<PyErr> = None;
+    let out = opt::levenberg_marquardt(
+        |p: &[f64], out: &mut [f64]| {
+            match f.call1(py, (p.to_vec(),)).and_then(|v| v.extract::<Vec<f64>>(py)) {
+                Ok(v) if v.len() == out.len() => out.copy_from_slice(&v),
+                Ok(v) => {
+                    if err.is_none() {
+                        err = Some(pyo3::exceptions::PyValueError::new_err(format!(
+                            "residual function returned {} values, expected {}", v.len(), out.len()
+                        )));
+                    }
+                    out.fill(f64::NAN);
+                }
+                Err(e) => {
+                    if err.is_none() { err = Some(e); }
+                    out.fill(f64::NAN);
+                }
+            }
+        },
+        &p0, &lower, &upper, n_resid, max_iter,
+    );
+    if let Some(e) = err { return Err(e); }
+    Ok(out)
+}
+
+#[pyfunction]
+#[pyo3(signature = (y, columns, max_iter=20000, tol=1e-14))]
+fn simplex_least_squares(y: Vec<f64>, columns: Vec<Vec<f64>>, max_iter: usize, tol: f64) -> Vec<f64> {
+    opt::simplex_least_squares(&y, &columns, max_iter, tol)
+}
+
 #[pymodule]
 fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ln_gamma, m)?)?;
@@ -405,5 +576,24 @@ fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(permutation_dist, m)?)?;
     m.add_function(wrap_pyfunction!(percentile_ci, m)?)?;
     m.add_function(wrap_pyfunction!(permutation_pvalue, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_inv, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_pinv, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_matmul, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_lstsq, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_eigh, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_svd, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_sqrtm_spd, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_cov, m)?)?;
+    m.add_function(wrap_pyfunction!(mat_corr, m)?)?;
+    m.add_function(wrap_pyfunction!(linregress, m)?)?;
+    m.add_function(wrap_pyfunction!(ols, m)?)?;
+    m.add_function(wrap_pyfunction!(ttest_1samp, m)?)?;
+    m.add_function(wrap_pyfunction!(ttest_ind, m)?)?;
+    m.add_function(wrap_pyfunction!(ttest_rel, m)?)?;
+    m.add_function(wrap_pyfunction!(f_oneway, m)?)?;
+    m.add_function(wrap_pyfunction!(chi2_contingency, m)?)?;
+    m.add_function(wrap_pyfunction!(brentq, m)?)?;
+    m.add_function(wrap_pyfunction!(curve_fit_lm, m)?)?;
+    m.add_function(wrap_pyfunction!(simplex_least_squares, m)?)?;
     Ok(())
 }

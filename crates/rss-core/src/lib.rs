@@ -5,7 +5,10 @@
 
 pub mod descriptive;
 pub mod dist;
+pub mod linalg;
 pub mod noncentral;
+pub mod optimize;
+pub mod regression;
 pub mod resample;
 pub mod rng;
 pub mod special;
