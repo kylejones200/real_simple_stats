@@ -1,4 +1,9 @@
+mod arr;
+
+use arr::{with_slice, with_two_slices, Arr};
 use pyo3::prelude::*;
+use rss_core::descriptive as ds;
+use rss_core::resample as rsmp;
 use rss_core::dist as d;
 use rss_core::noncentral as nc;
 use rss_core::special as sp;
@@ -155,6 +160,155 @@ fn ncf_sf(a0: f64, a1: f64, a2: f64, a3: f64) -> f64 { nc::ncf_sf(a0, a1, a2, a3
 #[pyfunction]
 fn shapiro_wilk(data: Vec<f64>) -> (f64, f64) { nc::shapiro_wilk(&data) }
 
+
+// ------------------------------------------------------- descriptive stats --
+
+#[pyfunction]
+fn sum_(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::sum_par)
+}
+#[pyfunction]
+fn mean(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::mean)
+}
+#[pyfunction]
+#[pyo3(signature = (x, ddof=1))]
+fn variance(py: Python<'_>, x: &Bound<'_, PyAny>, ddof: usize) -> PyResult<f64> {
+    with_slice(py, x, |s| ds::variance(s, ddof))
+}
+#[pyfunction]
+#[pyo3(signature = (x, ddof=1))]
+fn std_dev(py: Python<'_>, x: &Bound<'_, PyAny>, ddof: usize) -> PyResult<f64> {
+    with_slice(py, x, |s| ds::std_dev(s, ddof))
+}
+#[pyfunction]
+fn min_(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::min)
+}
+#[pyfunction]
+fn max_(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::max)
+}
+#[pyfunction]
+fn median(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::median)
+}
+#[pyfunction]
+fn quantile(py: Python<'_>, x: &Bound<'_, PyAny>, q: f64) -> PyResult<f64> {
+    with_slice(py, x, |s| ds::quantile_linear(s, q))
+}
+#[pyfunction]
+fn quantiles(py: Python<'_>, x: &Bound<'_, PyAny>, qs: Vec<f64>) -> PyResult<Vec<f64>> {
+    with_slice(py, x, |s| {
+        let sorted = ds::sorted_copy(s);
+        qs.iter().map(|&q| ds::quantile_linear_sorted(&sorted, q)).collect()
+    })
+}
+#[pyfunction]
+fn five_number_summary(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<Option<(f64, f64, f64, f64, f64)>> {
+    with_slice(py, x, |s| ds::five_number_summary(s).map(|f| (f.min, f.q1, f.median, f.q3, f.max)))
+}
+#[pyfunction]
+fn skewness(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::skewness)
+}
+#[pyfunction]
+fn kurtosis(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_slice(py, x, ds::kurtosis)
+}
+#[pyfunction]
+fn modes(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<Vec<f64>> {
+    with_slice(py, x, ds::modes)
+}
+#[pyfunction]
+fn sorted_copy(py: Python<'_>, x: &Bound<'_, PyAny>) -> PyResult<Vec<f64>> {
+    with_slice(py, x, ds::sorted_copy)
+}
+#[pyfunction]
+#[pyo3(signature = (x, y, ddof=1))]
+fn covariance(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>, ddof: usize) -> PyResult<f64> {
+    with_two_slices(py, x, y, |a, b| ds::covariance(a, b, ddof))
+}
+#[pyfunction]
+fn pearson_r(py: Python<'_>, x: &Bound<'_, PyAny>, y: &Bound<'_, PyAny>) -> PyResult<f64> {
+    with_two_slices(py, x, y, ds::pearson_r)
+}
+
+/// Diagnostic: did this input take the zero-copy path?
+#[pyfunction]
+fn is_zero_copy(x: &Bound<'_, PyAny>) -> PyResult<bool> {
+    Ok(Arr::from_py(x)?.is_zero_copy())
+}
+
+
+// ------------------------------------------------------------- resampling --
+
+fn parse_stat(name: &str) -> PyResult<rsmp::Stat> {
+    rsmp::Stat::from_name(name).ok_or_else(|| {
+        pyo3::exceptions::PyValueError::new_err(format!(
+            "unsupported statistic {name:?}; expected one of \
+             mean, median, std, var, min, max, sum"
+        ))
+    })
+}
+
+#[pyfunction]
+fn bootstrap_dist(
+    py: Python<'_>,
+    data: &Bound<'_, PyAny>,
+    stat: &str,
+    n_iterations: usize,
+    seed: u64,
+) -> PyResult<Vec<f64>> {
+    let st = parse_stat(stat)?;
+    let a = Arr::from_py(data)?;
+    let s = a.as_slice(py);
+    // Release the GIL: the kernel touches no Python objects, so other threads
+    // (and rayon's own pool) can run freely.
+    let owned = s.to_vec();
+    Ok(py.allow_threads(|| rsmp::bootstrap(&owned, st, n_iterations, seed)))
+}
+
+#[pyfunction]
+fn jackknife_values(py: Python<'_>, data: &Bound<'_, PyAny>, stat: &str) -> PyResult<Vec<f64>> {
+    let st = parse_stat(stat)?;
+    let a = Arr::from_py(data)?;
+    let owned = a.as_slice(py).to_vec();
+    Ok(py.allow_threads(|| rsmp::jackknife(&owned, st)))
+}
+
+#[pyfunction]
+fn permutation_dist(
+    py: Python<'_>,
+    a: &Bound<'_, PyAny>,
+    b: &Bound<'_, PyAny>,
+    stat: &str,
+    n_permutations: usize,
+    seed: u64,
+) -> PyResult<Vec<f64>> {
+    let st = parse_stat(stat)?;
+    let xa = Arr::from_py(a)?;
+    let xb = Arr::from_py(b)?;
+    let va = xa.as_slice(py).to_vec();
+    let vb = xb.as_slice(py).to_vec();
+    Ok(py.allow_threads(|| rsmp::permutation_diff(&va, &vb, st, n_permutations, seed)))
+}
+
+#[pyfunction]
+fn percentile_ci(py: Python<'_>, dist: &Bound<'_, PyAny>, confidence: f64) -> PyResult<(f64, f64)> {
+    with_slice(py, dist, |s| rsmp::percentile_ci(s, confidence))
+}
+
+#[pyfunction]
+fn permutation_pvalue(
+    py: Python<'_>,
+    dist: &Bound<'_, PyAny>,
+    observed: f64,
+    alternative: &str,
+) -> PyResult<f64> {
+    with_slice(py, dist, |s| rsmp::permutation_pvalue(s, observed, alternative))
+}
+
 #[pymodule]
 fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ln_gamma, m)?)?;
@@ -229,5 +383,27 @@ fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ncf_cdf, m)?)?;
     m.add_function(wrap_pyfunction!(ncf_sf, m)?)?;
     m.add_function(wrap_pyfunction!(shapiro_wilk, m)?)?;
+    m.add_function(wrap_pyfunction!(sum_, m)?)?;
+    m.add_function(wrap_pyfunction!(mean, m)?)?;
+    m.add_function(wrap_pyfunction!(variance, m)?)?;
+    m.add_function(wrap_pyfunction!(std_dev, m)?)?;
+    m.add_function(wrap_pyfunction!(min_, m)?)?;
+    m.add_function(wrap_pyfunction!(max_, m)?)?;
+    m.add_function(wrap_pyfunction!(median, m)?)?;
+    m.add_function(wrap_pyfunction!(quantile, m)?)?;
+    m.add_function(wrap_pyfunction!(quantiles, m)?)?;
+    m.add_function(wrap_pyfunction!(five_number_summary, m)?)?;
+    m.add_function(wrap_pyfunction!(skewness, m)?)?;
+    m.add_function(wrap_pyfunction!(kurtosis, m)?)?;
+    m.add_function(wrap_pyfunction!(modes, m)?)?;
+    m.add_function(wrap_pyfunction!(sorted_copy, m)?)?;
+    m.add_function(wrap_pyfunction!(covariance, m)?)?;
+    m.add_function(wrap_pyfunction!(pearson_r, m)?)?;
+    m.add_function(wrap_pyfunction!(is_zero_copy, m)?)?;
+    m.add_function(wrap_pyfunction!(bootstrap_dist, m)?)?;
+    m.add_function(wrap_pyfunction!(jackknife_values, m)?)?;
+    m.add_function(wrap_pyfunction!(permutation_dist, m)?)?;
+    m.add_function(wrap_pyfunction!(percentile_ci, m)?)?;
+    m.add_function(wrap_pyfunction!(permutation_pvalue, m)?)?;
     Ok(())
 }
