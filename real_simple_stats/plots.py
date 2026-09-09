@@ -6,6 +6,8 @@ otherwise falls back to matplotlib.
 
 import numpy as np
 
+from . import _rss
+
 try:
     from plotsmith import plot_histogram as _plot_histogram
 
@@ -182,7 +184,6 @@ def plot_p_value_area(
     -------
     (fig, ax)
     """
-    from scipy.stats import t as _t
 
     set_minimalist_style()
     created = ax is None
@@ -193,7 +194,7 @@ def plot_p_value_area(
 
     span = max(4.0, abs(t_stat) + 1.0)
     x = np.linspace(-span, span, 1000)
-    y = _t.pdf(x, df)
+    y = np.array([_rss.t_pdf(float(v), df) for v in x])
     ax.plot(x, y, color="black", linewidth=1.2)
 
     shade = "#c0392b"
@@ -203,7 +204,7 @@ def plot_p_value_area(
         left = x <= -a
         ax.fill_between(x[right], y[right], color=shade, alpha=0.45)
         ax.fill_between(x[left], y[left], color=shade, alpha=0.45)
-        crit = float(_t.ppf(1 - alpha / 2, df))
+        crit = _rss.t_ppf(1 - alpha / 2, df)
         for c in (crit, -crit):
             ax.axvline(c, color="gray", linestyle="--", linewidth=0.9)
         ax.axvline(t_stat, color=shade, linewidth=1.6)
@@ -211,26 +212,26 @@ def plot_p_value_area(
     elif alternative == "greater":
         right = x >= t_stat
         ax.fill_between(x[right], y[right], color=shade, alpha=0.45)
-        crit = float(_t.ppf(1 - alpha, df))
+        crit = _rss.t_ppf(1 - alpha, df)
         ax.axvline(crit, color="gray", linestyle="--", linewidth=0.9)
         ax.axvline(t_stat, color=shade, linewidth=1.6)
     else:  # less
         left = x <= t_stat
         ax.fill_between(x[left], y[left], color=shade, alpha=0.45)
-        crit = float(_t.ppf(alpha, df))
+        crit = _rss.t_ppf(alpha, df)
         ax.axvline(crit, color="gray", linestyle="--", linewidth=0.9)
         ax.axvline(t_stat, color=shade, linewidth=1.6)
 
     if alternative == "two-sided":
-        p_value = 2 * float(_t.sf(abs(t_stat), df))
+        p_value = 2 * _rss.t_sf(abs(t_stat), df)
     elif alternative == "greater":
-        p_value = float(_t.sf(t_stat, df))
+        p_value = _rss.t_sf(t_stat, df)
     else:
-        p_value = float(_t.cdf(t_stat, df))
+        p_value = _rss.t_cdf(t_stat, df)
 
     ax.annotate(
         f"t = {t_stat:.2f}",
-        xy=(t_stat, _t.pdf(t_stat, df)),
+        xy=(t_stat, _rss.t_pdf(t_stat, df)),
         xytext=(t_stat, max(y) * 0.6),
         ha="center",
         color=shade,
@@ -282,7 +283,6 @@ def plot_ci_coverage(
     -------
     (fig, ax)
     """
-    from scipy.stats import t as _t
 
     set_minimalist_style()
     created = ax is None
@@ -293,7 +293,7 @@ def plot_ci_coverage(
 
     rng = np.random.default_rng(seed)
     df = n - 1
-    crit = float(_t.ppf(1 - (1 - confidence) / 2, df))
+    crit = _rss.t_ppf(1 - (1 - confidence) / 2, df)
 
     captured = 0
     miss_color, hit_color = "#c0392b", "black"

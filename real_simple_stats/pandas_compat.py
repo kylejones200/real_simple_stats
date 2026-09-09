@@ -119,7 +119,7 @@ def one_sample_t_test(data: Union[Sequence[float], "pd.Series"], mu: float) -> t
 
     Delegates to hypothesis_testing.t_score and scipy.stats for the p-value.
     """
-    from scipy.stats import t as t_dist
+    from . import _rss
 
     from real_simple_stats import descriptive_statistics as desc
     from real_simple_stats import hypothesis_testing as ht
@@ -130,7 +130,7 @@ def one_sample_t_test(data: Union[Sequence[float], "pd.Series"], mu: float) -> t
     sample_std = desc.sample_std_dev(values)
     t_stat = ht.t_score(sample_mean, mu, sample_std, n)
     df = n - 1
-    p_value = 2 * (1 - t_dist.cdf(abs(t_stat), df))
+    p_value = 2 * _rss.t_sf(abs(t_stat), df)
     return t_stat, p_value
 
 
@@ -142,11 +142,11 @@ def two_sample_t_test(
 
     Delegates to scipy.stats.ttest_ind for independent samples.
     """
-    from scipy.stats import ttest_ind
+    from . import _rss
 
     values1 = _extract_values(data1)
     values2 = _extract_values(data2)
-    t_stat, p_value = ttest_ind(values1, values2)
+    t_stat, p_value = _rss.ttest_ind(values1, values2, True)
     return t_stat, p_value
 
 

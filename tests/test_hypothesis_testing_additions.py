@@ -153,15 +153,28 @@ class TestChiSquareIndependence:
         assert r["cramers_v"] == pytest.approx(0.0, abs=1e-9)
 
     def test_expected_shape_matches_observed(self):
+        # Since 0.5.0 "expected" is a plain list of lists, not an ndarray:
+        # the library no longer depends on NumPy at runtime.
         table = [[10, 20, 15], [5, 10, 20]]
         r = chi_square_independence(table)
-        assert r["expected"].shape == (2, 3)
+        expected = r["expected"]
+        assert len(expected) == 2
+        assert all(len(row) == 3 for row in expected)
 
     def test_expected_row_sums_match(self):
         table = [[10, 20], [30, 40]]
         r = chi_square_independence(table)
-        obs = np.array(table, dtype=float)
-        assert r["expected"].sum(axis=1) == pytest.approx(obs.sum(axis=1))
+        got = [sum(row) for row in r["expected"]]
+        want = [float(sum(row)) for row in table]
+        assert got == pytest.approx(want)
+
+    def test_expected_col_sums_match(self):
+        table = [[10, 20], [30, 40]]
+        r = chi_square_independence(table)
+        expected = r["expected"]
+        got = [sum(row[j] for row in expected) for j in range(2)]
+        want = [float(sum(row[j] for row in table)) for j in range(2)]
+        assert got == pytest.approx(want)
 
     def test_low_expected_cells_counted(self):
         # Very sparse table — some cells will have expected < 5

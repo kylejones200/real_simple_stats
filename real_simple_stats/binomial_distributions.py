@@ -1,6 +1,8 @@
 import math
 from collections.abc import Sequence
 
+from . import _rss
+
 # --- BINOMIAL CORE FUNCTIONS ---
 
 
@@ -84,6 +86,5 @@ def normal_approximation(
     mu = binomial_mean(n, p)
     sigma = binomial_std_dev(n, p)
     z = (k + 0.5 - mu) / sigma if use_continuity else (k - mu) / sigma
-    from scipy.stats import norm
 
-    return float(norm.cdf(z))
+    return _rss.norm_cdf(z)

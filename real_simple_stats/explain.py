@@ -40,7 +40,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from scipy.stats import t as t_dist
+from . import _rss
 
 from . import assumptions as assume
 from . import descriptive_statistics as desc
@@ -330,15 +330,15 @@ def one_sample_t_test_explained(
     t_stat = (xbar - mu) / se
 
     if alt == "two-sided":
-        p_value = 2 * float(t_dist.sf(abs(t_stat), df))
+        p_value = 2 * _rss.t_sf(abs(t_stat), df)
     elif alt == "greater":
-        p_value = float(t_dist.sf(t_stat, df))
+        p_value = _rss.t_sf(t_stat, df)
     else:  # less
-        p_value = float(t_dist.cdf(t_stat, df))
+        p_value = _rss.t_cdf(t_stat, df)
 
     # Two-sided (1 - alpha) confidence interval for the mean — reported
     # regardless of `alt` because it's the most interpretable companion to p.
-    t_crit = float(t_dist.ppf(1 - alpha / 2, df))
+    t_crit = _rss.t_ppf(1 - alpha / 2, df)
     margin = t_crit * se
     ci = (xbar - margin, xbar + margin)
 
@@ -837,8 +837,9 @@ def chi_square_independence_explained(
 
         width = 0.4
         pos = _np_array(list(range(_n_rows * _n_cols)), dtype=float)
-        obs_flat = _obs.flatten()
-        exp_flat = _exp.flatten()
+        # Both are now plain nested lists (no NumPy at runtime).
+        obs_flat = [v for row in _obs for v in row]
+        exp_flat = [v for row in _exp for v in row]
         ax.bar(pos - width / 2, obs_flat, width=width, label="Observed", color="#444444")
         ax.bar(pos + width / 2, exp_flat, width=width, label="Expected", color="#aaaaaa")
         cell_labels = [

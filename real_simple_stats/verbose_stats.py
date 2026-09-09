@@ -8,7 +8,7 @@ import logging
 import math
 from collections.abc import Sequence
 
-from scipy.stats import t as t_dist
+from . import _rss
 
 from . import descriptive_statistics as desc
 
@@ -93,13 +93,13 @@ def t_test_verbose(
     # Step 5: Find critical value
     if test_type == "two-tailed":
         t_critical = ht.critical_value_t(alpha, df, "two-tailed")
-        p_value = 2 * (1 - t_dist.cdf(abs(t_stat), df))
+        p_value = 2 * _rss.t_sf(abs(t_stat), df)
     elif test_type == "greater":
         t_critical = ht.critical_value_t(alpha, df, "greater")
-        p_value = 1 - t_dist.cdf(t_stat, df)
+        p_value = _rss.t_sf(t_stat, df)
     else:  # less
         t_critical = -ht.critical_value_t(alpha, df, "less")  # Negative for left-tailed
-        p_value = t_dist.cdf(t_stat, df)
+        p_value = _rss.t_cdf(t_stat, df)
 
     if verbose:
         logger.info("\nStep 5: Critical Value")

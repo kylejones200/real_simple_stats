@@ -4,6 +4,7 @@ use arr::{with_slice, with_two_slices, Arr};
 use pyo3::prelude::*;
 use rss_core::descriptive as ds;
 use rss_core::linalg as la;
+use rss_core::rng as rrng;
 use rss_core::optimize as opt;
 use rss_core::regression as reg;
 use rss_core::resample as rsmp;
@@ -480,6 +481,116 @@ fn simplex_least_squares(y: Vec<f64>, columns: Vec<Vec<f64>>, max_iter: usize, t
     opt::simplex_least_squares(&y, &columns, max_iter, tol)
 }
 
+
+// ------------------------------------------------------------------- rng ---
+
+/// The library's random number generator: a seeded PCG64 stream.
+///
+/// Exposed as a real type rather than as a NumPy-shaped compatibility object.
+/// Constructing with the same seed always reproduces the same sequence.
+#[pyclass(name = "Rng")]
+struct PyRng {
+    inner: rrng::Sampler,
+}
+
+#[pymethods]
+impl PyRng {
+    #[new]
+    #[pyo3(signature = (seed=None))]
+    fn new(seed: Option<u64>) -> PyRng {
+        PyRng {
+            inner: match seed {
+                Some(s) => rrng::Sampler::new(s),
+                None => rrng::Sampler::from_entropy(),
+            },
+        }
+    }
+
+    /// n uniform draws from [0, 1).
+    fn random(&mut self, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.uniform01()).collect()
+    }
+    #[pyo3(signature = (low=0.0, high=1.0, n=1))]
+    fn uniform(&mut self, low: f64, high: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.uniform(low, high)).collect()
+    }
+    #[pyo3(signature = (low, high, n=1))]
+    fn integers(&mut self, low: i64, high: i64, n: usize) -> Vec<i64> {
+        (0..n).map(|_| self.inner.integer(low, high)).collect()
+    }
+    #[pyo3(signature = (mean=0.0, sd=1.0, n=1))]
+    fn normal(&mut self, mean: f64, sd: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.normal(mean, sd)).collect()
+    }
+    #[pyo3(signature = (scale=1.0, n=1))]
+    fn exponential(&mut self, scale: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.exponential(scale)).collect()
+    }
+    #[pyo3(signature = (mu=0.0, sigma=1.0, n=1))]
+    fn lognormal(&mut self, mu: f64, sigma: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.lognormal(mu, sigma)).collect()
+    }
+    #[pyo3(signature = (shape, scale=1.0, n=1))]
+    fn gamma(&mut self, shape: f64, scale: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.gamma(shape, scale)).collect()
+    }
+    #[pyo3(signature = (a, b, n=1))]
+    fn beta(&mut self, a: f64, b: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.beta(a, b)).collect()
+    }
+    #[pyo3(signature = (lam=1.0, n=1))]
+    fn poisson(&mut self, lam: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.poisson(lam)).collect()
+    }
+    #[pyo3(signature = (trials, p, n=1))]
+    fn binomial(&mut self, trials: u64, p: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.binomial(trials, p)).collect()
+    }
+    #[pyo3(signature = (shape, scale=1.0, n=1))]
+    fn weibull(&mut self, shape: f64, scale: f64, n: usize) -> Vec<f64> {
+        (0..n).map(|_| self.inner.weibull(shape, scale)).collect()
+    }
+    #[pyo3(signature = (data, n, replace=true))]
+    fn choice(
+        &mut self,
+        py: Python<'_>,
+        data: &Bound<'_, PyAny>,
+        n: usize,
+        replace: bool,
+    ) -> PyResult<Vec<f64>> {
+        let a = Arr::from_py(data)?;
+        let s = a.as_slice(py);
+        if s.is_empty() {
+            return Err(pyo3::exceptions::PyValueError::new_err(
+                "cannot choose from an empty sequence",
+            ));
+        }
+        if replace {
+            let mut out = vec![0.0; n];
+            self.inner.choice_with_replacement(s, &mut out);
+            Ok(out)
+        } else {
+            if n > s.len() {
+                return Err(pyo3::exceptions::PyValueError::new_err(
+                    "cannot take a sample larger than the population without replacement",
+                ));
+            }
+            Ok(self.inner.choice_without_replacement(s, n))
+        }
+    }
+    /// A random permutation of 0..n.
+    fn permutation(&mut self, n: usize) -> Vec<usize> {
+        self.inner.permutation(n)
+    }
+    /// Return a shuffled copy of the input.
+    fn shuffled(&mut self, py: Python<'_>, data: &Bound<'_, PyAny>) -> PyResult<Vec<f64>> {
+        let a = Arr::from_py(data)?;
+        let mut v = a.as_slice(py).to_vec();
+        self.inner.shuffle_slice(&mut v);
+        Ok(v)
+    }
+}
+
 #[pymodule]
 fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ln_gamma, m)?)?;
@@ -595,5 +706,6 @@ fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(brentq, m)?)?;
     m.add_function(wrap_pyfunction!(curve_fit_lm, m)?)?;
     m.add_function(wrap_pyfunction!(simplex_least_squares, m)?)?;
+    m.add_class::<PyRng>()?;
     Ok(())
 }

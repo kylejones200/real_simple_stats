@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from scipy.stats import chi2
+from . import _rss
 
 # --- CHI-SQUARE CORE UTILITIES ---
 
@@ -25,7 +25,7 @@ def critical_chi_square_value(alpha: float, df: int) -> float:
     Returns:
         Right-tailed critical value from the chi-square distribution.
     """
-    return float(chi2.ppf(1 - alpha, df))
+    return _rss.chi2_ppf(1 - alpha, df)
 
 
 def reject_null_chi_square(chi_stat: float, critical_value: float) -> bool:

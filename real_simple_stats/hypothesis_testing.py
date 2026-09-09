@@ -3,8 +3,7 @@ import math
 from collections.abc import Sequence
 from typing import Any
 
-import numpy as np
-from scipy.stats import chi2_contingency, f, f_oneway, norm, t
+from . import _rss
 
 logger = logging.getLogger(__name__)
 
@@ -34,11 +33,11 @@ def is_two_tailed(test_statistic: float, critical_value: float) -> bool:
 def p_value_method(test_statistic: float, test_type: str = "two-tailed") -> float:
     """Returns the p-value based on the test type."""
     if test_type == "two-tailed":
-        return 2 * (1 - float(norm.cdf(abs(test_statistic))))
+        return 2 * _rss.norm_sf(abs(test_statistic))
     elif test_type == "right-tailed":
-        return 1 - float(norm.cdf(test_statistic))
+        return _rss.norm_sf(test_statistic)
     elif test_type == "left-tailed":
-        return float(norm.cdf(test_statistic))
+        return _rss.norm_cdf(test_statistic)
     else:
         raise ValueError("Invalid test_type")
 
@@ -63,18 +62,18 @@ def f_test(var1: float, var2: float) -> float:
 
 def critical_value_z(alpha: float, test_type: str = "two-tailed") -> float:
     if test_type == "two-tailed":
-        return float(norm.ppf(1 - alpha / 2))
-    return float(norm.ppf(1 - alpha))
+        return _rss.norm_ppf(1 - alpha / 2)
+    return _rss.norm_ppf(1 - alpha)
 
 
 def critical_value_t(alpha: float, df: int, test_type: str = "two-tailed") -> float:
     if test_type == "two-tailed":
-        return float(t.ppf(1 - alpha / 2, df))
-    return float(t.ppf(1 - alpha, df))
+        return _rss.t_ppf(1 - alpha / 2, df)
+    return _rss.t_ppf(1 - alpha, df)
 
 
 def critical_value_f(alpha: float, dfn: int, dfd: int) -> float:
-    return float(f.ppf(1 - alpha, dfn, dfd))
+    return _rss.f_ppf(1 - alpha, dfn, dfd)
 
 
 def one_way_anova(
@@ -113,8 +112,8 @@ def one_way_anova(
         ValueError: If fewer than 2 groups or any group has fewer than 2 observations.
 
     Example:
-        >>> import numpy as np
-        >>> rng = np.random.default_rng(0)
+        >>> from real_simple_stats import Rng
+        >>> rng = Rng(0)
         >>> g1 = rng.normal(0, 1, 30)
         >>> g2 = rng.normal(1, 1, 30)
         >>> g3 = rng.normal(2, 1, 30)
@@ -124,25 +123,24 @@ def one_way_anova(
     """
     if len(groups) < 2:
         raise ValueError("Need at least 2 groups.")
-    arrays: list[np.ndarray] = [np.asarray(g, dtype=float) for g in groups]
+    arrays: list[list[float]] = [[float(v) for v in g] for g in groups]
     for i, a in enumerate(arrays):
         if len(a) < 2:
             raise ValueError(f"Group {i} has fewer than 2 observations.")
 
-    f_stat, p_value = f_oneway(*arrays)
-    f_stat, p_value = float(f_stat), float(p_value)
+    f_stat, p_value = _rss.f_oneway(arrays)
 
     k = len(arrays)
-    group_means = [float(a.mean()) for a in arrays]
+    group_means = [_rss.mean(a) for a in arrays]
     group_ns = [len(a) for a in arrays]
     n_total = sum(group_ns)
 
-    grand_mean = float(np.concatenate(arrays).mean())
+    grand_mean = _rss.mean([v for a in arrays for v in a])
     ss_between = sum(
         n * (m - grand_mean) ** 2
         for n, m in zip(group_ns, group_means)
     )
-    ss_total = float(sum(((a - grand_mean) ** 2).sum() for a in arrays))
+    ss_total = sum((v - grand_mean) ** 2 for a in arrays for v in a)
     eta_squared = ss_between / ss_total if ss_total > 0 else float("nan")
 
     return {
@@ -202,18 +200,25 @@ def chi_square_independence(
         >>> 0 <= r["cramers_v"] <= 1
         True
     """
-    obs: np.ndarray = np.asarray(observed, dtype=float)
-    if obs.ndim != 2 or obs.shape[0] < 2 or obs.shape[1] < 2:
+    try:
+        obs: list[list[float]] = [[float(v) for v in row] for row in observed]
+    except TypeError as exc:
+        raise ValueError("observed must be a 2-D table of numbers.") from exc
+    n_rows = len(obs)
+    n_cols = len(obs[0]) if n_rows else 0
+    if n_rows < 2 or n_cols < 2 or any(len(r) != n_cols for r in obs):
         raise ValueError("observed must be a 2-D array with at least 2 rows and 2 columns.")
 
-    chi2, p_value, dof, expected = chi2_contingency(obs)
-    chi2, p_value, dof = float(chi2), float(p_value), int(dof)
+    flat = [v for row in obs for v in row]
+    chi2, p_value, dof, expected_flat = _rss.chi2_contingency(n_rows, n_cols, flat, True)
+    dof = int(dof)
+    expected = [expected_flat[i * n_cols : (i + 1) * n_cols] for i in range(n_rows)]
 
-    n = float(obs.sum())
-    min_dim = min(obs.shape) - 1
+    n = sum(flat)
+    min_dim = min(n_rows, n_cols) - 1
     cramers_v = float(math.sqrt(chi2 / (n * min_dim))) if n > 0 and min_dim > 0 else 0.0
 
-    low_expected = int((expected < 5).sum())
+    low_expected = sum(1 for row in expected for v in row if v < 5)
 
     if p_value < alpha:
         interp = (

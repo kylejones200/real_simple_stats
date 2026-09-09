@@ -1,10 +1,9 @@
 import logging
 from collections.abc import Sequence
 
-import numpy as np
 
 logger = logging.getLogger(__name__)
-from scipy.stats import linregress
+from . import _rss
 
 # --- SCATTER PLOT PREP (data only, no plotting here) ---
 
@@ -21,7 +20,7 @@ def prepare_scatter_data(
 
 def pearson_correlation(x: Sequence[float], y: Sequence[float]) -> float:
     """Computes Pearson's correlation coefficient (r)."""
-    return float(np.corrcoef(x, y)[0, 1])
+    return _rss.pearson_r(x, y)
 
 
 def coefficient_of_determination(x: Sequence[float], y: Sequence[float]) -> float:
@@ -40,14 +39,8 @@ def linear_regression(
     Returns slope, intercept, r_value, p_value, std_err
     Formula: y = a + b*x
     """
-    result = linregress(x, y)
-    return (
-        float(result.slope),
-        float(result.intercept),
-        float(result.rvalue),
-        float(result.pvalue),
-        float(result.stderr),
-    )
+    slope, intercept, rvalue, pvalue, stderr, _intercept_stderr = _rss.linregress(x, y)
+    return (slope, intercept, rvalue, pvalue, stderr)
 
 
 def regression_equation(x: float, slope: float, intercept: float) -> float:
@@ -62,8 +55,8 @@ def manual_slope_intercept(
     x: Sequence[float], y: Sequence[float]
 ) -> tuple[float, float]:
     """Computes slope and intercept manually."""
-    x_mean = float(np.mean(x))
-    y_mean = float(np.mean(y))
+    x_mean = _rss.mean(x)
+    y_mean = _rss.mean(y)
     numerator = sum((xi - x_mean) * (yi - y_mean) for xi, yi in zip(x, y))
     denominator = sum((xi - x_mean) ** 2 for xi in x)
     slope = float(numerator / denominator)

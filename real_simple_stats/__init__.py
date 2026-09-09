@@ -31,6 +31,9 @@ try:
 except PackageNotFoundError:  # When running from source without installed metadata
     __version__ = "0.0.0"
 
+# The native random generator (PCG64), used wherever the library samples.
+from ._rss import Rng  # noqa: E402, F401
+
 # Top-level exports for convenience
 from .assumptions import *  # noqa: F403, F401, E402
 from .bayesian_stats import *  # noqa: F403, F401
