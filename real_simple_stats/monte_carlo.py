@@ -1,65 +1,49 @@
-"""Monte Carlo simulation methods for statistical inference and forecasting.
+"""Monte Carlo simulation: price paths, integration, and probability estimation.
 
-This module provides functions for Monte Carlo simulations including
-geometric Brownian motion for financial modeling and general-purpose
-simulation techniques.
+Path generation runs in Rust and in parallel; each simulation draws from its own
+derived stream, so a given ``random_seed`` reproduces exactly regardless of core
+count.
+
+Two contract changes in 0.5.0, both consequences of dropping NumPy:
+
+* ``paths`` and ``mean_path`` are lists (``paths`` a list of rows, one row per
+  time step) rather than a 2-D ndarray.
+* ``func`` and ``condition`` are called once per sample -- with a float in one
+  dimension, or a tuple of floats in several -- instead of receiving a whole
+  array. Scalar-style lambdas such as ``lambda x: x**2`` and
+  ``lambda xy: xy[0]**2 + xy[1]**2 <= 1`` are unaffected; genuinely vectorised
+  callables need rewriting as scalar ones.
 """
 
-from collections.abc import Callable
+from __future__ import annotations
 
-import numpy as np
+import math
+from collections.abc import Callable, Sequence
+from typing import Any
 
-try:
-    from numba import jit
+from . import _rss
+from ._rss import Rng
 
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
+__all__ = [
+    "geometric_brownian_motion",
+    "monte_carlo_from_data",
+    "monte_carlo_integration",
+    "monte_carlo_probability",
+]
 
-    def jit(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
+_MAX_SEED = 2**63 - 1
 
 
-@jit(nopython=True)
-def _gbm_simulation_jit(
-    S0: float,
-    mu: float,
-    sigma: float,
-    T: float,
-    n_steps: int,
-    n_simulations: int,
-    seed: int,
-) -> np.ndarray:
-    """JIT-compiled Geometric Brownian Motion simulation.
+def _seed_or_random(random_seed: int | None) -> int:
+    if random_seed is not None:
+        return int(random_seed) % _MAX_SEED
+    return Rng().integers(0, _MAX_SEED, 1)[0]
 
-    Args:
-        S0: Initial value
-        mu: Drift (expected return)
-        sigma: Volatility (standard deviation)
-        T: Time horizon
-        n_steps: Number of time steps
-        n_simulations: Number of simulation paths
-        seed: Random seed
 
-    Returns:
-        Array of shape (n_steps+1, n_simulations) with simulated paths
-    """
-    np.random.seed(seed)
-    dt = T / n_steps
-    paths = np.zeros((n_steps + 1, n_simulations))
-    paths[0] = S0
-
-    for i in range(n_simulations):
-        for t in range(1, n_steps + 1):
-            Z = np.random.standard_normal()
-            paths[t, i] = paths[t - 1, i] * np.exp(
-                (mu - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z
-            )
-
-    return paths
+def _as_bounds(value: float | Sequence[float]) -> list[float]:
+    if isinstance(value, (int, float)):
+        return [float(value)]
+    return [float(v) for v in value]
 
 
 def geometric_brownian_motion(
@@ -70,52 +54,32 @@ def geometric_brownian_motion(
     n_steps: int = 252,
     n_simulations: int = 1000,
     random_seed: int | None = None,
-) -> dict[str, any]:
-    """Simulate paths using Geometric Brownian Motion.
-
-    Geometric Brownian Motion (GBM) is commonly used to model stock prices
-    and other financial time series. The model assumes:
-    dS = μS dt + σS dW
-
-    where:
-    - S is the asset price
-    - μ (mu) is the drift (expected return)
-    - σ (sigma) is the volatility
-    - dW is a Wiener process (Brownian motion)
+) -> dict[str, Any]:
+    """Simulate price paths under geometric Brownian motion.
 
     Args:
-        S0: Initial value (e.g., current stock price)
-        mu: Drift coefficient (expected return, annualized)
-        sigma: Volatility coefficient (standard deviation, annualized)
-        T: Time horizon in years (e.g., 1.0 for one year)
-        n_steps: Number of time steps (default: 252 for trading days)
-        n_simulations: Number of simulation paths
-        random_seed: Random seed for reproducibility
+        S0: Starting value (must be positive).
+        mu: Expected return per unit time.
+        sigma: Volatility per unit time (non-negative).
+        T: Total time horizon.
+        n_steps: Number of time steps.
+        n_simulations: Number of independent paths.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing:
-            - paths: Array of simulated paths (n_steps+1, n_simulations)
-            - times: Array of time points
-            - final_values: Final values from all simulations
-            - mean_path: Mean across all simulations
-            - percentiles: 5th, 25th, 50th, 75th, 95th percentiles
-            - statistics: Summary statistics
+        Dictionary with ``paths`` (a list of ``n_steps + 1`` rows, each holding
+        every simulation's value at that step), ``times``, ``final_values``,
+        ``mean_path``, ``percentiles`` and ``statistics``.
 
     Raises:
-        ValueError: If parameters are invalid
+        ValueError: If any parameter is out of range.
 
-    Examples:
-        >>> # Simulate stock price for 1 year
-        >>> result = geometric_brownian_motion(
-        ...     S0=100,           # Current price $100
-        ...     mu=0.10,          # 10% expected annual return
-        ...     sigma=0.20,       # 20% annual volatility
-        ...     T=1.0,            # 1 year
-        ...     n_steps=252,      # Daily steps
-        ...     n_simulations=1000
-        ... )
-        >>> print(f"Expected final price: ${result['statistics']['mean']:.2f}")
-        >>> print(f"95% CI: ${result['percentiles'][5]:.2f} - ${result['percentiles'][95]:.2f}")
+    Example:
+        >>> r = geometric_brownian_motion(100, 0.1, 0.2, 1.0, 12, 500, random_seed=1)
+        >>> len(r["paths"]), len(r["paths"][0])
+        (13, 500)
+        >>> all(v > 0 for v in r["final_values"])
+        True
     """
     if S0 <= 0:
         raise ValueError("S0 must be positive")
@@ -128,308 +92,205 @@ def geometric_brownian_motion(
     if n_simulations < 1:
         raise ValueError("n_simulations must be at least 1")
 
-    seed = random_seed if random_seed is not None else np.random.randint(0, 2**31)
+    seed = _seed_or_random(random_seed)
+    flat = _rss.gbm_paths(
+        float(S0), float(mu), float(sigma), float(T), n_steps, n_simulations, seed
+    )
 
-    # Use JIT-compiled version if available and beneficial
-    if NUMBA_AVAILABLE and n_simulations >= 100:
-        paths = _gbm_simulation_jit(S0, mu, sigma, T, n_steps, n_simulations, seed)
-    else:
-        # Standard NumPy implementation
-        np.random.seed(seed)
-        dt = T / n_steps
-        paths = np.zeros((n_steps + 1, n_simulations))
-        paths[0] = S0
+    rows = n_steps + 1
+    paths = [flat[t * n_simulations : (t + 1) * n_simulations] for t in range(rows)]
+    times = [T * t / n_steps for t in range(rows)]
+    final_values = paths[-1]
+    mean_path = [_rss.mean(row) for row in paths]
 
-        for t in range(1, n_steps + 1):
-            Z = np.random.standard_normal(n_simulations)
-            paths[t] = paths[t - 1] * np.exp(
-                (mu - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z
-            )
-
-    # Calculate statistics
-    times = np.linspace(0, T, n_steps + 1)
-    final_values = paths[-1, :]
-    mean_path = np.mean(paths, axis=1)
-
-    percentiles = {
-        5: np.percentile(final_values, 5),
-        25: np.percentile(final_values, 25),
-        50: np.percentile(final_values, 50),
-        75: np.percentile(final_values, 75),
-        95: np.percentile(final_values, 95),
-    }
-
-    statistics = {
-        "mean": float(np.mean(final_values)),
-        "median": float(np.median(final_values)),
-        "std": float(np.std(final_values)),
-        "min": float(np.min(final_values)),
-        "max": float(np.max(final_values)),
-    }
-
+    q = _rss.quantiles(final_values, [0.05, 0.25, 0.50, 0.75, 0.95])
     return {
         "paths": paths,
         "times": times,
         "final_values": final_values,
         "mean_path": mean_path,
-        "percentiles": percentiles,
-        "statistics": statistics,
+        "percentiles": {5: q[0], 25: q[1], 50: q[2], 75: q[3], 95: q[4]},
+        "statistics": {
+            "mean": _rss.mean(final_values),
+            "median": _rss.median(final_values),
+            "std": _rss.std_dev(final_values, 0),
+            "min": _rss.min_(final_values),
+            "max": _rss.max_(final_values),
+        },
     }
 
 
 def monte_carlo_from_data(
-    data: list[float],
+    data: Sequence[float],
     n_steps: int,
     n_simulations: int = 1000,
     random_seed: int | None = None,
-) -> dict[str, any]:
-    """Run Monte Carlo simulation using parameters estimated from historical data.
-
-    This function estimates drift (mu) and volatility (sigma) from historical
-    data and uses them to simulate future paths using Geometric Brownian Motion.
+) -> dict[str, Any]:
+    """Simulate forward using drift and volatility estimated from history.
 
     Args:
-        data: Historical data (e.g., stock prices)
-        n_steps: Number of steps to simulate into the future
-        n_simulations: Number of simulation paths
-        random_seed: Random seed for reproducibility
+        data: Historical series, e.g. prices (at least 2 values, all positive).
+        n_steps: Steps to project forward. Daily data is assumed, so the
+            horizon is ``n_steps / 252`` years.
+        n_simulations: Number of paths.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing simulation results and estimated parameters
+        The :func:`geometric_brownian_motion` result plus a ``parameters``
+        entry holding the estimated ``mu``, ``sigma``, ``drift`` and ``S0``.
 
     Raises:
-        ValueError: If data is insufficient
+        ValueError: If fewer than 2 values are given, or any value is not
+            positive (log returns would be undefined).
 
-    Examples:
-        >>> # Simulate future stock prices based on historical data
-        >>> historical_prices = [100, 102, 101, 105, 103, 107, 110]
-        >>> result = monte_carlo_from_data(
-        ...     data=historical_prices,
-        ...     n_steps=30,  # Simulate 30 days ahead
-        ...     n_simulations=1000
-        ... )
-        >>> print(f"Estimated drift: {result['parameters']['mu']:.4f}")
-        >>> print(f"Estimated volatility: {result['parameters']['sigma']:.4f}")
+    Example:
+        >>> r = monte_carlo_from_data([100, 102, 101, 105, 103], 10, 100, random_seed=2)
+        >>> "mu" in r["parameters"]
+        True
     """
-    if len(data) < 2:
+    values = [float(v) for v in data]
+    if len(values) < 2:
         raise ValueError("Data must contain at least 2 values")
+    if any(v <= 0 for v in values):
+        raise ValueError("All data values must be positive to compute log returns")
 
-    data_array = np.asarray(data)
-
-    # Calculate log returns
-    log_returns = np.log(data_array[1:] / data_array[:-1])
-
-    # Estimate parameters
-    mu = np.mean(log_returns)
-    sigma = np.std(log_returns, ddof=1)
-
-    # Adjust drift for bias correction
-    drift = mu - (0.5 * sigma**2)
-
-    # Run simulation
-    S0 = data_array[-1]
-    T = n_steps / 252  # Assume daily data, convert to years
+    log_returns = [math.log(b / a) for a, b in zip(values, values[1:])]
+    mu = _rss.mean(log_returns)
+    sigma = _rss.std_dev(log_returns, 1) if len(log_returns) > 1 else 0.0
+    drift = mu - 0.5 * sigma**2
+    s0 = values[-1]
 
     result = geometric_brownian_motion(
-        S0=S0,
+        S0=s0,
         mu=drift,
         sigma=sigma,
-        T=T,
+        T=n_steps / 252,
         n_steps=n_steps,
         n_simulations=n_simulations,
         random_seed=random_seed,
     )
-
-    # Add estimated parameters to result
-    result["parameters"] = {
-        "mu": float(mu),
-        "sigma": float(sigma),
-        "drift": float(drift),
-        "S0": float(S0),
-    }
-
+    result["parameters"] = {"mu": mu, "sigma": sigma, "drift": drift, "S0": s0}
     return result
 
 
+def _sample_box(
+    lower: list[float], upper: list[float], n_samples: int, seed: int
+) -> list:
+    """Draw `n_samples` points from the box, as floats (1-D) or tuples (n-D)."""
+    d = len(lower)
+    flat = _rss.uniform_box(lower, upper, n_samples, seed)
+    if d == 1:
+        return flat
+    return [tuple(flat[i * d : (i + 1) * d]) for i in range(n_samples)]
+
+
 def monte_carlo_integration(
-    func: Callable[[np.ndarray], np.ndarray],
-    lower_bounds: float | list[float],
-    upper_bounds: float | list[float],
+    func: Callable[..., float],
+    lower_bounds: float | Sequence[float],
+    upper_bounds: float | Sequence[float],
     n_samples: int = 10000,
     random_seed: int | None = None,
-) -> dict[str, float]:
-    """Estimate integral using Monte Carlo integration.
-
-    Monte Carlo integration estimates the integral of a function by
-    randomly sampling points in the integration domain and computing
-    the average function value.
+) -> dict[str, Any]:
+    """Estimate a definite integral by averaging the integrand over the domain.
 
     Args:
-        func: Function to integrate (must accept numpy arrays)
-        lower_bounds: Lower bounds for each dimension
-        upper_bounds: Upper bounds for each dimension
-        n_samples: Number of random samples
-        random_seed: Random seed for reproducibility
+        func: The integrand, called once per sample. It receives a float in one
+            dimension, or a tuple of floats in several.
+        lower_bounds: Lower limit per dimension.
+        upper_bounds: Upper limit per dimension.
+        n_samples: Number of samples.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing:
-            - integral: Estimated integral value
-            - std_error: Standard error of the estimate
-            - confidence_interval: 95% confidence interval
+        Dictionary with ``integral``, ``std_error`` and a 95%
+        ``confidence_interval``.
 
     Raises:
-        ValueError: If parameters are invalid
+        ValueError: If the bounds disagree in length or ``n_samples`` < 1.
 
-    Examples:
-        >>> # Integrate x^2 from 0 to 1 (analytical answer: 1/3)
-        >>> result = monte_carlo_integration(
-        ...     func=lambda x: x**2,
-        ...     lower_bounds=0,
-        ...     upper_bounds=1,
-        ...     n_samples=10000
-        ... )
-        >>> print(f"Estimated integral: {result['integral']:.4f}")
-        >>> print(f"True value: {1/3:.4f}")
+    Example:
+        >>> r = monte_carlo_integration(lambda x: x**2, 0, 1, 20000, random_seed=7)
+        >>> abs(r["integral"] - 1/3) < 0.01
+        True
     """
     if n_samples < 1:
         raise ValueError("n_samples must be at least 1")
-
-    # Convert bounds to arrays
-    if not isinstance(lower_bounds, list | np.ndarray):
-        lower_bounds = [lower_bounds]
-    if not isinstance(upper_bounds, list | np.ndarray):
-        upper_bounds = [upper_bounds]
-
-    lower_bounds = np.asarray(lower_bounds)
-    upper_bounds = np.asarray(upper_bounds)
-
-    if len(lower_bounds) != len(upper_bounds):
+    lower = _as_bounds(lower_bounds)
+    upper = _as_bounds(upper_bounds)
+    if len(lower) != len(upper):
         raise ValueError("lower_bounds and upper_bounds must have same length")
 
-    n_dims = len(lower_bounds)
+    samples = _sample_box(lower, upper, n_samples, _seed_or_random(random_seed))
+    values = [float(func(s)) for s in samples]
 
-    # Set random seed
-    if random_seed is not None:
-        np.random.seed(random_seed)
+    volume = 1.0
+    for lo, hi in zip(lower, upper):
+        volume *= hi - lo
 
-    # Generate random samples
-    samples = np.random.uniform(
-        lower_bounds,
-        upper_bounds,
-        size=(n_samples, n_dims) if n_dims > 1 else n_samples,
+    integral = volume * _rss.mean(values)
+    std_error = (
+        volume * _rss.std_dev(values, 1) / math.sqrt(n_samples) if n_samples > 1 else 0.0
     )
-
-    # Evaluate function
-    if n_dims == 1:
-        function_values = func(samples)
-    else:
-        function_values = func(samples.T)
-
-    # Calculate volume of integration domain
-    volume = np.prod(upper_bounds - lower_bounds)
-
-    # Estimate integral
-    integral_estimate = volume * np.mean(function_values)
-    std_error = volume * np.std(function_values, ddof=1) / np.sqrt(n_samples)
-
-    # 95% confidence interval
-    ci_lower = integral_estimate - 1.96 * std_error
-    ci_upper = integral_estimate + 1.96 * std_error
-
     return {
-        "integral": float(integral_estimate),
-        "std_error": float(std_error),
-        "confidence_interval": (float(ci_lower), float(ci_upper)),
+        "integral": integral,
+        "std_error": std_error,
+        "confidence_interval": (
+            integral - 1.96 * std_error,
+            integral + 1.96 * std_error,
+        ),
     }
 
 
 def monte_carlo_probability(
-    condition: Callable[[np.ndarray], np.ndarray],
-    lower_bounds: float | list[float],
-    upper_bounds: float | list[float],
+    condition: Callable[..., bool],
+    lower_bounds: float | Sequence[float],
+    upper_bounds: float | Sequence[float],
     n_samples: int = 10000,
     random_seed: int | None = None,
-) -> dict[str, float]:
-    """Estimate probability using Monte Carlo simulation.
-
-    Estimates P(condition is True) by randomly sampling points
-    and computing the fraction that satisfy the condition.
+) -> dict[str, Any]:
+    """Estimate the probability that a condition holds over a uniform domain.
 
     Args:
-        condition: Function that returns True/False for each sample
-        lower_bounds: Lower bounds for sampling
-        upper_bounds: Upper bounds for sampling
-        n_samples: Number of random samples
-        random_seed: Random seed for reproducibility
+        condition: Predicate called once per sample, receiving a float in one
+            dimension or a tuple of floats in several.
+        lower_bounds: Lower limit per dimension.
+        upper_bounds: Upper limit per dimension.
+        n_samples: Number of samples.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing:
-            - probability: Estimated probability
-            - std_error: Standard error
-            - confidence_interval: 95% confidence interval
+        Dictionary with ``probability``, ``std_error``, ``confidence_interval``,
+        ``n_successes`` and ``n_samples``.
 
-    Examples:
-        >>> # Estimate P(x^2 + y^2 <= 1) for x,y in [0,1]
-        >>> # This estimates pi/4
-        >>> result = monte_carlo_probability(
-        ...     condition=lambda xy: xy[0]**2 + xy[1]**2 <= 1,
-        ...     lower_bounds=[0, 0],
-        ...     upper_bounds=[1, 1],
-        ...     n_samples=10000
+    Raises:
+        ValueError: If the bounds disagree in length or ``n_samples`` < 1.
+
+    Example:
+        >>> r = monte_carlo_probability(
+        ...     lambda xy: xy[0]**2 + xy[1]**2 <= 1, [0, 0], [1, 1], 20000, random_seed=4
         ... )
-        >>> pi_estimate = result['probability'] * 4
-        >>> print(f"Estimated pi: {pi_estimate:.4f}")
+        >>> abs(r["probability"] * 4 - 3.14159) < 0.1
+        True
     """
     if n_samples < 1:
         raise ValueError("n_samples must be at least 1")
+    lower = _as_bounds(lower_bounds)
+    upper = _as_bounds(upper_bounds)
+    if len(lower) != len(upper):
+        raise ValueError("lower_bounds and upper_bounds must have same length")
 
-    # Convert bounds to arrays
-    if not isinstance(lower_bounds, list | np.ndarray):
-        lower_bounds = [lower_bounds]
-    if not isinstance(upper_bounds, list | np.ndarray):
-        upper_bounds = [upper_bounds]
+    samples = _sample_box(lower, upper, n_samples, _seed_or_random(random_seed))
+    n_successes = sum(1 for s in samples if condition(s))
 
-    lower_bounds = np.asarray(lower_bounds)
-    upper_bounds = np.asarray(upper_bounds)
-    n_dims = len(lower_bounds)
-
-    # Set random seed
-    if random_seed is not None:
-        np.random.seed(random_seed)
-
-    # Generate random samples
-    samples = np.random.uniform(
-        lower_bounds,
-        upper_bounds,
-        size=(n_samples, n_dims) if n_dims > 1 else n_samples,
-    )
-
-    # Evaluate condition
-    if n_dims == 1:
-        satisfies_condition = condition(samples)
-    else:
-        satisfies_condition = condition(samples.T)
-
-    # Estimate probability
-    probability = np.mean(satisfies_condition)
-    std_error = np.sqrt(probability * (1 - probability) / n_samples)
-
-    # 95% confidence interval
-    ci_lower = max(0, probability - 1.96 * std_error)
-    ci_upper = min(1, probability + 1.96 * std_error)
-
+    probability = n_successes / n_samples
+    std_error = math.sqrt(probability * (1 - probability) / n_samples)
     return {
-        "probability": float(probability),
-        "std_error": float(std_error),
-        "confidence_interval": (float(ci_lower), float(ci_upper)),
-        "n_successes": int(np.sum(satisfies_condition)),
+        "probability": probability,
+        "std_error": std_error,
+        "confidence_interval": (
+            max(0.0, probability - 1.96 * std_error),
+            min(1.0, probability + 1.96 * std_error),
+        ),
+        "n_successes": n_successes,
         "n_samples": int(n_samples),
     }
-
-
-__all__ = [
-    "geometric_brownian_motion",
-    "monte_carlo_from_data",
-    "monte_carlo_integration",
-    "monte_carlo_probability",
-]

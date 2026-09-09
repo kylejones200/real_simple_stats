@@ -5,6 +5,7 @@ use pyo3::prelude::*;
 use rss_core::descriptive as ds;
 use rss_core::linalg as la;
 use rss_core::rng as rrng;
+use rss_core::simulate as sim;
 use rss_core::optimize as opt;
 use rss_core::regression as reg;
 use rss_core::resample as rsmp;
@@ -591,6 +592,16 @@ impl PyRng {
     }
 }
 
+#[pyfunction]
+fn gbm_paths(py: Python<'_>, s0: f64, mu: f64, sigma: f64, t: f64, n_steps: usize, n_sims: usize, seed: u64) -> Vec<f64> {
+    py.allow_threads(|| sim::gbm_paths(s0, mu, sigma, t, n_steps, n_sims, seed))
+}
+
+#[pyfunction]
+fn uniform_box(py: Python<'_>, lower: Vec<f64>, upper: Vec<f64>, n_samples: usize, seed: u64) -> Vec<f64> {
+    py.allow_threads(|| sim::uniform_box(&lower, &upper, n_samples, seed))
+}
+
 #[pymodule]
 fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(ln_gamma, m)?)?;
@@ -707,5 +718,7 @@ fn _rss(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(curve_fit_lm, m)?)?;
     m.add_function(wrap_pyfunction!(simplex_least_squares, m)?)?;
     m.add_class::<PyRng>()?;
+    m.add_function(wrap_pyfunction!(gbm_paths, m)?)?;
+    m.add_function(wrap_pyfunction!(uniform_box, m)?)?;
     Ok(())
 }

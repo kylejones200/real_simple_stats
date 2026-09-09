@@ -11,4 +11,5 @@ pub mod optimize;
 pub mod regression;
 pub mod resample;
 pub mod rng;
+pub mod simulate;
 pub mod special;

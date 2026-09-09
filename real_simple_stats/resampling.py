@@ -1,525 +1,343 @@
+"""Resampling methods: bootstrap, permutation tests, jackknife, and validation splits.
+
+The heavy loops run in Rust and in parallel. When ``statistic`` is one of the
+standard summaries the whole resample never enters Python at all; anything else
+falls back to a Python loop driven by the same native generator, so custom
+statistics still work, just more slowly.
+
+Reproducibility: passing ``random_seed`` gives the same answer on every machine
+and every run, and -- because each iteration draws from its own derived stream
+rather than a shared one -- the same answer regardless of how many CPU cores do
+the work. Sequences differ from 0.4.x, which used NumPy's generator.
 """
-Resampling methods for statistical inference.
 
-This module provides functions for bootstrap, permutation tests,
-and cross-validation techniques.
-"""
+from __future__ import annotations
 
-from collections.abc import Callable
+import math
+from collections.abc import Callable, Sequence
+from typing import Any
 
-import numpy as np
+from . import _rss
+from ._rss import Rng
 
-try:
-    from numba import jit
+__all__ = [
+    "bootstrap",
+    "bootstrap_hypothesis_test",
+    "permutation_test",
+    "jackknife",
+    "cross_validate",
+    "stratified_split",
+]
 
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
+#: Statistics the Rust backend can compute without calling back into Python.
+_NATIVE_STATS = {"mean", "median", "std", "var", "min", "max", "sum"}
 
-    # Fallback decorator that does nothing
-    def jit(*args, **kwargs):
-        def decorator(func):
-            return func
-
-        return decorator
-
-
-# Module-level constants
-VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
+_MAX_SEED = 2**63 - 1
 
 
-# Numba-optimized helper functions for common statistics
-@jit(nopython=True)
-def _bootstrap_mean_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.ndarray:
-    """JIT-compiled bootstrap for mean calculation.
+def _native_value(name: str, values: list[float]) -> float:
+    """Evaluate a native statistic on the full sample."""
+    if name == "var":
+        return _rss.variance(values, 1)
+    if name == "std":
+        return _rss.std_dev(values, 1)
+    return {
+        "mean": _rss.mean,
+        "median": _rss.median,
+        "sum": _rss.sum_,
+        "min": _rss.min_,
+        "max": _rss.max_,
+    }[name](values)
 
-    Args:
-        data: Input data array
-        n_iterations: Number of bootstrap iterations
-        seed: Random seed
 
-    Returns:
-        Array of bootstrap statistics
+def _resolve_stat(statistic: Callable | str | None) -> str | None:
+    """Map a statistic to a native kernel name, or None if it must run in Python.
+
+    Recognises a plain string, this package's own functions, and anything whose
+    ``__name__`` matches -- which covers ``statistics.mean``, ``numpy.mean`` for
+    users who still have NumPy around, and most hand-written wrappers.
     """
-    np.random.seed(seed)
-    n = len(data)
-    results = np.empty(n_iterations)
-
-    for i in range(n_iterations):
-        sample_sum = 0.0
-        for j in range(n):
-            idx = np.random.randint(0, n)
-            sample_sum += data[idx]
-        results[i] = sample_sum / n
-
-    return results
-
-
-@jit(nopython=True)
-def _bootstrap_median_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.ndarray:
-    """JIT-compiled bootstrap for median calculation.
-
-    Args:
-        data: Input data array
-        n_iterations: Number of bootstrap iterations
-        seed: Random seed
-
-    Returns:
-        Array of bootstrap statistics
-    """
-    np.random.seed(seed)
-    n = len(data)
-    results = np.empty(n_iterations)
-    sample = np.empty(n)
-
-    for i in range(n_iterations):
-        for j in range(n):
-            idx = np.random.randint(0, n)
-            sample[j] = data[idx]
-        results[i] = np.median(sample)
-
-    return results
+    if statistic is None:
+        return "mean"
+    if isinstance(statistic, str):
+        name = statistic
+    else:
+        name = getattr(statistic, "__name__", "")
+        # Our own aliases carry longer names than the kernels.
+        name = {
+            "sample_std_dev": "std",
+            "sample_variance": "var",
+            "population_std_dev": None,
+            "std_dev": "std",
+            "variance": "var",
+            "amin": "min",
+            "amax": "max",
+        }.get(name, name)
+    return name if name in _NATIVE_STATS else None
 
 
-@jit(nopython=True)
-def _bootstrap_std_jit(data: np.ndarray, n_iterations: int, seed: int) -> np.ndarray:
-    """JIT-compiled bootstrap for standard deviation calculation.
-
-    Args:
-        data: Input data array
-        n_iterations: Number of bootstrap iterations
-        seed: Random seed
-
-    Returns:
-        Array of bootstrap statistics
-    """
-    np.random.seed(seed)
-    n = len(data)
-    results = np.empty(n_iterations)
-    sample = np.empty(n)
-
-    for i in range(n_iterations):
-        for j in range(n):
-            idx = np.random.randint(0, n)
-            sample[j] = data[idx]
-        results[i] = np.std(sample)
-
-    return results
+def _seed_or_random(random_seed: int | None) -> int:
+    if random_seed is not None:
+        return int(random_seed) % _MAX_SEED
+    return Rng().integers(0, _MAX_SEED, 1)[0]
 
 
-@jit(nopython=True)
-def _permutation_mean_diff_jit(
-    data1: np.ndarray, data2: np.ndarray, n_permutations: int, seed: int
-) -> np.ndarray:
-    """JIT-compiled permutation test for mean difference.
-
-    Args:
-        data1: First sample
-        data2: Second sample
-        n_permutations: Number of permutations
-        seed: Random seed
-
-    Returns:
-        Array of permutation statistics
-    """
-    np.random.seed(seed)
-    pooled = np.concatenate((data1, data2))
-    n1 = len(data1)
-    n_total = len(pooled)
-    results = np.empty(n_permutations)
-
-    for i in range(n_permutations):
-        # Shuffle pooled data
-        for j in range(n_total - 1, 0, -1):
-            k = np.random.randint(0, j + 1)
-            pooled[j], pooled[k] = pooled[k], pooled[j]
-
-        # Calculate mean difference
-        sum1 = 0.0
-        sum2 = 0.0
-        for j in range(n1):
-            sum1 += pooled[j]
-        for j in range(n1, n_total):
-            sum2 += pooled[j]
-
-        mean1 = sum1 / n1
-        mean2 = sum2 / (n_total - n1)
-        results[i] = mean1 - mean2
-
-    return results
+def _as_floats(data: Sequence[float]) -> list[float]:
+    return [float(v) for v in data]
 
 
 def bootstrap(
-    data: list[float],
-    statistic: Callable[[list[float]], float],
+    data: Sequence[float],
+    statistic: Callable[[Sequence[float]], float] | str = "mean",
     n_iterations: int = 1000,
     confidence_level: float = 0.95,
     random_seed: int | None = None,
-) -> dict[str, any]:
-    """Perform bootstrap resampling to estimate sampling distribution.
+) -> dict[str, Any]:
+    """Estimate a sampling distribution by resampling with replacement.
 
     Args:
-        data: Original sample data
-        statistic: Function to compute statistic (e.g., np.mean, np.median)
-        n_iterations: Number of bootstrap samples
-        confidence_level: Confidence level for interval
-        random_seed: Random seed for reproducibility
+        data: The observed sample.
+        statistic: A summary to bootstrap. Pass ``"mean"``, ``"median"``,
+            ``"std"``, ``"var"``, ``"min"``, ``"max"`` or ``"sum"`` (or a
+            function with one of those names) to use the native kernel; any
+            other callable works but runs in Python.
+        n_iterations: Number of bootstrap resamples.
+        confidence_level: Coverage of the percentile interval.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing:
-            - statistic: Original statistic value
-            - bootstrap_distribution: Bootstrap distribution
-            - mean: Mean of bootstrap distribution
-            - std_error: Standard error
-            - confidence_interval: Confidence interval
+        Dictionary with ``statistic``, ``bootstrap_distribution``, ``mean``,
+        ``std_error`` and ``confidence_interval``.
 
     Raises:
-        ValueError: If parameters are invalid
+        ValueError: If the data is empty or the parameters are out of range.
 
-    Examples:
-        >>> data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        >>> result = bootstrap(data, np.mean, n_iterations=100)
-        >>> 'confidence_interval' in result
+    Example:
+        >>> r = bootstrap([1, 2, 3, 4, 5], "mean", n_iterations=200, random_seed=1)
+        >>> lo, hi = r["confidence_interval"]
+        >>> lo <= r["statistic"] <= hi
         True
     """
-    if len(data) < 2:
-        raise ValueError("Data must contain at least 2 values")
+    values = _as_floats(data)
+    if not values:
+        raise ValueError("Cannot bootstrap an empty dataset")
     if n_iterations < 1:
         raise ValueError("n_iterations must be at least 1")
     if not 0 < confidence_level < 1:
         raise ValueError("confidence_level must be between 0 and 1")
 
-    data_array = np.asarray(data)
-    n = len(data_array)
+    seed = _seed_or_random(random_seed)
+    native = _resolve_stat(statistic)
 
-    # Set random seed
-    seed = random_seed if random_seed is not None else np.random.randint(0, 2**31)
-
-    # Calculate original statistic
-    original_stat = statistic(data)
-
-    # Use JIT-compiled versions for common statistics (10-50x faster)
-    if NUMBA_AVAILABLE and n_iterations >= 100:
-        # Check if statistic is a common function
-        stat_name = getattr(statistic, "__name__", "")
-
-        if statistic is np.mean or stat_name == "mean":
-            bootstrap_stats = _bootstrap_mean_jit(data_array, n_iterations, seed)
-        elif statistic is np.median or stat_name == "median":
-            bootstrap_stats = _bootstrap_median_jit(data_array, n_iterations, seed)
-        elif statistic is np.std or stat_name == "std":
-            bootstrap_stats = _bootstrap_std_jit(data_array, n_iterations, seed)
-        else:
-            # Fall back to standard Python loop for custom statistics
-            np.random.seed(seed)
-            bootstrap_stats = []
-            for _ in range(n_iterations):
-                bootstrap_sample = np.random.choice(data_array, size=n, replace=True)
-                bootstrap_stats.append(statistic(bootstrap_sample))
-            bootstrap_stats = np.array(bootstrap_stats)
+    if native is not None:
+        dist = _rss.bootstrap_dist(values, native, n_iterations, seed)
+        original_stat = _native_value(native, values)
     else:
-        # Standard implementation for small iterations or when Numba unavailable
-        np.random.seed(seed)
-        bootstrap_stats = []
-        for _ in range(n_iterations):
-            bootstrap_sample = np.random.choice(data_array, size=n, replace=True)
-            bootstrap_stats.append(statistic(bootstrap_sample))
-        bootstrap_stats = np.array(bootstrap_stats)
+        rng = Rng(seed)
+        n = len(values)
+        dist = [
+            float(statistic(rng.choice(values, n, True)))  # type: ignore[operator]
+            for _ in range(n_iterations)
+        ]
+        original_stat = float(statistic(values))  # type: ignore[operator]
 
-    # Calculate confidence interval
-    alpha = 1 - confidence_level
-    lower_percentile = (alpha / 2) * 100
-    upper_percentile = (1 - alpha / 2) * 100
-
-    ci_lower = np.percentile(bootstrap_stats, lower_percentile)
-    ci_upper = np.percentile(bootstrap_stats, upper_percentile)
-
+    ci_lower, ci_upper = _rss.percentile_ci(dist, confidence_level)
     return {
         "statistic": float(original_stat),
-        "bootstrap_distribution": bootstrap_stats.tolist(),
-        "mean": float(np.mean(bootstrap_stats)),
-        "std_error": float(np.std(bootstrap_stats)),
-        "confidence_interval": (float(ci_lower), float(ci_upper)),
+        "bootstrap_distribution": dist,
+        "mean": _rss.mean(dist),
+        "std_error": _rss.std_dev(dist, 0),
+        "confidence_interval": (ci_lower, ci_upper),
     }
 
 
 def bootstrap_hypothesis_test(
-    data1: list[float],
-    data2: list[float],
-    statistic: Callable[[list[float], list[float]], float],
+    data1: Sequence[float],
+    data2: Sequence[float],
+    statistic: Callable[[Sequence[float], Sequence[float]], float] | str = "mean",
     n_iterations: int = 1000,
     random_seed: int | None = None,
-) -> dict[str, any]:
-    """Perform bootstrap hypothesis test for difference between two groups.
+) -> dict[str, Any]:
+    """Test whether two groups differ, by resampling under a pooled null.
 
     Args:
-        data1: First sample
-        data2: Second sample
-        statistic: Function to compute test statistic (e.g., difference of means)
-        n_iterations: Number of bootstrap samples
-        random_seed: Random seed for reproducibility
+        data1: First sample.
+        data2: Second sample.
+        statistic: Two-argument statistic, or ``"mean"`` for the difference in
+            means (the native path).
+        n_iterations: Number of resamples.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing:
-            - observed_statistic: Observed test statistic
-            - bootstrap_distribution: Bootstrap null distribution
-            - p_value: Two-tailed p-value
+        Dictionary with ``observed_statistic``, ``bootstrap_distribution`` and
+        ``p_value``.
 
     Raises:
-        ValueError: If parameters are invalid
-
-    Examples:
-        >>> data1 = [1, 2, 3, 4, 5]
-        >>> data2 = [3, 4, 5, 6, 7]
-        >>> stat = lambda x, y: np.mean(x) - np.mean(y)
-        >>> result = bootstrap_hypothesis_test(data1, data2, stat)
-        >>> 'p_value' in result
-        True
+        ValueError: If either sample is empty.
     """
-    if len(data1) < 2 or len(data2) < 2:
-        raise ValueError("Both samples must contain at least 2 values")
+    a = _as_floats(data1)
+    b = _as_floats(data2)
+    if not a or not b:
+        raise ValueError("Both datasets must be non-empty")
     if n_iterations < 1:
         raise ValueError("n_iterations must be at least 1")
 
-    if random_seed is not None:
-        np.random.seed(random_seed)
+    seed = _seed_or_random(random_seed)
 
-    # Calculate observed statistic
-    observed_stat = statistic(data1, data2)
-
-    # Pool data under null hypothesis
-    pooled_data = np.concatenate([data1, data2])
-    n1 = len(data1)
-
-    # Bootstrap under null hypothesis
-    null_distribution = []
-    for _ in range(n_iterations):
-        # Shuffle and split
-        shuffled = np.random.permutation(pooled_data)
-        bootstrap_sample1 = shuffled[:n1]
-        bootstrap_sample2 = shuffled[n1:]
-        null_distribution.append(statistic(bootstrap_sample1, bootstrap_sample2))
-
-    null_distribution = np.array(null_distribution)
-
-    # Calculate two-tailed p-value
-    p_value = np.mean(np.abs(null_distribution) >= np.abs(observed_stat))
+    if isinstance(statistic, str) or getattr(statistic, "__name__", "") == "mean":
+        observed = _rss.mean(a) - _rss.mean(b)
+        dist = _rss.permutation_dist(a, b, "mean", n_iterations, seed)
+    else:
+        observed = float(statistic(a, b))
+        rng = Rng(seed)
+        pooled = a + b
+        n1 = len(a)
+        dist = []
+        for _ in range(n_iterations):
+            shuffled = rng.shuffled(pooled)
+            dist.append(float(statistic(shuffled[:n1], shuffled[n1:])))
 
     return {
-        "observed_statistic": float(observed_stat),
-        "bootstrap_distribution": null_distribution.tolist(),
-        "p_value": float(p_value),
+        "observed_statistic": observed,
+        "bootstrap_distribution": dist,
+        "p_value": _rss.permutation_pvalue(dist, observed, "two-sided"),
     }
 
 
 def permutation_test(
-    data1: list[float],
-    data2: list[float],
-    statistic: Callable[[list[float], list[float]], float],
+    data1: Sequence[float],
+    data2: Sequence[float],
+    statistic: Callable[[Sequence[float], Sequence[float]], float] | str = "mean",
     n_permutations: int = 1000,
     alternative: str = "two-sided",
     random_seed: int | None = None,
-) -> dict[str, any]:
-    """Perform permutation test for comparing two groups.
+) -> dict[str, Any]:
+    """Compare two groups by permuting group labels.
 
     Args:
-        data1: First sample
-        data2: Second sample
-        statistic: Function to compute test statistic
-        n_permutations: Number of permutations
-        alternative: 'two-sided', 'greater', or 'less'
-        random_seed: Random seed for reproducibility
+        data1: First sample.
+        data2: Second sample.
+        statistic: Two-argument statistic, or ``"mean"`` for the difference in
+            means (the native path).
+        n_permutations: Number of label permutations.
+        alternative: ``"two-sided"``, ``"greater"`` or ``"less"``.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Dictionary containing:
-            - observed_statistic: Observed test statistic
-            - permutation_distribution: Permutation distribution
-            - p_value: P-value
+        Dictionary with ``observed_statistic``, ``permutation_distribution``
+        and ``p_value``.
 
     Raises:
-        ValueError: If parameters are invalid
+        ValueError: If a sample is empty or ``alternative`` is unrecognised.
 
-    Examples:
-        >>> data1 = [1, 2, 3, 4, 5]
-        >>> data2 = [3, 4, 5, 6, 7]
-        >>> stat = lambda x, y: np.mean(x) - np.mean(y)
-        >>> result = permutation_test(data1, data2, stat)
-        >>> 0 <= result['p_value'] <= 1
+    Example:
+        >>> r = permutation_test([1, 2, 3], [7, 8, 9], "mean", 200, random_seed=3)
+        >>> 0 <= r["p_value"] <= 1
         True
     """
-    validation_errors = {
-        "samples": (len(data1) < 1 or len(data2) < 1, "Both samples must contain at least 1 value"),
-        "n_permutations": (n_permutations < 1, "n_permutations must be at least 1"),
-        "alternative": (alternative not in VALID_ALTERNATIVES, f"alternative must be one of {VALID_ALTERNATIVES}"),
-    }
-    for fails, msg in validation_errors.values():
-        if fails:
-            raise ValueError(msg)
+    a = _as_floats(data1)
+    b = _as_floats(data2)
+    if not a or not b:
+        raise ValueError("Both datasets must be non-empty")
+    if alternative not in {"two-sided", "greater", "less"}:
+        raise ValueError("alternative must be 'two-sided', 'greater', or 'less'")
+    if n_permutations < 1:
+        raise ValueError("n_permutations must be at least 1")
 
-    data1_array = np.asarray(data1)
-    data2_array = np.asarray(data2)
+    seed = _seed_or_random(random_seed)
 
-    # Set random seed
-    seed = random_seed if random_seed is not None else np.random.randint(0, 2**31)
-
-    # Calculate observed statistic
-    observed_stat = statistic(data1, data2)
-
-    # Use JIT-compiled version for mean difference (10-50x faster)
-    if NUMBA_AVAILABLE and n_permutations >= 100:
-        # Check if this is a mean difference test
-        try:
-            # Test if statistic computes mean difference
-            test_result = statistic([1.0, 2.0], [3.0, 4.0])
-            expected_mean_diff = 1.5 - 3.5  # -2.0
-
-            if abs(test_result - expected_mean_diff) < 1e-10:
-                # Use JIT-compiled version
-                permutation_stats = _permutation_mean_diff_jit(
-                    data1_array, data2_array, n_permutations, seed
-                )
-            else:
-                # Fall back to standard loop
-                np.random.seed(seed)
-                pooled_data = np.concatenate([data1_array, data2_array])
-                n1 = len(data1_array)
-                permutation_stats = []
-                for _ in range(n_permutations):
-                    shuffled = np.random.permutation(pooled_data)
-                    perm_sample1 = shuffled[:n1]
-                    perm_sample2 = shuffled[n1:]
-                    permutation_stats.append(statistic(perm_sample1, perm_sample2))
-                permutation_stats = np.array(permutation_stats)
-        except Exception:
-            # Fall back to standard loop if test fails
-            np.random.seed(seed)
-            pooled_data = np.concatenate([data1_array, data2_array])
-            n1 = len(data1_array)
-            permutation_stats = []
-            for _ in range(n_permutations):
-                shuffled = np.random.permutation(pooled_data)
-                perm_sample1 = shuffled[:n1]
-                perm_sample2 = shuffled[n1:]
-                permutation_stats.append(statistic(perm_sample1, perm_sample2))
-            permutation_stats = np.array(permutation_stats)
+    if isinstance(statistic, str) or getattr(statistic, "__name__", "") == "mean":
+        observed = _rss.mean(a) - _rss.mean(b)
+        dist = _rss.permutation_dist(a, b, "mean", n_permutations, seed)
     else:
-        # Standard implementation
-        np.random.seed(seed)
-        pooled_data = np.concatenate([data1_array, data2_array])
-        n1 = len(data1_array)
-        permutation_stats = []
+        observed = float(statistic(a, b))
+        rng = Rng(seed)
+        pooled = a + b
+        n1 = len(a)
+        dist = []
         for _ in range(n_permutations):
-            shuffled = np.random.permutation(pooled_data)
-            perm_sample1 = shuffled[:n1]
-            perm_sample2 = shuffled[n1:]
-            permutation_stats.append(statistic(perm_sample1, perm_sample2))
-        permutation_stats = np.array(permutation_stats)
-
-    # Calculate p-value based on alternative hypothesis
-    if alternative == "two-sided":
-        p_value = np.mean(np.abs(permutation_stats) >= np.abs(observed_stat))
-    elif alternative == "greater":
-        p_value = np.mean(permutation_stats >= observed_stat)
-    else:  # less
-        p_value = np.mean(permutation_stats <= observed_stat)
+            shuffled = rng.shuffled(pooled)
+            dist.append(float(statistic(shuffled[:n1], shuffled[n1:])))
 
     return {
-        "observed_statistic": float(observed_stat),
-        "permutation_distribution": permutation_stats.tolist(),
-        "p_value": float(p_value),
+        "observed_statistic": observed,
+        "permutation_distribution": dist,
+        "p_value": _rss.permutation_pvalue(dist, observed, alternative),
     }
 
 
 def jackknife(
-    data: list[float], statistic: Callable[[list[float]], float]
-) -> dict[str, any]:
-    """Perform jackknife resampling to estimate bias and variance.
+    data: Sequence[float],
+    statistic: Callable[[Sequence[float]], float] | str = "mean",
+) -> dict[str, Any]:
+    """Leave-one-out estimates of a statistic's bias and standard error.
 
     Args:
-        data: Original sample data
-        statistic: Function to compute statistic
+        data: The observed sample (at least 2 values).
+        statistic: Summary to evaluate; native names take the fast path.
 
     Returns:
-        Dictionary containing:
-            - statistic: Original statistic value
-            - jackknife_values: Jackknife statistics
-            - bias: Estimated bias
-            - std_error: Standard error
+        Dictionary with ``statistic``, ``jackknife_values``, ``bias`` and
+        ``std_error``.
 
     Raises:
-        ValueError: If data is insufficient
+        ValueError: If fewer than 2 values are supplied.
 
-    Examples:
-        >>> data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        >>> result = jackknife(data, np.mean)
-        >>> 'std_error' in result
-        True
+    Example:
+        >>> r = jackknife([1, 2, 3, 4, 5], "mean")
+        >>> len(r["jackknife_values"])
+        5
     """
-    if len(data) < 2:
-        raise ValueError("Data must contain at least 2 values")
+    values = _as_floats(data)
+    n = len(values)
+    if n < 2:
+        raise ValueError("Jackknife requires at least 2 values")
 
-    data_array = np.array(data)
-    n = len(data_array)
+    native = _resolve_stat(statistic)
+    if native is not None:
+        jack = _rss.jackknife_values(values, native)
+        original = _native_value(native, values)
+    else:
+        jack = [
+            float(statistic(values[:i] + values[i + 1 :]))  # type: ignore[operator]
+            for i in range(n)
+        ]
+        original = float(statistic(values))  # type: ignore[operator]
 
-    # Calculate original statistic
-    original_stat = statistic(data)
-
-    # Jackknife: leave one out
-    jackknife_stats = []
-    for i in range(n):
-        jackknife_sample = np.delete(data_array, i)
-        jackknife_stats.append(statistic(jackknife_sample))
-
-    jackknife_stats = np.array(jackknife_stats)
-
-    # Estimate bias
-    jackknife_mean = np.mean(jackknife_stats)
-    bias = (n - 1) * (jackknife_mean - original_stat)
-
-    # Estimate standard error
-    std_error = np.sqrt(((n - 1) / n) * np.sum((jackknife_stats - jackknife_mean) ** 2))
-
+    jack_mean = _rss.mean(jack)
+    bias = (n - 1) * (jack_mean - original)
+    std_error = math.sqrt(
+        ((n - 1) / n) * sum((v - jack_mean) ** 2 for v in jack)
+    )
     return {
-        "statistic": float(original_stat),
-        "jackknife_values": jackknife_stats.tolist(),
-        "bias": float(bias),
-        "std_error": float(std_error),
+        "statistic": float(original),
+        "jackknife_values": jack,
+        "bias": bias,
+        "std_error": std_error,
     }
 
 
 def cross_validate(
-    X: list[list[float]],
-    y: list[float],
+    X: Sequence[Sequence[float]],
+    y: Sequence[float],
     model_fn: Callable,
     k_folds: int = 5,
     random_seed: int | None = None,
-) -> dict[str, any]:
-    """Perform k-fold cross-validation.
+) -> dict[str, Any]:
+    """Score a model by k-fold cross-validation, using mean squared error.
 
     Args:
-        X: Feature matrix (n_samples x n_features)
-        y: Target values
-        model_fn: Function that takes (X_train, y_train, X_test) and returns predictions
-        k_folds: Number of folds
-        random_seed: Random seed for reproducibility
+        X: Feature matrix, one row per sample.
+        y: Target values.
+        model_fn: Callable ``(X_train, y_train, X_test) -> predictions``.
+        k_folds: Number of folds (at least 2).
+        random_seed: Seed for the shuffle.
 
     Returns:
-        Dictionary containing:
-            - scores: Score for each fold (MSE)
-            - mean_score: Mean cross-validation score
-            - std_score: Standard deviation of scores
+        Dictionary with ``scores``, ``mean_score`` and ``std_score``.
 
     Raises:
-        ValueError: If parameters are invalid
-
-    Examples:
-        >>> X = [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10]]
-        >>> y = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-        >>> def simple_model(X_train, y_train, X_test):
-        ...     return [np.mean(y_train)] * len(X_test)
-        >>> result = cross_validate(X, y, simple_model, k_folds=5)
-        >>> 'mean_score' in result
-        True
+        ValueError: If the shapes disagree or there are too few samples.
     """
     if len(X) != len(y):
         raise ValueError("X and y must have same number of samples")
@@ -528,68 +346,58 @@ def cross_validate(
     if k_folds < 2:
         raise ValueError("k_folds must be at least 2")
 
-    if random_seed is not None:
-        np.random.seed(random_seed)
+    rows = [list(map(float, r)) for r in X]
+    targets = _as_floats(y)
+    n = len(rows)
 
-    X_array = np.array(X)
-    y_array = np.array(y)
-    n = len(X_array)
-
-    # Shuffle indices
-    indices = np.random.permutation(n)
-
-    # Create folds
+    order = Rng(_seed_or_random(random_seed)).permutation(n)
     fold_size = n // k_folds
-    fold_scores = []
+    scores: list[float] = []
 
     for fold in range(k_folds):
-        # Split into train and test
-        start_idx = fold * fold_size
-        end_idx = start_idx + fold_size if fold < k_folds - 1 else n
+        start = fold * fold_size
+        end = start + fold_size if fold < k_folds - 1 else n
+        test_idx = order[start:end]
+        train_idx = order[:start] + order[end:]
 
-        test_indices = indices[start_idx:end_idx]
-        train_indices = np.concatenate([indices[:start_idx], indices[end_idx:]])
-
-        X_train = X_array[train_indices]
-        y_train = y_array[train_indices]
-        X_test = X_array[test_indices]
-        y_test = y_array[test_indices]
-
-        # Train and predict
-        predictions = model_fn(X_train.tolist(), y_train.tolist(), X_test.tolist())
-
-        # Calculate MSE
-        mse = np.mean((np.array(predictions) - y_test) ** 2)
-        fold_scores.append(float(mse))
+        predictions = model_fn(
+            [rows[i] for i in train_idx],
+            [targets[i] for i in train_idx],
+            [rows[i] for i in test_idx],
+        )
+        errors = [
+            (float(p) - targets[i]) ** 2 for p, i in zip(predictions, test_idx)
+        ]
+        scores.append(_rss.mean(errors))
 
     return {
-        "scores": fold_scores,
-        "mean_score": float(np.mean(fold_scores)),
-        "std_score": float(np.std(fold_scores)),
+        "scores": scores,
+        "mean_score": _rss.mean(scores),
+        "std_score": _rss.std_dev(scores, 0),
     }
 
 
 def stratified_split(
-    X: list[list[float]],
-    y: list[int],
+    X: Sequence[Sequence[float]],
+    y: Sequence[int],
     test_size: float = 0.2,
     random_seed: int | None = None,
 ) -> tuple[list[list[float]], list[list[float]], list[int], list[int]]:
-    """Split data into train and test sets with stratification.
+    """Split into train and test sets, preserving each class's proportion.
 
     Args:
-        X: Feature matrix
-        y: Target labels (must be categorical)
-        test_size: Proportion of data for test set
-        random_seed: Random seed for reproducibility
+        X: Feature matrix.
+        y: Categorical labels.
+        test_size: Fraction of each class held out.
+        random_seed: Seed for reproducibility.
 
     Returns:
-        Tuple of (X_train, X_test, y_train, y_test)
+        ``(X_train, X_test, y_train, y_test)``.
 
     Raises:
-        ValueError: If parameters are invalid
+        ValueError: If the shapes disagree or ``test_size`` is out of range.
 
-    Examples:
+    Example:
         >>> X = [[i] for i in range(100)]
         >>> y = [0] * 50 + [1] * 50
         >>> X_train, X_test, y_train, y_test = stratified_split(X, y, test_size=0.2)
@@ -601,76 +409,38 @@ def stratified_split(
     if not 0 < test_size < 1:
         raise ValueError("test_size must be between 0 and 1")
 
-    if random_seed is not None:
-        np.random.seed(random_seed)
+    rows = [list(map(float, r)) for r in X]
+    labels = list(y)
+    rng = Rng(_seed_or_random(random_seed))
 
-    X_array = np.array(X)
-    y_array = np.array(y)
+    # Preserve first-appearance order so the split is deterministic given the seed.
+    classes: list = []
+    for label in labels:
+        if label not in classes:
+            classes.append(label)
 
-    # Get unique classes
-    classes = np.unique(y_array)
-
-    X_train_list = []
-    X_test_list = []
-    y_train_list = []
-    y_test_list = []
-
-    # Split each class proportionally
+    train_idx: list[int] = []
+    test_idx: list[int] = []
     for cls in classes:
-        cls_indices = np.where(y_array == cls)[0]
-        n_cls = len(cls_indices)
+        cls_idx = [i for i, label in enumerate(labels) if label == cls]
+        n_cls = len(cls_idx)
         n_test = int(n_cls * test_size)
-
-        # Ensure minority classes get at least 1 test sample if class has > 1 sample
-        # and we have multiple classes (to maintain stratification)
+        # Give a minority class at least one test sample, but never all of them.
         if n_test == 0 and n_cls > 1 and len(classes) > 1:
             n_test = 1
-        # But don't take all samples if class is very small
         if n_test >= n_cls and n_cls > 1:
             n_test = max(1, n_cls - 1)
 
-        # Ensure minority classes get at least 1 test sample if class has > 1 sample
-        # and we have multiple classes (to maintain stratification)
-        if n_test == 0 and n_cls > 1 and len(classes) > 1:
-            n_test = 1
-        # But don't take all samples if class is very small
-        if n_test >= n_cls and n_cls > 1:
-            n_test = max(1, n_cls - 1)
+        shuffled = [cls_idx[j] for j in rng.permutation(n_cls)]
+        test_idx.extend(shuffled[:n_test])
+        train_idx.extend(shuffled[n_test:])
 
-        # Shuffle class indices
-        shuffled_indices = np.random.permutation(cls_indices)
-
-        test_indices = shuffled_indices[:n_test]
-        train_indices = shuffled_indices[n_test:]
-
-        X_train_list.append(X_array[train_indices])
-        X_test_list.append(X_array[test_indices])
-        y_train_list.append(y_array[train_indices])
-        y_test_list.append(y_array[test_indices])
-
-    # Concatenate all classes
-    X_train = np.vstack(X_train_list)
-    X_test = np.vstack(X_test_list)
-    y_train = np.concatenate(y_train_list)
-    y_test = np.concatenate(y_test_list)
-
-    # Shuffle final sets
-    train_shuffle = np.random.permutation(len(X_train))
-    test_shuffle = np.random.permutation(len(X_test))
+    train_idx = [train_idx[j] for j in rng.permutation(len(train_idx))]
+    test_idx = [test_idx[j] for j in rng.permutation(len(test_idx))]
 
     return (
-        X_train[train_shuffle].tolist(),
-        X_test[test_shuffle].tolist(),
-        y_train[train_shuffle].tolist(),
-        y_test[test_shuffle].tolist(),
+        [rows[i] for i in train_idx],
+        [rows[i] for i in test_idx],
+        [labels[i] for i in train_idx],
+        [labels[i] for i in test_idx],
     )
-
-
-__all__ = [
-    "bootstrap",
-    "bootstrap_hypothesis_test",
-    "permutation_test",
-    "jackknife",
-    "cross_validate",
-    "stratified_split",
-]
