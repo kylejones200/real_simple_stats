@@ -195,8 +195,10 @@ def chi_square_independence(
     Example:
         >>> table = [[25, 15], [20, 30]]
         >>> r = chi_square_independence(table)
+        >>> round(r["p_value"], 4)   # just above 0.05 once Yates-corrected
+        0.0562
         >>> r["reject_null"]
-        True
+        False
         >>> 0 <= r["cramers_v"] <= 1
         True
     """

@@ -9,6 +9,9 @@ use std::f64::consts::PI;
 
 pub const SQRT_2: f64 = std::f64::consts::SQRT_2;
 pub const SQRT_2PI: f64 = 2.506_628_274_631_000_5;
+/// 1/sqrt(2*pi). Multiplying by this is both faster and better rounded than
+/// dividing by SQRT_2PI, which costs an extra ulp at the peak of the density.
+pub const FRAC_1_SQRT_2PI: f64 = 0.398_942_280_401_432_7;
 pub const LN_SQRT_2PI: f64 = 0.918_938_533_204_672_7;
 
 /// Lanczos coefficients (g = 7, n = 9); good to ~15 significant digits.
@@ -321,7 +324,7 @@ fn erfc_scaled(x: f64) -> f64 {
 
 /// Standard normal PDF.
 pub fn norm_pdf(x: f64) -> f64 {
-    (-0.5 * x * x).exp() / SQRT_2PI
+    (-0.5 * x * x).exp() * FRAC_1_SQRT_2PI
 }
 
 /// Standard normal quantile — Wichura's AS241 (PPND16), ~1e-16 accurate.

@@ -109,7 +109,8 @@ def gamma_poisson_update(
 
     Examples:
         >>> data = [3, 5, 4, 6, 5]
-        >>> post_shape, post_rate = gamma_poisson_update(1, 1, data)
+        >>> prior_shape, prior_rate = 1, 1
+        >>> post_shape, post_rate = gamma_poisson_update(prior_shape, prior_rate, data)
         >>> post_shape > prior_shape
         True
     """
@@ -338,8 +339,8 @@ def empirical_bayes_estimate(data: list[float]) -> dict[str, float]:
     Examples:
         >>> data = [10, 11, 9, 12, 10, 11]
         >>> params = empirical_bayes_estimate(data)
-        >>> 'prior_mean' in params
-        True
+        >>> sorted(params)
+        ['mean', 'variance']
     """
     if len(data) < 2:
         raise ValueError("Need at least 2 data points")

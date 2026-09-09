@@ -234,7 +234,7 @@ def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
         ValueError: If probabilities are not between 0 and 1, or P(B) is zero
 
     Example:
-        >>> bayes_theorem(0.9, 0.01, 0.05)
+        >>> round(bayes_theorem(0.9, 0.01, 0.05), 4)
         0.18
     """
     if not 0 <= p_b_given_a <= 1:
@@ -265,7 +265,7 @@ def probability_tree(branches: Sequence[tuple[float, float]]) -> float:
 
     Example:
         >>> probability_tree([(0.5, 0.7), (0.25, 0.25), (0.25, 0.25)])
-        0.5
+        0.475
     """
     if not branches:
         raise ValueError("branches sequence cannot be empty")

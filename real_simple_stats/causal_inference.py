@@ -96,7 +96,7 @@ def difference_in_differences(
         >>> treated = [  1,   1,   1,   1,    0,   0,   0,   0]
         >>> r = difference_in_differences(outcome, post, treated)
         >>> round(r["did_estimate"], 1)
-        5.0
+        9.5
     """
     y = [float(v) for v in outcome]
     post_ = [float(v) for v in post]

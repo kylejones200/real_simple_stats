@@ -25,11 +25,11 @@ Example
 >>> import real_simple_stats as rss
 >>> result = rss.one_sample_t_test_explained([5.1, 4.9, 5.3, 5.0, 5.2], mu=5.0)
 >>> result.p_value            # use it as data
-0.4...
+0.2301...
 >>> print(result)             # or let it teach
 === One-Sample t-Test ===
 ...
->>> result.plot()             # or let it show you the p-value
+>>> fig, ax = result.plot()   # or let it show you the p-value  # doctest: +SKIP
 """
 
 from __future__ import annotations

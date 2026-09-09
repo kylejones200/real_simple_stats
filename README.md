@@ -20,7 +20,7 @@ import real_simple_stats as rss
 
 result = rss.one_sample_t_test_explained([5.2, 5.4, 5.1, 5.5, 5.3], mu=5.0)
 
-result.p_value    # 0.0421  → use it as data, just like any other library
+result.p_value    # 0.0132  → use it as data, just like any other library
 result.plot()     # → the p-value drawn as a shaded tail area
 
 print(result)     # → the full narrative below

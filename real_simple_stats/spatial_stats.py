@@ -177,12 +177,12 @@ def morans_i(
             n: Number of observations.
 
     Example:
-        >>> import numpy as np
         >>> from real_simple_stats import Rng
         >>> rng = Rng(0)
         >>> x = rng.uniform(0, 100, 50)
         >>> y = rng.uniform(0, 100, 50)
-        >>> v = 5 + 0.1 * x + rng.normal(0, 2, 50)  # correlated with location
+        >>> noise = rng.normal(0, 2, 50)
+        >>> v = [5 + 0.1 * xi + e for xi, e in zip(x, noise)]  # varies with location
         >>> r = morans_i(x, y, v, distance_threshold=30)
         >>> r["moran_i"] > 0  # expect positive autocorrelation
         True

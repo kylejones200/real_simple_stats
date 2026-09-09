@@ -230,8 +230,7 @@ def detect_fake_statistics(
 
     Example:
         >>> detect_fake_statistics("Diet Pill Company", True, True)
-        ['Potential bias: Self-funded study', 'Warning: Voluntary response samples are biased',
-         'Warning: Correlation does not imply causation']
+        ['Potential bias: Self-funded study', 'Warning: Voluntary response samples are biased', 'Warning: Correlation does not imply causation']
     """
     warnings: list[str] = []
     if survey_sponsor.lower() in {
