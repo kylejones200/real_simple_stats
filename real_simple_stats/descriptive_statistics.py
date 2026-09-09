@@ -2,6 +2,8 @@ import math
 from collections import Counter
 from collections.abc import Sequence
 
+from . import _rss
+
 # --- Basic Descriptive Functions ---
 
 
@@ -55,67 +57,21 @@ def five_number_summary(values: Sequence[float]) -> dict[str, float]:
 
     Example:
         >>> five_number_summary([1, 2, 3, 4, 5])
-        {'min': 1, 'Q1': 1.5, 'median': 3, 'Q3': 4.5, 'max': 5}
+        {'min': 1.0, 'Q1': 1.5, 'median': 3.0, 'Q3': 4.5, 'max': 5.0}
         >>> five_number_summary([5])
-        {'min': 5, 'Q1': 5, 'median': 5, 'Q3': 5, 'max': 5}
+        {'min': 5.0, 'Q1': 5.0, 'median': 5.0, 'Q3': 5.0, 'max': 5.0}
     """
     if not values:
         raise ValueError("Cannot calculate five-number summary of empty list")
 
-    sorted_vals = sorted(values)
-    n = len(sorted_vals)
-
-    # Handle edge cases for small samples
-    if n == 1:
-        # Single value: all statistics equal the value
-        val = sorted_vals[0]
-        return {
-            "min": val,
-            "Q1": val,
-            "median": val,
-            "Q3": val,
-            "max": val,
-        }
-
-    # Calculate median
-    mid = n // 2
-    median_val = (
-        sorted_vals[mid] if n % 2 else (sorted_vals[mid - 1] + sorted_vals[mid]) / 2
-    )
-
-    # For n=2, Q1 and Q3 are the two values
-    if n == 2:
-        return {
-            "min": sorted_vals[0],
-            "Q1": sorted_vals[0],
-            "median": median_val,
-            "Q3": sorted_vals[1],
-            "max": sorted_vals[1],
-        }
-
-    # For n=3, Q1 is min and Q3 is max
-    if n == 3:
-        return {
-            "min": sorted_vals[0],
-            "Q1": sorted_vals[0],
-            "median": median_val,
-            "Q3": sorted_vals[2],
-            "max": sorted_vals[2],
-        }
-
-    # Standard calculation for n >= 4
-    lower_half = sorted_vals[:mid]
-    upper_half = sorted_vals[mid + 1 :] if n % 2 else sorted_vals[mid:]
-    Q1 = median(lower_half)
-    Q3 = median(upper_half)
-
-    return {
-        "min": sorted_vals[0],
-        "Q1": Q1,
-        "median": median_val,
-        "Q3": Q3,
-        "max": sorted_vals[-1],
-    }
+    # The native kernel reproduces this library's Tukey (median-of-halves)
+    # convention exactly, including the special cases at n <= 3. It is
+    # deliberately not NumPy's linear-interpolation quantile.
+    summary = _rss.five_number_summary(values)
+    if summary is None:  # pragma: no cover - guarded by the emptiness check above
+        raise ValueError("Cannot calculate five-number summary of empty list")
+    minimum, q1, med, q3, maximum = summary
+    return {"min": minimum, "Q1": q1, "median": med, "Q3": q3, "max": maximum}
 
 
 def median(values: Sequence[float]) -> float:
@@ -138,10 +94,7 @@ def median(values: Sequence[float]) -> float:
     """
     if not values:
         raise ValueError("Cannot calculate median of empty list")
-    sorted_vals = sorted(values)
-    n = len(sorted_vals)
-    mid = n // 2
-    return sorted_vals[mid] if n % 2 else (sorted_vals[mid - 1] + sorted_vals[mid]) / 2
+    return _rss.median(values)
 
 
 def interquartile_range(values: Sequence[float]) -> float:
@@ -169,8 +122,7 @@ def sample_variance(values: Sequence[float]) -> float:
     """
     if len(values) < 2:
         raise ValueError("Sample variance requires at least 2 values")
-    m = sum(values) / len(values)
-    return sum((x - m) ** 2 for x in values) / (len(values) - 1)
+    return _rss.variance(values, 1)
 
 
 def sample_std_dev(values: Sequence[float]) -> float:
@@ -189,7 +141,9 @@ def sample_std_dev(values: Sequence[float]) -> float:
         >>> sample_std_dev([1, 2, 3, 4, 5])
         1.5811388300841898
     """
-    return math.sqrt(sample_variance(values))
+    if len(values) < 2:
+        raise ValueError("Sample standard deviation requires at least 2 values")
+    return _rss.std_dev(values, 1)
 
 
 def coefficient_of_variation(values: Sequence[float]) -> float:
@@ -217,7 +171,7 @@ def mean(values: Sequence[float]) -> float:
     """
     if not values:
         raise ValueError("Cannot calculate mean of empty list")
-    return sum(values) / len(values)
+    return _rss.mean(values)
 
 
 def draw_frequency_table(
