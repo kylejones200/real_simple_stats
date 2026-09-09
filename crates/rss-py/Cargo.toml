@@ -1,0 +1,16 @@
+[package]
+name = "rss-py"
+description = "PyO3 bindings exposing rss-core to Python as real_simple_stats._rss"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "_rss"
+crate-type = ["cdylib"]
+
+[dependencies]
+rss-core = { path = "../rss-core" }
+pyo3 = { version = "0.22", features = ["abi3-py312", "extension-module"] }

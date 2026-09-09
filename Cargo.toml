@@ -1,0 +1,16 @@
+[workspace]
+members = ["crates/rss-core", "crates/rss-py"]
+resolver = "2"
+
+[workspace.package]
+version = "0.5.0"
+edition = "2021"
+rust-version = "1.78"
+license = "MIT"
+repository = "https://github.com/kylejones200/real_simple_stats"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+# NOTE: no panic="abort" — PyO3 needs unwinding to turn Rust panics into Python exceptions.
