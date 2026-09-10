@@ -280,3 +280,291 @@ if __name__ == "__main__":
 
     # Critical z values
     logger.info("Critical Z (alpha=0.05): %s", critical_value_z(0.05))
+
+
+def _average_ranks(values: Sequence[float]) -> list[float]:
+    """Rank values from 1 upward, giving tied values their average rank.
+
+    Ties matter here: both nonparametric tests below correct their variance
+    using the tie structure, and using ordinal ranks instead would inflate
+    significance.
+    """
+    order = sorted(range(len(values)), key=lambda i: values[i])
+    ranks = [0.0] * len(values)
+    i = 0
+    while i < len(order):
+        j = i
+        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
+            j += 1
+        shared = (i + j) / 2.0 + 1.0  # average of the 1-based positions
+        for k in range(i, j + 1):
+            ranks[order[k]] = shared
+        i = j + 1
+    return ranks
+
+
+def _tie_correction_sum(values: Sequence[float]) -> float:
+    """Sum of (t^3 - t) over each group of t tied values."""
+    counts: dict[float, int] = {}
+    for v in values:
+        counts[v] = counts.get(v, 0) + 1
+    return sum(t**3 - t for t in counts.values() if t > 1)
+
+
+def one_sample_t_test(
+    data: Sequence[float], mu: float = 0.0
+) -> tuple[float, float]:
+    """Test whether a sample mean differs from a hypothesized value.
+
+    Args:
+        data: The observed sample (at least 2 values)
+        mu: The hypothesized population mean
+
+    Returns:
+        Tuple of (t_statistic, two_sided_p_value)
+
+    Raises:
+        ValueError: If fewer than 2 values are given, or they are all identical
+
+    Example:
+        >>> t, p = one_sample_t_test([5.1, 4.9, 5.3, 5.0, 5.2], mu=5.0)
+        >>> round(t, 4), round(p, 4)
+        (1.4142, 0.2302)
+    """
+    if len(data) < 2:
+        raise ValueError("One-sample t-test requires at least 2 values")
+    t_stat, p_value = _rss.ttest_1samp(data, float(mu))
+    if math.isnan(t_stat):
+        raise ValueError("t-test is undefined when all values are identical")
+    return t_stat, p_value
+
+
+def two_sample_t_test(
+    group1: Sequence[float], group2: Sequence[float], equal_var: bool = True
+) -> tuple[float, float]:
+    """Compare the means of two independent groups.
+
+    Args:
+        group1: First sample (at least 2 values)
+        group2: Second sample (at least 2 values)
+        equal_var: True for Student's pooled-variance test, False for Welch's,
+            which does not assume the two groups share a variance
+
+    Returns:
+        Tuple of (t_statistic, two_sided_p_value)
+
+    Raises:
+        ValueError: If either group has fewer than 2 values
+
+    Example:
+        >>> t, p = two_sample_t_test([1, 2, 3, 4], [6, 7, 8, 9])
+        >>> p < 0.01
+        True
+    """
+    if len(group1) < 2 or len(group2) < 2:
+        raise ValueError("Two-sample t-test requires at least 2 values per group")
+    return _rss.ttest_ind(group1, group2, bool(equal_var))
+
+
+def paired_t_test(
+    before: Sequence[float], after: Sequence[float]
+) -> tuple[float, float]:
+    """Compare two measurements taken on the same subjects.
+
+    Equivalent to a one-sample t-test on the differences.
+
+    Args:
+        before: Measurements before the intervention
+        after: Measurements after, in the same subject order
+
+    Returns:
+        Tuple of (t_statistic, two_sided_p_value)
+
+    Raises:
+        ValueError: If the samples differ in length or have fewer than 2 pairs
+
+    Example:
+        >>> t, p = paired_t_test([10, 12, 11, 13], [12, 15, 13, 16])
+        >>> t < 0    # values rose, so the before-after difference is negative
+        True
+    """
+    if len(before) != len(after):
+        raise ValueError("Paired t-test requires samples of the same length")
+    if len(before) < 2:
+        raise ValueError("Paired t-test requires at least 2 pairs")
+    return _rss.ttest_rel(before, after)
+
+
+def z_test(
+    data: Sequence[float], mu: float, sigma: float
+) -> tuple[float, float]:
+    """Test a sample mean against a hypothesized mean with a *known* variance.
+
+    Use this only when the population standard deviation is genuinely known.
+    When it is estimated from the sample -- the usual case -- use
+    :func:`one_sample_t_test` instead.
+
+    Args:
+        data: The observed sample
+        mu: Hypothesized population mean
+        sigma: Known population standard deviation (positive)
+
+    Returns:
+        Tuple of (z_statistic, two_sided_p_value)
+
+    Raises:
+        ValueError: If the sample is empty or sigma is not positive
+
+    Example:
+        >>> z, p = z_test([102, 98, 105, 101, 99], mu=100, sigma=15)
+        >>> round(z, 4)
+        0.1491
+    """
+    if not data:
+        raise ValueError("z-test requires at least one value")
+    if sigma <= 0:
+        raise ValueError("sigma must be positive")
+    n = len(data)
+    z_stat = (_rss.mean(data) - mu) / (sigma / math.sqrt(n))
+    return z_stat, 2 * _rss.norm_sf(abs(z_stat))
+
+
+def one_proportion_z_test(
+    p_hat: float, n: int, p0: float
+) -> tuple[float, float]:
+    """Test an observed proportion against a hypothesized one.
+
+    The standard error uses the hypothesized proportion ``p0``, which is the
+    convention for a null-hypothesis test.
+
+    Args:
+        p_hat: Observed sample proportion, in [0, 1]
+        n: Sample size (positive)
+        p0: Hypothesized population proportion, strictly between 0 and 1
+
+    Returns:
+        Tuple of (z_statistic, two_sided_p_value)
+
+    Raises:
+        ValueError: If any argument is out of range
+
+    Example:
+        >>> z, p = one_proportion_z_test(p_hat=0.6, n=50, p0=0.5)
+        >>> round(z, 4)
+        1.4142
+    """
+    if not 0.0 <= p_hat <= 1.0:
+        raise ValueError("p_hat must be between 0 and 1")
+    if n <= 0:
+        raise ValueError("n must be positive")
+    if not 0.0 < p0 < 1.0:
+        raise ValueError("p0 must be strictly between 0 and 1")
+    z_stat = (p_hat - p0) / math.sqrt(p0 * (1 - p0) / n)
+    return z_stat, 2 * _rss.norm_sf(abs(z_stat))
+
+
+def mann_whitney_u(
+    group1: Sequence[float], group2: Sequence[float]
+) -> tuple[float, float]:
+    """Nonparametric test for whether one group tends to exceed the other.
+
+    The rank-based alternative to :func:`two_sample_t_test`: it assumes no
+    particular distribution, only that the observations are independent. The
+    p-value comes from the normal approximation with a continuity correction
+    and a tie correction, matching ``scipy.stats.mannwhitneyu`` with
+    ``method="asymptotic"``.
+
+    Args:
+        group1: First sample (non-empty)
+        group2: Second sample (non-empty)
+
+    Returns:
+        Tuple of (U_statistic_for_group1, two_sided_p_value)
+
+    Raises:
+        ValueError: If either group is empty
+
+    Example:
+        >>> u, p = mann_whitney_u([1, 2, 3, 4, 5], [6, 7, 8, 9, 10])
+        >>> u
+        0.0
+        >>> p < 0.05
+        True
+    """
+    n1, n2 = len(group1), len(group2)
+    if n1 == 0 or n2 == 0:
+        raise ValueError("Mann-Whitney U requires both groups to be non-empty")
+
+    pooled = list(group1) + list(group2)
+    ranks = _average_ranks(pooled)
+    rank_sum_1 = sum(ranks[:n1])
+    u1 = rank_sum_1 - n1 * (n1 + 1) / 2.0
+
+    n = n1 + n2
+    mean_u = n1 * n2 / 2.0
+    ties = _tie_correction_sum(pooled)
+    variance = (n1 * n2 / 12.0) * ((n + 1) - ties / (n * (n - 1))) if n > 1 else 0.0
+    if variance <= 0:
+        return u1, 1.0
+
+    # Continuity correction of 0.5 toward the mean.
+    numerator = abs(u1 - mean_u) - 0.5
+    z = max(numerator, 0.0) / math.sqrt(variance)
+    return u1, 2 * _rss.norm_sf(z)
+
+
+def wilcoxon_signed_rank(
+    before: Sequence[float],
+    after: Sequence[float],
+    correction: bool = True,
+) -> tuple[float, float]:
+    """Nonparametric test for a shift between paired measurements.
+
+    The rank-based alternative to :func:`paired_t_test`. Pairs with zero
+    difference are discarded, as is conventional, and the p-value comes from
+    the normal approximation with a tie correction.
+
+    Args:
+        before: Measurements before the intervention
+        after: Measurements after, in the same subject order
+        correction: Apply the continuity correction. Defaults to True, which
+            is the textbook treatment and matches this library's
+            :func:`mann_whitney_u`. Note that ``scipy.stats.wilcoxon``
+            defaults the other way, so pass ``correction=False`` to reproduce
+            SciPy's default output exactly.
+
+    Returns:
+        Tuple of (W_statistic, two_sided_p_value), where W is the smaller of
+        the positive and negative signed-rank sums
+
+    Raises:
+        ValueError: If the samples differ in length, or every difference is zero
+
+    Example:
+        >>> w, p = wilcoxon_signed_rank([10, 12, 11, 13, 9], [12, 15, 13, 16, 12])
+        >>> w
+        0.0
+    """
+    if len(before) != len(after):
+        raise ValueError("Wilcoxon signed-rank requires samples of the same length")
+
+    diffs = [float(a) - float(b) for a, b in zip(before, after)]
+    nonzero = [d for d in diffs if d != 0.0]
+    if not nonzero:
+        raise ValueError("All differences are zero; the test is undefined")
+
+    n = len(nonzero)
+    ranks = _average_ranks([abs(d) for d in nonzero])
+    w_plus = sum(r for d, r in zip(nonzero, ranks) if d > 0)
+    w_minus = sum(r for d, r in zip(nonzero, ranks) if d < 0)
+    w = float(min(w_plus, w_minus))
+
+    mean_w = n * (n + 1) / 4.0
+    ties = _tie_correction_sum([abs(d) for d in nonzero])
+    variance = n * (n + 1) * (2 * n + 1) / 24.0 - ties / 48.0
+    if variance <= 0:
+        return w, 1.0
+
+    shift = 0.5 if correction else 0.0
+    z = (w - mean_w + shift) / math.sqrt(variance)
+    return w, 2 * _rss.norm_cdf(z)

@@ -119,10 +119,10 @@ def one_sample_t_test(data: Union[Sequence[float], "pd.Series"], mu: float) -> t
 
     Delegates to hypothesis_testing.t_score and the native backend for the p-value.
     """
-    from . import _rss
-
     from real_simple_stats import descriptive_statistics as desc
     from real_simple_stats import hypothesis_testing as ht
+
+    from . import _rss
 
     values = _extract_values(data)
     n = len(values)

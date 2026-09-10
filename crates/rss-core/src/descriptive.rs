@@ -285,7 +285,10 @@ pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
     if sxx <= 0.0 || syy <= 0.0 {
         return f64::NAN;
     }
-    (sxy / (sxx.sqrt() * syy.sqrt())).clamp(-1.0, 1.0)
+    // sqrt(sxx * syy) rather than sqrt(sxx) * sqrt(syy): the latter cannot
+    // return exactly 1.0 for a perfectly correlated pair, because squaring a
+    // rounded square root does not recover the original product.
+    (sxy / (sxx * syy).sqrt()).clamp(-1.0, 1.0)
 }
 
 /// Mode(s): every value tied for the highest frequency, ascending.

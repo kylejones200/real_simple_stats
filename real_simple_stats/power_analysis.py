@@ -6,10 +6,9 @@ required sample sizes for various statistical tests.
 Refactored for Pythonic elegance and maintainability.
 """
 
+import math
 from collections.abc import Callable
 from functools import lru_cache
-
-import math
 
 from . import _rss
 

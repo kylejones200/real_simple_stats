@@ -200,12 +200,12 @@ rss.mean(data)                  # 21.25
 rss.median(data)                # 21.0
 rss.sample_std_dev(data)        # 6.41
 rss.five_number_summary(data)   # {'min': 12, 'Q1': 16.5, 'median': 21.0, 'Q3': 26.5, 'max': 30}
-rss.iqr(data)                   # 10.0
+rss.interquartile_range(data)   # 10.0
 rss.coefficient_of_variation(data)  # 30.2 (percent)
 rss.skewness(data)
 rss.kurtosis(data)
 rss.detect_outliers_iqr(data)   # returns list of outlier values
-rss.frequency_table(data)       # value → count mapping
+rss.draw_frequency_table(data)  # value → count mapping
 ```
 
 ---
@@ -217,7 +217,7 @@ rss.frequency_table(data)       # value → count mapping
 rss.simple_probability(favorable=3, total=10)      # 0.3
 rss.joint_probability(0.4, 0.3)                    # 0.12
 rss.conditional_probability(0.12, 0.3)             # 0.4
-rss.bayes_theorem(prior=0.01, sensitivity=0.95, specificity=0.90)
+rss.bayes_theorem(p_b_given_a=0.9, p_a=0.01, p_b=0.05)   # P(A|B) = 0.18
 
 # Combinatorics
 rss.combinations(n=10, k=3)      # 120
@@ -231,12 +231,13 @@ rss.binomial_cdf(n=10, k=3, p=0.5)           # cumulative through k=3
 # Normal
 rss.normal_pdf(x=1.0, mean=0, std_dev=1)     # 0.2420
 rss.normal_cdf(x=1.96, mean=0, std_dev=1)    # 0.9750
-rss.z_score(value=75, mean=70, std_dev=10)   # 0.5
+rss.z_score(x=75, mean=70, std_dev=10)       # 0.5
 
 # Poisson, geometric, exponential
-rss.poisson_probability(k=3, lam=2.5)
-rss.geometric_probability(k=4, p=0.3)
-rss.exponential_probability(x=2.0, lam=0.5)
+rss.poisson_pmf(k=3, lam=2.5)                # exactly 3 events
+rss.poisson_cdf(k=3, lam=2.5)                # 3 or fewer
+rss.geometric_pmf(k=4, p=0.3)                # first success on trial 4
+rss.exponential_cdf(x=2.0, lam=0.5)          # P(X <= 2)
 ```
 
 ---
@@ -285,20 +286,23 @@ rss.wilcoxon_signed_rank(before, after)
 
 ```python
 # Simple linear regression
-slope, intercept = rss.linear_regression(x, y)
-r2 = rss.r_squared(x, y)
+slope, intercept, r, p_value, std_err = rss.linear_regression(x, y)
+r2 = rss.coefficient_of_determination(x, y)
 rss.pearson_correlation(x, y)      # correlation coefficient
 rss.spearman_correlation(x, y)     # rank correlation
 
 # Multiple regression
 result = rss.multiple_regression(X, y)
 result["coefficients"]
+result["intercept"]
 result["r_squared"]
-result["p_values"]
+result["adjusted_r_squared"]
+result["p_value"]        # F-test for the model as a whole
 
 # Predictions and residuals
-y_hat = rss.predict(slope, intercept, x_new)
-residuals = rss.calculate_residuals(y, y_hat)
+rss.regression_equation(x_new, slope, intercept)     # predict a single point
+fitted = [rss.regression_equation(xi, slope, intercept) for xi in x]
+residuals = rss.calculate_residuals(y, fitted)       # observed - predicted
 
 # Diagnostics
 rss.check_regression_assumptions(x, y, verbose=True)
@@ -399,7 +403,10 @@ itemsets = rss.frequent_itemsets(matrix, items, min_support=0.3)
 # Step 3: generate association rules
 rules = rss.association_rules(itemsets, min_confidence=0.6, min_lift=1.0)
 for rule in rules:
-    print(f"{rule['antecedent']} → {rule['consequent']}")
+    # antecedents/consequents are frozensets of item names
+    lhs = ", ".join(sorted(rule["antecedents"]))
+    rhs = ", ".join(sorted(rule["consequents"]))
+    print(f"{lhs} → {rhs}")
     print(f"  support={rule['support']:.2f}, confidence={rule['confidence']:.2f}, lift={rule['lift']:.2f}")
 ```
 
@@ -444,10 +451,12 @@ fit["range_param"]  # distance at which autocorrelation effectively vanishes
 fit["model_fn"]     # callable: h → γ(h)
 fit["rmse"]         # fit quality
 
-# Three model families
-rss.variogram_spherical(lags, nugget, sill, range_param)
-rss.variogram_exponential(lags, nugget, sill, range_param)
-rss.variogram_gaussian(lags, nugget, sill, range_param)
+# Three model families, evaluated at the fitted parameters.
+# Each accepts a single lag or a sequence of them.
+nugget, sill, rng_param = fit["nugget"], fit["sill"], fit["range_param"]
+rss.variogram_spherical(vario["lags"], nugget, sill, rng_param)
+rss.variogram_exponential(vario["lags"], nugget, sill, rng_param)
+rss.variogram_gaussian(vario["lags"], nugget, sill, rng_param)
 ```
 
 ---
@@ -561,7 +570,7 @@ result["std_error"]
 # Cross-validation
 result = rss.cross_validate(X, y, model_fn, k_folds=5)
 result["mean_score"]
-result["fold_scores"]
+result["scores"]         # one mean-squared error per fold
 ```
 
 ---
@@ -676,10 +685,13 @@ rss-calc --help
 
 ```python
 rss.multiple_regression(X, y)
-rss.pca(X, n_components=2)
-result["components"]
-result["explained_variance_ratio"]
-rss.mahalanobis_distance(X)
+
+result = rss.pca(X, n_components=2)
+result["components"]                 # each component's loadings
+result["explained_variance_ratio"]   # share of variance per component
+result["transformed"]                # the data in component space
+
+rss.mahalanobis_distance(X)          # distance of each row from the centre
 ```
 
 ---

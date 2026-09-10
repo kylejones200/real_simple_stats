@@ -41,7 +41,6 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import _rss
-
 from . import assumptions as assume
 from . import descriptive_statistics as desc
 

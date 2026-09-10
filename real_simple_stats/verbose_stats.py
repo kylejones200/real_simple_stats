@@ -9,7 +9,6 @@ import math
 from collections.abc import Sequence
 
 from . import _rss
-
 from . import descriptive_statistics as desc
 
 logger = logging.getLogger(__name__)

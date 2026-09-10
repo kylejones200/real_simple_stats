@@ -6,7 +6,7 @@ multiple regression, PCA, and factor analysis.
 
 import math
 
-from . import _matrix as M
+from . import _matrix as mat
 from . import _rss
 
 
@@ -46,10 +46,10 @@ def multiple_regression(
     if len(X) < 2:
         raise ValueError("Need at least 2 samples")
 
-    X_array = M.as_matrix(X)
+    X_array = mat.as_matrix(X)
     y_array = [float(v) for v in y]
 
-    n_samples, n_features = M.shape(X_array)
+    n_samples, n_features = mat.shape(X_array)
 
     if n_samples <= n_features + 1:
         raise ValueError("Need more samples than features")
@@ -57,10 +57,10 @@ def multiple_regression(
     if include_intercept:
         X_array = [[1.0, *row] for row in X_array]
 
-    rows, cols = M.shape(X_array)
-    coefficients = _rss.mat_lstsq(rows, cols, M.flatten(X_array), y_array)
+    rows, cols = mat.shape(X_array)
+    coefficients = _rss.mat_lstsq(rows, cols, mat.flatten(X_array), y_array)
 
-    predictions = M.matvec(X_array, coefficients)
+    predictions = mat.matvec(X_array, coefficients)
     residuals = [a - b for a, b in zip(y_array, predictions)]
 
     y_mean = _rss.mean(y_array)
@@ -126,8 +126,8 @@ def pca(X: list[list[float]], n_components: int | None = None) -> dict[str, any]
     if len(X) < 2:
         raise ValueError("Need at least 2 samples")
 
-    X_array = M.as_matrix(X)
-    n_samples, n_features = M.shape(X_array)
+    X_array = mat.as_matrix(X)
+    n_samples, n_features = mat.shape(X_array)
 
     if n_components is None:
         n_components = min(n_samples, n_features)
@@ -136,14 +136,14 @@ def pca(X: list[list[float]], n_components: int | None = None) -> dict[str, any]
             f"n_components must be between 1 and {min(n_samples, n_features)}"
         )
 
-    X_centered, mean = M.center(X_array)
-    cov_matrix = M.cov(X_centered, ddof=1)
+    X_centered, mean = mat.center(X_array)
+    cov_matrix = mat.cov(X_centered, ddof=1)
 
-    eigenvalues, eigenvectors = M.eigh_descending(cov_matrix)
+    eigenvalues, eigenvectors = mat.eigh_descending(cov_matrix)
     eigenvalues = eigenvalues[:n_components]
-    eigenvectors = M.take_columns(eigenvectors, n_components)
+    eigenvectors = mat.take_columns(eigenvectors, n_components)
 
-    transformed = M.matmul(X_centered, eigenvectors)
+    transformed = mat.matmul(X_centered, eigenvectors)
 
     total_variance = sum(eigenvalues)
     explained_variance_ratio = (
@@ -153,7 +153,7 @@ def pca(X: list[list[float]], n_components: int | None = None) -> dict[str, any]
     )
 
     return {
-        "components": M.transpose(eigenvectors),
+        "components": mat.transpose(eigenvectors),
         "explained_variance": eigenvalues,
         "explained_variance_ratio": explained_variance_ratio,
         "transformed": transformed,
@@ -190,17 +190,17 @@ def factor_analysis(
     if len(X) < 2:
         raise ValueError("Need at least 2 samples")
 
-    X_array = M.as_matrix(X)
-    n_samples, n_features = M.shape(X_array)
+    X_array = mat.as_matrix(X)
+    n_samples, n_features = mat.shape(X_array)
 
     if n_factors < 1 or n_factors > n_features:
         raise ValueError(f"n_factors must be between 1 and {n_features}")
 
-    X_standardized, _mean, _std = M.standardize(X_array)
-    corr_matrix = M.corr(X_standardized)
+    X_standardized, _mean, _std = mat.standardize(X_array)
+    corr_matrix = mat.corr(X_standardized)
 
     uniquenesses = [0.5] * n_features
-    loadings: M.Matrix = [[0.0] * n_factors for _ in range(n_features)]
+    loadings: mat.Matrix = [[0.0] * n_factors for _ in range(n_features)]
     communalities = [0.0] * n_features
 
     # Principal-axis factoring: repeatedly re-estimate the communalities on the
@@ -210,9 +210,9 @@ def factor_analysis(
         for i in range(n_features):
             reduced_corr[i][i] -= uniquenesses[i]
 
-        eigenvalues, eigenvectors = M.eigh_descending(reduced_corr)
+        eigenvalues, eigenvectors = mat.eigh_descending(reduced_corr)
         eigenvalues = eigenvalues[:n_factors]
-        eigenvectors = M.take_columns(eigenvectors, n_factors)
+        eigenvectors = mat.take_columns(eigenvectors, n_factors)
 
         scales = [math.sqrt(max(v, 0.0)) for v in eigenvalues]
         loadings = [
@@ -230,11 +230,11 @@ def factor_analysis(
         uniquenesses = new_uniquenesses
 
     # Regression-method factor scores: X_std @ L @ (L'L)^-1
-    lt_l = M.matmul(M.transpose(loadings), loadings)
-    factor_scores = M.matmul(M.matmul(X_standardized, loadings), M.inv_or_pinv(lt_l))
+    lt_l = mat.matmul(mat.transpose(loadings), loadings)
+    factor_scores = mat.matmul(mat.matmul(X_standardized, loadings), mat.inv_or_pinv(lt_l))
 
     return {
-        "loadings": M.transpose(loadings),
+        "loadings": mat.transpose(loadings),
         "communalities": communalities,
         "uniquenesses": uniquenesses,
         "transformed": factor_scores,
@@ -269,40 +269,40 @@ def canonical_correlation(X: list[list[float]], Y: list[list[float]]) -> dict[st
     if len(X) < 2:
         raise ValueError("Need at least 2 samples")
 
-    X_array = M.as_matrix(X)
-    Y_array = M.as_matrix(Y)
+    X_array = mat.as_matrix(X)
+    Y_array = mat.as_matrix(Y)
 
-    n_samples, p = M.shape(X_array)
-    q = M.shape(Y_array)[1]
+    n_samples, p = mat.shape(X_array)
+    q = mat.shape(Y_array)[1]
 
-    X_centered, _ = M.center(X_array)
-    Y_centered, _ = M.center(Y_array)
+    X_centered, _ = mat.center(X_array)
+    Y_centered, _ = mat.center(Y_array)
 
     denom = n_samples - 1
-    xt = M.transpose(X_centered)
-    yt = M.transpose(Y_centered)
-    Cxx = [[v / denom for v in row] for row in M.matmul(xt, X_centered)]
-    Cyy = [[v / denom for v in row] for row in M.matmul(yt, Y_centered)]
-    Cxy = [[v / denom for v in row] for row in M.matmul(xt, Y_centered)]
+    xt = mat.transpose(X_centered)
+    yt = mat.transpose(Y_centered)
+    Cxx = [[v / denom for v in row] for row in mat.matmul(xt, X_centered)]
+    Cyy = [[v / denom for v in row] for row in mat.matmul(yt, Y_centered)]
+    Cxy = [[v / denom for v in row] for row in mat.matmul(xt, Y_centered)]
 
     # Ridge the diagonals so a near-collinear block stays invertible.
-    Cxx = M.add_ridge(Cxx, 1e-8)
-    Cyy = M.add_ridge(Cyy, 1e-8)
+    Cxx = mat.add_ridge(Cxx, 1e-8)
+    Cyy = mat.add_ridge(Cyy, 1e-8)
 
     try:
-        Cxx_inv_sqrt = M.sqrtm_spd(M.inv(Cxx))
-        Cyy_inv_sqrt = M.sqrtm_spd(M.inv(Cyy))
+        Cxx_inv_sqrt = mat.sqrtm_spd(mat.inv(Cxx))
+        Cyy_inv_sqrt = mat.sqrtm_spd(mat.inv(Cyy))
     except ValueError as exc:
         raise ValueError(
             "Singular covariance matrix - check for collinearity"
         ) from exc
 
-    mat = M.matmul(M.matmul(Cxx_inv_sqrt, Cxy), Cyy_inv_sqrt)
-    u, sv, vt = M.svd(mat)
+    cross = mat.matmul(mat.matmul(Cxx_inv_sqrt, Cxy), Cyy_inv_sqrt)
+    u, sv, vt = mat.svd(cross)
 
     correlations = [min(max(v, 0.0), 1.0) for v in sv[: min(p, q)]]
-    x_weights = M.matmul(Cxx_inv_sqrt, u)
-    y_weights = M.matmul(Cyy_inv_sqrt, M.transpose(vt))
+    x_weights = mat.matmul(Cxx_inv_sqrt, u)
+    y_weights = mat.matmul(Cyy_inv_sqrt, mat.transpose(vt))
 
     return {
         "correlations": correlations,
@@ -335,11 +335,11 @@ def mahalanobis_distance(
     if len(X) < 2:
         raise ValueError("Need at least 2 samples")
 
-    X_array = M.as_matrix(X)
-    n_samples, n_features = M.shape(X_array)
+    X_array = mat.as_matrix(X)
+    n_samples, n_features = mat.shape(X_array)
 
-    mean = M.col_means(X_array)
-    cov_matrix = M.cov(X_array, ddof=1)
+    mean = mat.col_means(X_array)
+    cov_matrix = mat.cov(X_array, ddof=1)
 
     if point is not None:
         if len(point) != n_features:
@@ -349,17 +349,17 @@ def mahalanobis_distance(
         center = mean
 
     # Ridge the diagonal for numerical stability, as the NumPy version did.
-    cov_matrix = M.add_ridge(cov_matrix, 1e-8)
+    cov_matrix = mat.add_ridge(cov_matrix, 1e-8)
 
     try:
-        cov_inv = M.inv(cov_matrix)
+        cov_inv = mat.inv(cov_matrix)
     except ValueError as exc:
         raise ValueError("Singular covariance matrix") from exc
 
     distances = []
     for row in X_array:
         diff = [a - b for a, b in zip(row, center)]
-        quad = sum(d * v for d, v in zip(diff, M.matvec(cov_inv, diff)))
+        quad = sum(d * v for d, v in zip(diff, mat.matvec(cov_inv, diff)))
         distances.append(math.sqrt(max(quad, 0.0)))
 
     return distances

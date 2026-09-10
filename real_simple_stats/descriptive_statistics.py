@@ -244,3 +244,94 @@ def detect_fake_statistics(
     if correlation_not_causation:
         warnings.append("Warning: Correlation does not imply causation")
     return warnings
+
+
+def skewness(values: Sequence[float]) -> float:
+    """Measure the asymmetry of a distribution.
+
+    Uses the Fisher-Pearson standardized third moment. Zero means symmetric,
+    positive means a longer right tail, negative a longer left tail.
+
+    Args:
+        values: List of numerical values (at least 2)
+
+    Returns:
+        The population skewness
+
+    Raises:
+        ValueError: If fewer than 2 values are provided, or all values are equal
+
+    Example:
+        >>> round(skewness([1, 2, 3, 4, 5]), 10)
+        0.0
+        >>> skewness([1, 1, 1, 2, 10]) > 0   # long right tail
+        True
+    """
+    if len(values) < 2:
+        raise ValueError("Skewness requires at least 2 values")
+    result = _rss.skewness(values)
+    if math.isnan(result):
+        raise ValueError("Skewness is undefined when all values are identical")
+    return result
+
+
+def kurtosis(values: Sequence[float]) -> float:
+    """Measure how heavy a distribution's tails are.
+
+    Returns *excess* kurtosis, so a normal distribution scores 0. Positive
+    means heavier tails than normal, negative means lighter.
+
+    Args:
+        values: List of numerical values (at least 2)
+
+    Returns:
+        The excess kurtosis
+
+    Raises:
+        ValueError: If fewer than 2 values are provided, or all values are equal
+
+    Example:
+        >>> kurtosis([1, 2, 3, 4, 5]) < 0    # flatter than normal
+        True
+    """
+    if len(values) < 2:
+        raise ValueError("Kurtosis requires at least 2 values")
+    result = _rss.kurtosis(values)
+    if math.isnan(result):
+        raise ValueError("Kurtosis is undefined when all values are identical")
+    return result
+
+
+def detect_outliers_iqr(values: Sequence[float], multiplier: float = 1.5) -> list[float]:
+    """Find outliers using Tukey's interquartile-range rule.
+
+    A value is an outlier when it falls below ``Q1 - multiplier * IQR`` or
+    above ``Q3 + multiplier * IQR``. The conventional multiplier is 1.5;
+    3.0 is sometimes used to flag only extreme outliers.
+
+    Args:
+        values: List of numerical values (at least 1)
+        multiplier: How many IQRs beyond the quartiles counts as an outlier
+
+    Returns:
+        The outlying values, in the order they appear in the input
+
+    Raises:
+        ValueError: If the input is empty or the multiplier is negative
+
+    Example:
+        >>> detect_outliers_iqr([10, 12, 11, 13, 12, 100])
+        [100.0]
+        >>> detect_outliers_iqr([1, 2, 3, 4])
+        []
+    """
+    if not values:
+        raise ValueError("Cannot detect outliers in an empty list")
+    if multiplier < 0:
+        raise ValueError("multiplier must be non-negative")
+
+    summary = five_number_summary(values)
+    spread = summary["Q3"] - summary["Q1"]
+    low = summary["Q1"] - multiplier * spread
+    high = summary["Q3"] + multiplier * spread
+    return [float(v) for v in values if v < low or v > high]

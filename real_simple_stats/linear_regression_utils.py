@@ -1,7 +1,6 @@
 import logging
 from collections.abc import Sequence
 
-
 logger = logging.getLogger(__name__)
 from . import _rss
 
@@ -81,3 +80,65 @@ if __name__ == "__main__":
     m_slope, m_intercept = manual_slope_intercept(x, y)
     logger.info("Manual slope: %s", m_slope)
     logger.info("Manual intercept: %s", m_intercept)
+
+
+def spearman_correlation(x: Sequence[float], y: Sequence[float]) -> float:
+    """Correlation of the *ranks* of two variables.
+
+    Spearman's rho measures monotonic association rather than linear
+    association, so it is unaffected by outliers and does not assume the
+    relationship is a straight line. It is Pearson's correlation applied to
+    average ranks; tied values share their average rank.
+
+    Args:
+        x: First variable
+        y: Second variable, the same length as x
+
+    Returns:
+        Spearman's rho, between -1 and 1
+
+    Raises:
+        ValueError: If the inputs differ in length or have fewer than 2 values
+
+    Example:
+        >>> spearman_correlation([1, 2, 3, 4, 5], [1, 4, 9, 16, 25])
+        1.0
+        >>> spearman_correlation([1, 2, 3, 4], [4, 3, 2, 1])
+        -1.0
+    """
+    if len(x) != len(y):
+        raise ValueError("x and y must have the same length")
+    if len(x) < 2:
+        raise ValueError("Spearman correlation requires at least 2 values")
+
+    from .hypothesis_testing import _average_ranks
+
+    return _rss.pearson_r(_average_ranks(x), _average_ranks(y))
+
+
+def calculate_residuals(
+    y: Sequence[float], y_hat: Sequence[float]
+) -> list[float]:
+    """Differences between observed and predicted values.
+
+    Residuals are ``observed - predicted``, so a positive residual means the
+    model underpredicted that point. Plotting them against the predictions is
+    the standard way to check a regression's assumptions.
+
+    Args:
+        y: Observed values
+        y_hat: Predicted values, the same length as y
+
+    Returns:
+        List of residuals
+
+    Raises:
+        ValueError: If the inputs differ in length
+
+    Example:
+        >>> calculate_residuals([2.0, 4.0, 6.0], [2.5, 3.5, 6.0])
+        [-0.5, 0.5, 0.0]
+    """
+    if len(y) != len(y_hat):
+        raise ValueError("y and y_hat must have the same length")
+    return [float(a) - float(b) for a, b in zip(y, y_hat)]

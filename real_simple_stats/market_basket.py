@@ -21,7 +21,6 @@ import itertools
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-
 __all__ = [
     "encode_transactions",
     "frequent_itemsets",

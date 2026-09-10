@@ -4,9 +4,8 @@ This module provides functions for analyzing time series data including
 moving averages, autocorrelation, and trend analysis.
 """
 
-from collections.abc import Sequence
-
 import math
+from collections.abc import Sequence
 
 from . import _rss
 

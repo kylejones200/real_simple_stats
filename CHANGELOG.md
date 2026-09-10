@@ -35,6 +35,18 @@ Changed sections before upgrading.
 - **`posterior_predictive(..., random_seed=...)`** for reproducible draws.
 - 44 Rust unit tests, plus a Python parity suite gating the special functions
   against mpmath at 60 digits and the rest against SciPy.
+- **Fourteen functions the README had always documented but that never
+  existed.** They are thin wrappers over kernels the Rust backend already
+  provides, and each is pinned against SciPy where SciPy has an equivalent:
+  `skewness`, `kurtosis`, `detect_outliers_iqr`, `one_sample_t_test`,
+  `two_sample_t_test`, `paired_t_test`, `z_test`, `one_proportion_z_test`,
+  `mann_whitney_u`, `wilcoxon_signed_rank`, `spearman_correlation`,
+  `calculate_residuals`, `simple_probability`, and `binomial_cdf`.
+
+  Note that `wilcoxon_signed_rank` applies the continuity correction by
+  default, matching this library's `mann_whitney_u` and the textbook
+  treatment. `scipy.stats.wilcoxon` defaults the other way, so pass
+  `correction=False` to reproduce SciPy's default output exactly.
 
 ### Changed
 
@@ -103,8 +115,28 @@ Changed sections before upgrading.
 
 ### Fixed
 
+- **Twenty-one of the 109 `rss.*` references in the README did not exist.**
+  Seven were renames of functions that do (`iqr` ->
+  `interquartile_range`, `r_squared` -> `coefficient_of_determination`,
+  `predict` -> `regression_equation`, and so on); the other fourteen are
+  listed under Added above. Also corrected in the README: `linear_regression`
+  unpacked as two values when it returns five, wrong keyword names for
+  `bayes_theorem` and `z_score`, three dictionary keys that do not exist
+  (`p_values`, `fold_scores`, `components`), and `antecedent`/`consequent`,
+  which are `antecedents`/`consequents` and are frozensets.
+- **Seven documented outputs that were simply wrong**, each verified by hand
+  or against SciPy: `difference_in_differences` claimed a DiD estimate of 5.0
+  where the correct answer is 9.5; `chi_square_independence` claimed
+  `reject_null` was True for a table whose Yates-corrected p is 0.0562;
+  `empirical_bayes_estimate` checked for a key it does not return;
+  `gamma_poisson_update` referenced an undefined name; `probability_tree`
+  claimed 0.5 for a tree summing to 0.475; plus two formatting mismatches.
+  Every doctest in the package now passes.
 - `median`'s doctest, which was failing at 0.4.1.
 - Two doctests in `survival`, likewise failing at 0.4.1.
+- `pearson_correlation` now returns exactly 1.0 for a perfectly correlated
+  pair. It computed `sxy / (sqrt(sxx) * sqrt(syy))`, which cannot, because
+  squaring a rounded square root does not recover the product.
 
 ## [0.4.1] - 2026-07-16
 

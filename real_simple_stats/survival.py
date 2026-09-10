@@ -16,10 +16,9 @@ where the event had not occurred by the time the study ended.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import Any
-
-import math
 
 from . import _rss
 

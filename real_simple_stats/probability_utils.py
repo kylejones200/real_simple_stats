@@ -348,3 +348,35 @@ if __name__ == "__main__":
     dist = probability_distribution_table(values, probs)
     logger.info("Probability distribution: %s", dist)
     logger.info("Expected value: %s", expected_value(values, probs))
+
+
+def simple_probability(favorable: int, total: int) -> float:
+    """The classical probability of an event: favorable outcomes over total.
+
+    This is the definition every statistics course opens with, and it assumes
+    all outcomes are equally likely.
+
+    Args:
+        favorable: Number of outcomes counted as a success (non-negative)
+        total: Total number of equally likely outcomes (positive)
+
+    Returns:
+        Probability between 0 and 1
+
+    Raises:
+        ValueError: If total is not positive, favorable is negative, or
+            favorable exceeds total
+
+    Example:
+        >>> simple_probability(favorable=3, total=10)
+        0.3
+        >>> simple_probability(1, 2)
+        0.5
+    """
+    if total <= 0:
+        raise ValueError("total must be positive")
+    if favorable < 0:
+        raise ValueError("favorable must be non-negative")
+    if favorable > total:
+        raise ValueError("favorable cannot exceed total")
+    return favorable / total
