@@ -410,10 +410,10 @@ if len(observed) != len(expected):
 
 1. **Check data validity:**
    ```python
-   import numpy as np
+   import math
 
-   # Check for NaN or inf
-   if any(np.isnan(data)) or any(np.isinf(data)):
+   # Check for NaN or inf -- no NumPy needed
+   if any(math.isnan(v) or math.isinf(v) for v in data):
        print("Data contains NaN or inf values")
    ```
 
@@ -511,11 +511,17 @@ rss.multiple_regression(X, y)
 
 **Solution:**
 ```python
-# Check correlation between predictors
-import numpy as np
-X_array = np.array(X)
-corr_matrix = np.corrcoef(X_array.T)
-print(corr_matrix)
+# Check correlation between predictors, pairwise
+import real_simple_stats as rss
+
+n_features = len(X[0])
+for i in range(n_features):
+    for j in range(i + 1, n_features):
+        col_i = [row[i] for row in X]
+        col_j = [row[j] for row in X]
+        r = rss.pearson_correlation(col_i, col_j)
+        if abs(r) > 0.99:
+            print(f"features {i} and {j} are collinear (r = {r:.4f})")
 
 # Remove perfectly correlated variables
 # Or use regularization (not in this package)
@@ -558,16 +564,16 @@ result = rss.pca(X, n_components=n_components)
    result = rss.bootstrap(data, np.mean, n_iterations=10000)
    ```
 
-2. **Use progress indicator:**
+2. **Let the backend do the loop.** Naming the statistic keeps the whole
+   resample inside Rust and spreads it across cores, which is far faster than
+   any Python loop you could wrap a progress bar around:
    ```python
-   from tqdm import tqdm
-   import numpy as np
+   import real_simple_stats as rss
 
-   results = []
-   for _ in tqdm(range(n_iterations)):
-       sample = np.random.choice(data, size=len(data), replace=True)
-       results.append(np.mean(sample))
+   result = rss.bootstrap(data, "mean", n_iterations=10_000, random_seed=1)
+   result["confidence_interval"]
    ```
+   10,000 bootstrap iterations take roughly 2 ms this way.
 
 ---
 
@@ -591,8 +597,9 @@ print(f"Group 2: mean={rss.mean(group2)}, std={rss.sample_std_dev(group2)}")
 rss.plot_box_plot(group1)
 rss.plot_box_plot(group2)
 
-# Check assumptions
-# (normality tests not in this package - use scipy.stats.shapiro)
+# Check assumptions -- Shapiro-Wilk is built in
+from real_simple_stats.assumptions import check_t_test_assumptions
+check_t_test_assumptions(group1, group2)
 ```
 
 ---
@@ -623,16 +630,20 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
 
 **Solutions:**
 
-1. **Use NumPy arrays:**
+1. **Hand over a buffer instead of a list.** The backend reads any contiguous
+   float64 buffer without copying it; a list has to be unboxed one element at
+   a time, which for large inputs costs more than the arithmetic:
    ```python
-   import numpy as np
+   import array
 
-   # Slower
-   data_list = list(range(10000))
+   # Slower for large n: every element is unboxed on the way in
+   data_list = [float(v) for v in range(1_000_000)]
 
-   # Faster
-   data_array = np.array(data_list)
+   # Faster: read in place, no copy
+   data_buf = array.array("d", data_list)
    ```
+   A NumPy array or a `memoryview` works the same way if you already have one.
+   For a few thousand values the difference is not worth thinking about.
 
 2. **Reduce bootstrap/permutation iterations:**
    ```python
@@ -668,10 +679,10 @@ print(f"Cohen's d: {d:.3f}")      # Very small (trivial effect)
 
 2. **Check for missing values:**
    ```python
-   import numpy as np
+   import math
    if any(x is None for x in data):
        print("Contains None values")
-   if any(np.isnan(x) for x in data):
+   if any(isinstance(x, float) and math.isnan(x) for x in data):
        print("Contains NaN values")
    ```
 

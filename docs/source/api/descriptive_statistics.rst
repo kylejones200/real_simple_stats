@@ -1,5 +1,5 @@
 Descriptive Statistics
-=====================
+======================
 
 The ``descriptive_statistics`` module provides functions for calculating basic statistical measures that describe the central tendency, variability, and distribution of datasets.
 
@@ -9,29 +9,30 @@ The ``descriptive_statistics`` module provides functions for calculating basic s
    :show-inheritance:
 
 Functions Overview
------------------
+------------------
 
 Central Tendency
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. autofunction:: real_simple_stats.descriptive_statistics.mean
 .. autofunction:: real_simple_stats.descriptive_statistics.median
-.. autofunction:: real_simple_stats.descriptive_statistics.mode
+.. autofunction:: real_simple_stats.pre_statistics.mode
 
 Variability
-~~~~~~~~~~
+~~~~~~~~~~~
 
-.. autofunction:: real_simple_stats.descriptive_statistics.variance
-.. autofunction:: real_simple_stats.descriptive_statistics.standard_deviation
 .. autofunction:: real_simple_stats.descriptive_statistics.sample_variance
-.. autofunction:: real_simple_stats.descriptive_statistics.sample_standard_deviation
+.. autofunction:: real_simple_stats.descriptive_statistics.sample_std_dev
 .. autofunction:: real_simple_stats.descriptive_statistics.coefficient_of_variation
+.. autofunction:: real_simple_stats.descriptive_statistics.skewness
+.. autofunction:: real_simple_stats.descriptive_statistics.kurtosis
+.. autofunction:: real_simple_stats.descriptive_statistics.detect_outliers_iqr
 
 Usage Examples
--------------
+--------------
 
 Basic Statistics
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Calculate common descriptive statistics for a dataset:
 
@@ -61,7 +62,7 @@ Calculate common descriptive statistics for a dataset:
     print(f"Coefficient of Variation: {cv:.2f}%")
 
 Population vs Sample Statistics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Understanding the difference between population and sample statistics:
 
@@ -87,7 +88,7 @@ Understanding the difference between population and sample statistics:
     print(f"  Standard Deviation: {sample_std:.2f}")
 
 Error Handling
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 The functions include comprehensive error handling:
 
@@ -121,10 +122,10 @@ The functions include comprehensive error handling:
         print(f"Error: {e}")
 
 Mathematical Background
-----------------------
+-----------------------
 
 Mean (Arithmetic Average)
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The arithmetic mean is the sum of all values divided by the number of values:
 
@@ -138,7 +139,7 @@ Where:
 - :math:`x_i` is the i-th observation
 
 Median
-~~~~~
+~~~~~~
 
 The median is the middle value when data is arranged in ascending order:
 
@@ -146,7 +147,7 @@ The median is the middle value when data is arranged in ascending order:
 - For even n: median = average of two middle values
 
 Variance
-~~~~~~~
+~~~~~~~~
 
 **Population Variance:**
 
@@ -161,7 +162,7 @@ Variance
     s^2 = \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
 
 Standard Deviation
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 The standard deviation is the square root of the variance:
 
@@ -169,7 +170,7 @@ The standard deviation is the square root of the variance:
 - Sample: :math:`s = \sqrt{s^2}`
 
 Coefficient of Variation
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The coefficient of variation expresses the standard deviation as a percentage of the mean:
 
@@ -182,6 +183,6 @@ This allows comparison of variability between datasets with different units or s
 See Also
 --------
 
-* :doc:`probability_utils` - For probability calculations
-* :doc:`hypothesis_testing` - For statistical testing
-* :doc:`../tutorials/basic_statistics` - Tutorial on descriptive statistics
+* ``real_simple_stats.probability_utils`` - For probability calculations
+* ``real_simple_stats.hypothesis_testing`` - For statistical testing
+* the tutorials index - Tutorial on descriptive statistics

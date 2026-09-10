@@ -39,10 +39,11 @@ class TestKaplanMeier:
 
     def test_ci_bounds_valid(self):
         r = kaplan_meier([1, 2, 3, 4, 5, 6, 7, 8], [1, 1, 0, 1, 1, 0, 1, 1])
-        assert np.all(r["ci_lower"] >= 0)
-        assert np.all(r["ci_upper"] <= 1)
-        assert np.all(r["ci_lower"] <= r["survival_prob"] + 1e-9)
-        assert np.all(r["ci_upper"] >= r["survival_prob"] - 1e-9)
+        # Since 0.5.0 kaplan_meier returns plain lists, not ndarrays.
+        assert all(v >= 0 for v in r["ci_lower"])
+        assert all(v <= 1 for v in r["ci_upper"])
+        assert all(lo <= s + 1e-9 for lo, s in zip(r["ci_lower"], r["survival_prob"]))
+        assert all(hi >= s - 1e-9 for hi, s in zip(r["ci_upper"], r["survival_prob"]))
 
     def test_median_survival_reasonable(self):
         # Exponential with mean 10: median ≈ 6.93

@@ -216,17 +216,17 @@ print(f"Predicted score for 10 hours: {predicted_score:.1f}")
 ### Example 4: Bootstrap Confidence Interval
 ```python
 import real_simple_stats as rss
-import numpy as np
 
 # Sample data
 data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-# Bootstrap CI for the mean
-result = rss.bootstrap(data, np.mean, n_iterations=1000, confidence_level=0.95)
+# Bootstrap CI for the mean. Naming the statistic keeps the resampling
+# inside the Rust backend and runs it across every core.
+result = rss.bootstrap(data, "mean", n_iterations=1000, confidence_level=0.95)
 
 print(f"Sample mean: {result['statistic']:.2f}")
 print(f"95% CI: {result['confidence_interval']}")
-print(f"Standard error: {np.std(result['bootstrap_distribution']):.2f}")
+print(f"Standard error: {result['std_error']:.2f}")
 ```
 
 ---
@@ -256,10 +256,11 @@ print(f"Total participants needed: {result['n'] * 2}")
 ```python
 import real_simple_stats as rss
 import matplotlib.pyplot as plt
-import numpy as np
+from real_simple_stats import Rng
 
-# Simulate null distribution
-null_samples = [rss.mean(np.random.normal(0, 1, 30)) for _ in range(1000)]
+# Simulate null distribution using the bundled generator
+rng = Rng(0)
+null_samples = [rss.mean(rng.normal(0, 1, 30)) for _ in range(1000)]
 
 # Your observed statistic
 observed = 0.5
@@ -318,20 +319,21 @@ effect_size_calculator(control, treatment)
 
 ```python
 import real_simple_stats as rss
+from real_simple_stats import Rng
 import matplotlib.pyplot as plt
-import numpy as np
 
 def simulate_confidence_intervals(true_mean=100, true_std=15, n=30,
                                    n_simulations=100, confidence=0.95):
     """Simulate confidence intervals to show coverage"""
 
     covers_true_mean = 0
+    rng = Rng(0)
 
     plt.figure(figsize=(12, 8))
 
     for i in range(n_simulations):
         # Generate sample
-        sample = np.random.normal(true_mean, true_std, n)
+        sample = rng.normal(true_mean, true_std, n)
 
         # Calculate CI
         sample_mean = rss.mean(sample)
@@ -376,9 +378,8 @@ simulate_confidence_intervals()
 ### Bayesian Updating Visualization
 ```python
 import real_simple_stats as rss
+from real_simple_stats import _rss
 import matplotlib.pyplot as plt
-import numpy as np
-from scipy import stats
 
 def visualize_bayesian_update(prior_alpha=1, prior_beta=1,
                                successes=7, trials=10):
@@ -389,10 +390,11 @@ def visualize_bayesian_update(prior_alpha=1, prior_beta=1,
         prior_alpha, prior_beta, successes, trials
     )
 
-    # Plot
-    x = np.linspace(0, 1, 1000)
-    prior = stats.beta.pdf(x, prior_alpha, prior_beta)
-    posterior = stats.beta.pdf(x, post_alpha, post_beta)
+    # Plot. The Beta density comes from the native backend, so this example
+    # needs nothing beyond matplotlib.
+    x = [i / 999 for i in range(1000)]
+    prior = [_rss.beta_pdf(v, prior_alpha, prior_beta) for v in x]
+    posterior = [_rss.beta_pdf(v, post_alpha, post_beta) for v in x]
 
     plt.figure(figsize=(10, 6))
     plt.plot(x, prior, label='Prior', linewidth=2)

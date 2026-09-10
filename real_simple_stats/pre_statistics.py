@@ -1,6 +1,24 @@
 import logging
 import math
 
+# `mean` and `median` here are deliberately elementary: they show a beginner
+# the arithmetic rather than calling the fast path. They are NOT exported,
+# because a star-import of this module runs after descriptive_statistics and
+# would otherwise shadow the documented, validated, Rust-backed versions --
+# real_simple_stats.mean([]) used to raise ZeroDivisionError instead of a
+# helpful ValueError for exactly that reason. Reach them explicitly as
+# `real_simple_stats.pre_statistics.mean` when teaching.
+__all__ = [
+    "percent_to_decimal",
+    "decimal_to_percent",
+    "round_to_decimal_places",
+    "order_of_operations_example",
+    "mode",
+    "weighted_mean",
+    "factorial",
+]
+
+
 logger = logging.getLogger(__name__)
 
 

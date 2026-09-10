@@ -16,19 +16,11 @@ where the event had not occurred by the time the study ended.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import Any
 
-import numpy as np
-from scipy.stats import (
-    expon,
-    fisk,
-    lognorm,
-    weibull_min,
-)
-from scipy.stats import (
-    norm as norm_dist,
-)
+from . import _rss
 
 __all__ = [
     "kaplan_meier",
@@ -36,11 +28,13 @@ __all__ = [
     "compare_survival_models",
 ]
 
+#: Supported parametric families, mapped to their survival functions.
+#: Location is fixed at 0 throughout, as befits durations.
 _DISTRIBUTIONS: dict[str, Any] = {
-    "exponential": expon,
-    "weibull": weibull_min,
-    "lognormal": lognorm,
-    "loglogistic": fisk,
+    "exponential": lambda x, scale: _rss.expon_sf(x, scale),
+    "weibull": lambda x, c, scale: _rss.weibull_sf(x, c, scale),
+    "lognormal": lambda x, s, scale: _rss.lognorm_sf(x, s, scale),
+    "loglogistic": lambda x, c, scale: _rss.fisk_sf(x, c, scale),
 }
 
 
@@ -85,20 +79,16 @@ def kaplan_meier(
         >>> r["n_events"]
         6
     """
-    t: np.ndarray = np.asarray(durations, dtype=float)
-    e: np.ndarray = np.asarray(event_observed, dtype=int)
+    t = [float(v) for v in durations]
+    e = [int(v) for v in event_observed]
     n = len(t)
     if len(e) != n:
         raise ValueError("durations and event_observed must have the same length.")
     if n == 0:
         raise ValueError("Need at least one observation.")
 
-    # Sort once; iterate over unique event times
-    order = np.argsort(t)
-    t_s = t[order]
-    e_s = e[order]
-
-    event_times = np.unique(t_s[e_s == 1])
+    # Distinct times at which an event (not a censoring) was observed.
+    event_times = sorted({ti for ti, ei in zip(t, e) if ei == 1})
 
     times = [0.0]
     surv = [1.0]
@@ -108,8 +98,8 @@ def kaplan_meier(
     gw = 0.0
 
     for ti in event_times:
-        n_at_risk = float(np.sum(t >= ti))
-        d = float(np.sum((t == ti) & (e == 1)))
+        n_at_risk = float(sum(1 for v in t if v >= ti))
+        d = float(sum(1 for v, ev in zip(t, e) if v == ti and ev == 1))
         if n_at_risk > d:
             gw += d / (n_at_risk * (n_at_risk - d))
         s *= 1.0 - d / n_at_risk
@@ -117,27 +107,25 @@ def kaplan_meier(
         surv.append(float(s))
         greenwood.append(gw)
 
-    times_arr = np.array(times)
-    surv_arr = np.array(surv)
-    gw_arr = np.array(greenwood)
-
-    z = float(norm_dist.ppf(1 - alpha / 2))
-    se = surv_arr * np.sqrt(gw_arr)
-    ci_lower = np.clip(surv_arr - z * se, 0.0, 1.0)
-    ci_upper = np.clip(surv_arr + z * se, 0.0, 1.0)
+    # Greenwood standard errors and the corresponding normal-approximation band.
+    z = _rss.norm_ppf(1 - alpha / 2)
+    se = [sv * math.sqrt(g) for sv, g in zip(surv, greenwood)]
+    ci_lower = [min(max(sv - z * e_i, 0.0), 1.0) for sv, e_i in zip(surv, se)]
+    ci_upper = [min(max(sv + z * e_i, 0.0), 1.0) for sv, e_i in zip(surv, se)]
+    # Survival is 1 at time 0 by definition, so the band is degenerate there.
     ci_lower[0] = ci_upper[0] = 1.0
 
-    below_half = np.where(surv_arr <= 0.5)[0]
-    median_survival = float(times_arr[below_half[0]]) if len(below_half) > 0 else None
+    median_survival = next((ti for ti, sv in zip(times, surv) if sv <= 0.5), None)
+    n_events = sum(e)
 
     return {
-        "times": times_arr,
-        "survival_prob": surv_arr,
+        "times": times,
+        "survival_prob": surv,
         "ci_lower": ci_lower,
         "ci_upper": ci_upper,
         "median_survival": median_survival,
-        "n_events": int(e.sum()),
-        "n_censored": int(n - e.sum()),
+        "n_events": int(n_events),
+        "n_censored": int(n - n_events),
     }
 
 
@@ -164,7 +152,8 @@ def fit_parametric_survival(
     Returns:
         dict with keys:
             distribution: Name of the fitted distribution.
-            params: Fitted scipy distribution parameters (shape, loc, scale, …).
+            params: Fitted parameters as (shape, loc, scale), or (loc, scale)
+                for the exponential. Location is always 0.
             aic: Akaike Information Criterion (lower = better fit).
             bic: Bayesian Information Criterion.
             n_fit: Number of observed events used in the fit.
@@ -174,10 +163,10 @@ def fit_parametric_survival(
         ValueError: If distribution name is unrecognised or too few events.
 
     Example:
-        >>> import numpy as np
-        >>> rng = np.random.default_rng(0)
-        >>> t = rng.weibull(1.5, 200) * 50
-        >>> e = np.ones(200, dtype=int)
+        >>> from real_simple_stats import Rng
+        >>> rng = Rng(0)
+        >>> t = rng.weibull(1.5, 50.0, 200)
+        >>> e = [1] * 200
         >>> r = fit_parametric_survival(t, e, distribution="weibull")
         >>> r["distribution"]
         'weibull'
@@ -191,9 +180,11 @@ def fit_parametric_survival(
             f"Choose from: {', '.join(_DISTRIBUTIONS)}."
         )
 
-    t: np.ndarray = np.asarray(durations, dtype=float)
-    e: np.ndarray = np.asarray(event_observed, dtype=int)
-    t_obs = t[e == 1]
+    t = [float(v) for v in durations]
+    e = [int(v) for v in event_observed]
+    if len(e) != len(t):
+        raise ValueError("durations and event_observed must have the same length.")
+    t_obs = [ti for ti, ei in zip(t, e) if ei == 1]
 
     if len(t_obs) < 3:
         raise ValueError(
@@ -201,18 +192,29 @@ def fit_parametric_survival(
             f"got {len(t_obs)}."
         )
 
-    dist = _DISTRIBUTIONS[dist_name]
-    params = dist.fit(t_obs, floc=0)
+    if any(v <= 0 for v in t_obs):
+        raise ValueError("All observed durations must be strictly positive.")
 
-    # Log-likelihood and information criteria
-    log_lik = float(dist.logpdf(t_obs, *params).sum())
+    shape, scale, log_lik = _rss.fit_survival(dist_name, t_obs)
+
+    # Parameter tuples keep the (shape, loc, scale) layout, with loc pinned to
+    # 0. The exponential has no shape, so it reports (loc, scale).
+    if dist_name == "exponential":
+        params = (0.0, scale)
+        sf_args = (scale,)
+    else:
+        params = (shape, 0.0, scale)
+        sf_args = (shape, scale)
+
     k = len(params)
     n = len(t_obs)
     aic = 2 * k - 2 * log_lik
-    bic = k * np.log(n) - 2 * log_lik
+    bic = k * math.log(n) - 2 * log_lik
+
+    sf = _DISTRIBUTIONS[dist_name]
 
     def survival_fn(time: float) -> float:
-        return float(dist.sf(time, *params))
+        return float(sf(float(time), *sf_args))
 
     return {
         "distribution": dist_name,
@@ -242,10 +244,10 @@ def compare_survival_models(
         sorted by AIC ascending.  Each dict also includes ``"rank"`` (1 = best).
 
     Example:
-        >>> import numpy as np
-        >>> rng = np.random.default_rng(1)
-        >>> t = rng.exponential(scale=30, size=300)
-        >>> e = np.ones(300, dtype=int)
+        >>> from real_simple_stats import Rng
+        >>> rng = Rng(1)
+        >>> t = rng.exponential(30, 300)
+        >>> e = [1] * 300
         >>> results = compare_survival_models(t, e)
         >>> results[0]["distribution"]  # exponential should win
         'exponential'

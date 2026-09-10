@@ -31,9 +31,9 @@ Under the null hypothesis of spatial randomness, E[I] = −1/(n−1) ≈ 0.
 
 ```python
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 n = 100
 
 # Spatially structured data: two clusters (high in left half, low in right)
@@ -63,11 +63,21 @@ The distance threshold defines who counts as a "neighbour." It is the most conse
 3. **Average neighbour count**: each observation should have at least 3–5 neighbours on average.
 
 ```python
-from scipy.spatial.distance import cdist
-import numpy as np
+import math
 
-coords = np.column_stack([x, y])
-D = cdist(coords, coords)
+def neighbours_within(x, y, threshold):
+    """Average number of neighbours each point has within `threshold`."""
+    n = len(x)
+    counts = []
+    for i in range(n):
+        c = sum(
+            1
+            for j in range(n)
+            if i != j
+            and math.dist((x[i], y[i]), (x[j], y[j])) <= threshold
+        )
+        counts.append(c)
+    return sum(counts) / n
 
 for d in [10, 20, 30, 50]:
     avg_n = (D < d).sum(axis=1).mean() - 1
@@ -151,22 +161,30 @@ for model in ("spherical", "exponential", "gaussian"):
 ### Full worked example
 
 ```python
+import math
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(1)
+rng = Rng(1)
 n = 120
 
-# Spatially structured data with known range ≈ 25
+# Spatially structured data with known range ~ 25
 x = rng.uniform(0, 100, n)
 y = rng.uniform(0, 100, n)
 
-# Generate spatially correlated values using a simple approximation
-from scipy.spatial.distance import cdist
-D = cdist(np.column_stack([x, y]), np.column_stack([x, y]))
-C = np.exp(-D / 25)   # exponential covariance with range 25
-L = np.linalg.cholesky(C + 1e-8 * np.eye(n))
-values = L @ rng.standard_normal(n)
+# Generate a spatially correlated field: an exponential covariance with range
+# 25, factored by hand. rss itself needs no dependencies -- this is just how
+# the demo data is made.
+cov = [
+    [math.exp(-math.dist((x[i], y[i]), (x[j], y[j])) / 25) for j in range(n)]
+    for i in range(n)
+]
+for i in range(n):
+    cov[i][i] += 1e-8
+
+chol = rss._matrix.sqrtm_spd(cov)          # symmetric factor of the covariance
+noise = rng.normal(0, 1, n)
+values = [sum(chol[i][j] * noise[j] for j in range(n)) for i in range(n)]
 
 # Step 1: Moran's I
 r = rss.morans_i(x, y, values, distance_threshold=25)

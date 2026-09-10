@@ -23,9 +23,11 @@ pip install git+https://github.com/kylejones200/real_simple_stats.git
 ### Q: What are the system requirements?
 
 **A:**
-- **Python**: 3.7 or higher
-- **Dependencies**: NumPy, SciPy (automatically installed)
-- **Optional**: matplotlib (for plotting), pandas (for data handling)
+- **Python**: 3.12 or higher
+- **Dependencies**: none. Since 0.5.0 the statistics engine is a compiled Rust
+  extension shipped inside the wheel, so there is no NumPy or SciPy to install.
+- **Optional extras**: `plots` (matplotlib, for the `.plot()` methods),
+  `pandas` (for the DataFrame helpers)
 
 ---
 
@@ -70,10 +72,13 @@ mean([1, 2, 3])
 
 **A:** Most functions accept:
 - Python lists: `[1, 2, 3, 4, 5]`
-- NumPy arrays: `np.array([1, 2, 3, 4, 5])`
 - Tuples: `(1, 2, 3, 4, 5)`
+- Anything supporting the buffer protocol with float64 items:
+  `array.array('d', ...)`, a `memoryview`, or a NumPy array if you have one
 
-For multivariate functions, use lists of lists or 2D NumPy arrays.
+The library does not require NumPy, but it does accept NumPy arrays — and
+reads them without copying, which is the fastest path in. For multivariate
+functions, use lists of lists (or a 2-D NumPy array).
 
 ---
 
@@ -401,9 +406,20 @@ print(f"Cohen's d = {d:.3f} ({interpretation})")
 
 ## 🔧 Technical Questions
 
-### Q: Are the functions vectorized?
+### Q: Are the functions fast?
 
-**A:** Yes, most functions use NumPy internally for efficient computation.
+**A:** Yes. Every numeric routine runs in a compiled Rust extension, and the
+resampling functions run in parallel across cores. On a million values,
+`sample_std_dev` takes about 0.12 ms against 52.8 ms for the pure-Python
+implementation this library shipped before 0.5.0 — and about 4x less time than
+the NumPy equivalent.
+
+The one thing worth knowing is the input type. Handing over a contiguous
+float64 buffer — a NumPy array, an `array.array('d')`, a `memoryview` — lets
+the backend read your data without copying it. A plain list has to be unboxed
+one element at a time, which at a million values costs more than the
+arithmetic does. Lists are perfectly fine for ordinary sizes; reach for a
+buffer when the data gets large.
 
 ---
 
@@ -419,7 +435,7 @@ df = pd.DataFrame({'A': [1, 2, 3], 'B': [4, 5, 6]})
 # Method 1: Convert to list
 mean_A = rss.mean(df['A'].tolist())
 
-# Method 2: Use values (NumPy array)
+# Method 2: hand over the underlying array directly (no copy is made)
 mean_A = rss.mean(df['A'].values)
 
 # Regression
@@ -430,16 +446,32 @@ slope, intercept, *_ = rss.linear_regression(df['A'].values, df['B'].values)
 
 ### Q: How accurate are the calculations?
 
-**A:** Real Simple Stats uses SciPy and NumPy for numerical computations, which are industry-standard and highly accurate. Results match those from R, SPSS, and other statistical software.
+**A:** The numerics are implemented from scratch in Rust and gated by a
+parity test suite on every commit.
+
+The special functions — error function, incomplete gamma and beta and their
+inverses, the normal quantile — are checked against **mpmath at 60 decimal
+digits**, not against SciPy. That distinction is deliberate: SciPy's own
+`erfc` and `ndtr` carry about 1e-13 relative error in the tails, so testing
+against SciPy would cap this library's accuracy at SciPy's and would report
+genuine improvements as regressions. Measured against true values, the normal
+CDF and survival function here are roughly 50x more accurate than SciPy's
+(2.5e-15 relative error against 1.3e-13).
+
+Everything above that layer — the distributions, regression, ANOVA, effect
+sizes, linear algebra — is checked against SciPy and NumPy, and agrees to
+about 1e-12 or better. Results match R, SPSS, and other statistical software.
 
 ---
 
 ### Q: Can I use this for production/research?
 
 **A:** Yes! The package is:
-- Well-tested (86% code coverage)
-- Based on established statistical methods
-- Uses reliable numerical libraries (SciPy, NumPy)
+- Well-tested — 908 Python tests and 44 Rust tests, including a numerical
+  parity suite that pins results against mpmath and SciPy
+- Based on established statistical methods, with the source algorithm named in
+  the code (Wichura AS241, Lenth AS243, Royston AS R94, and so on)
+- Free of runtime dependencies, so there is no version-conflict surface
 - Documented with references
 
 However, always validate results for critical applications.

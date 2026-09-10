@@ -1,42 +1,117 @@
 name: CI
+
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  build-test:
+  rust:
+    name: Rust core (cargo test)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          python-version-file: ".python-version"
-          cache: "pip"
+          components: rustfmt, clippy
 
-      - name: Install deps
+      - uses: Swatinem/rust-cache@v2
+
+      # rss-core is pure Rust with no Python linkage, so it tests standalone.
+      # rss-py is only built, since linking the extension needs a Python host.
+      - name: Test the core crate
+        run: cargo test -p rss-core --release
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy -p rss-core --release -- -D warnings
+
+  python:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install (builds the Rust extension via maturin)
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
       - name: Test
+        run: pytest -q --maxfail=1
+
+      # The whole point of 0.5.0: the library must work with nothing installed
+      # alongside it. The dev extra pulls in numpy/scipy as test oracles, so
+      # this guard is what actually proves the runtime dependency set is empty.
+      - name: Verify zero runtime dependencies
+        shell: bash
         run: |
-          pytest -q --maxfail=1
-      
+          python -m pip install maturin
+          maturin build --release --out dist
+          python -m venv /tmp/bare
+          if [ -f /tmp/bare/bin/python ]; then PY=/tmp/bare/bin/python; else PY=/tmp/bare/Scripts/python; fi
+          "$PY" -m pip install --upgrade pip
+          "$PY" -m pip install --no-index --find-links dist real_simple_stats
+          cd /tmp
+          "$PY" -c "
+          import importlib.util as u
+          for m in ('numpy', 'scipy', 'pandas', 'matplotlib'):
+              assert u.find_spec(m) is None, f'{m} unexpectedly present'
+          import real_simple_stats as rss
+          assert abs(rss.mean([1, 2, 3]) - 2.0) < 1e-12
+          assert abs(rss.critical_value_t(0.05, 10) - 2.2281388519862735) < 1e-9
+          from real_simple_stats.resampling import bootstrap
+          bootstrap([1, 2, 3, 4, 5], 'mean', n_iterations=100, random_seed=1)
+          print('zero-dependency install verified')
+          "
+
+  quality:
+    name: Lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
       - name: Format check (non-blocking)
         continue-on-error: true
-        run: |
-          ruff format --check . || echo "Formatting issues found (non-blocking)"
-      
+        run: ruff format --check .
+
       - name: Lint check (non-blocking)
         continue-on-error: true
-        run: |
-          ruff check . || echo "Linting issues found (non-blocking)"
-      
+        run: ruff check .
+
       - name: Type check (non-blocking)
         continue-on-error: true
-        run: |
-          python -m mypy real_simple_stats tests --config-file mypy.ini --namespace-packages --explicit-package-bases || echo "Type check issues found (non-blocking)"
+        run: python -m mypy real_simple_stats --config-file mypy.ini --namespace-packages --explicit-package-bases

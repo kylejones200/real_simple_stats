@@ -4,10 +4,10 @@ Code Quality Standards
 Real Simple Stats maintains high code quality standards to ensure reliability, maintainability, and ease of use. This document outlines our quality practices and tools.
 
 Quality Metrics
---------------
+---------------
 
 Current Status
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. list-table:: Quality Metrics
    :header-rows: 1
@@ -35,10 +35,10 @@ Current Status
      - 🟢 Good
 
 Tools and Standards
-------------------
+-------------------
 
 Code Formatting
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 **Black** - Automatic code formatting
 
@@ -59,7 +59,7 @@ Usage::
     make format-check  # Check formatting without changes
 
 Linting
-~~~~~~
+~~~~~~~
 
 **Flake8** - Code style and error checking
 
@@ -79,7 +79,7 @@ Usage::
     make lint  # Run linting checks
 
 Type Checking
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 **MyPy** - Static type checking
 
@@ -103,7 +103,7 @@ Usage::
     make type-check  # Run type checking
 
 Testing
-~~~~~~
+~~~~~~~
 
 **Pytest** - Testing framework
 
@@ -126,10 +126,10 @@ Usage::
     make test-cov  # Run tests with coverage report
 
 Development Workflow
--------------------
+--------------------
 
 Pre-commit Hooks
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Automatic quality checks before each commit:
 
@@ -164,7 +164,7 @@ Installation::
     make pre-commit-install
 
 Makefile Commands
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 Convenient commands for development tasks:
 
@@ -186,7 +186,7 @@ Usage::
     make help     # Show all available commands
 
 Code Standards
--------------
+--------------
 
 Type Hints
 ~~~~~~~~~~
@@ -212,7 +212,7 @@ All functions must have comprehensive type annotations:
         """
 
 Docstrings
-~~~~~~~~~
+~~~~~~~~~~
 
 Google-style docstrings with comprehensive information:
 
@@ -249,7 +249,7 @@ Google-style docstrings with comprehensive information:
         """
 
 Error Handling
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Comprehensive input validation and meaningful error messages:
 
@@ -271,10 +271,10 @@ Comprehensive input validation and meaningful error messages:
         return (std_val / abs(mean_val)) * 100
 
 Testing Standards
-----------------
+-----------------
 
 Test Coverage
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 We aim for high test coverage with meaningful tests:
 
@@ -306,7 +306,7 @@ We aim for high test coverage with meaningful tests:
             assert mean(values) == expected
 
 Test Organization
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 
 * **Descriptive names**: Test names clearly describe what is being tested
 * **Arrange-Act-Assert**: Clear test structure
@@ -314,10 +314,10 @@ Test Organization
 * **Parameterized tests**: Test multiple scenarios efficiently
 
 Continuous Integration
----------------------
+----------------------
 
 GitHub Actions
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Automated quality checks on every pull request:
 
@@ -347,7 +347,7 @@ Automated quality checks on every pull request:
             make quality
 
 Quality Gates
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 Pull requests must pass all quality checks:
 
@@ -358,10 +358,10 @@ Pull requests must pass all quality checks:
 * Documentation is updated
 
 Monitoring and Reporting
------------------------
+------------------------
 
 Coverage Reports
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 HTML coverage reports generated automatically::
 
@@ -371,7 +371,7 @@ HTML coverage reports generated automatically::
 Coverage badges in README show current status.
 
 Quality Metrics
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 Regular monitoring of:
 
@@ -382,10 +382,10 @@ Regular monitoring of:
 * Code complexity metrics
 
 Best Practices Summary
----------------------
+----------------------
 
 For Contributors
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 1. **Run quality checks** before committing: ``make quality``
 2. **Write comprehensive tests** for new functionality
@@ -394,7 +394,7 @@ For Contributors
 5. **Follow existing patterns** in the codebase
 
 For Maintainers
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 1. **Review quality metrics** regularly
 2. **Update tools and dependencies** periodically

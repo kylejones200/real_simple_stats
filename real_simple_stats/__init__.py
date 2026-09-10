@@ -1,35 +1,38 @@
-import os
-import sys
-from pathlib import Path
+"""Real Simple Stats - an educational statistics library with a Rust backend.
 
-# Ensure the project’s bundled virtualenv (if present) takes precedence over any
-# globally installed packages. This prevents crashes caused by incompatible
-# system-wide NumPy/SciPy builds when running the test suite.
-_VENV_SITE = Path(__file__).resolve().parents[1] / "venv" / "lib"
-if _VENV_SITE.exists():
-    for candidate in sorted(_VENV_SITE.glob("python*/site-packages")):
-        candidate_str = str(candidate)
-        if candidate_str not in sys.path:
-            sys.path.insert(0, candidate_str)
+Every numeric routine runs in the bundled native extension
+(``real_simple_stats._rss``); the library has no runtime dependencies. Plotting
+is optional and pulls in matplotlib via the ``plots`` extra.
 
-# Disable autoloading of externally installed pytest plugins unless the user
-# explicitly opts back in. Some environments have globally installed plugins
-# that pull in native extensions (e.g. pyarrow) compiled against incompatible
-# BLAS stacks, which previously triggered segmentation faults during import.
-if "PYTEST_DISABLE_PLUGIN_AUTOLOAD" not in os.environ:
-    os.environ["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+Inputs may be lists, tuples, or anything exposing the buffer protocol. Passing
+a contiguous float64 buffer (a NumPy array, ``array.array('d')``, a
+``memoryview``) lets the backend read it without copying, which is where the
+large speedups come from.
+"""
 
-# Expose package version
-try:
-    from importlib.metadata import PackageNotFoundError, version  # Python 3.8+
-except Exception:  # pragma: no cover - fallback if needed
-    # Fallback for environments with importlib_metadata backport
-    from importlib_metadata import PackageNotFoundError, version  # type: ignore
+from __future__ import annotations
 
-try:
-    __version__ = version("real-simple-stats")
-except PackageNotFoundError:  # When running from source without installed metadata
-    __version__ = "0.0.0"
+
+def __getattr__(name: str) -> str:
+    """Resolve ``__version__`` lazily (PEP 562).
+
+    Reading it eagerly costs ~13 ms, because importlib.metadata drags in
+    pathlib and the email package. That was lost in the noise when SciPy
+    dominated import time; now that the whole import is ~10 ms, it is most of
+    it. Users still just write ``real_simple_stats.__version__``.
+    """
+    if name == "__version__":
+        from importlib.metadata import PackageNotFoundError, version
+
+        try:
+            return version("real-simple-stats")
+        except PackageNotFoundError:
+            # Running from a source tree with no installed metadata.
+            return "0.0.0"
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+# The native random generator (PCG64), used wherever the library samples.
+from ._rss import Rng  # noqa: E402, F401
 
 # Top-level exports for convenience
 from .assumptions import *  # noqa: F403, F401, E402

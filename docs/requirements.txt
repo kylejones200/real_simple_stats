@@ -1,6 +1,8 @@
 sphinx>=4.0.0
 sphinx-rtd-theme>=1.0.0
 myst-parser>=0.18.0
-numpy>=1.19.0
-scipy>=1.5.0
+
+# real_simple_stats itself has no runtime dependencies. These are needed only
+# to execute the plotting examples embedded in the documentation.
 matplotlib>=3.3.0
+numpy>=1.20.0

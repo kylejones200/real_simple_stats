@@ -21,8 +21,6 @@ import itertools
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-import numpy as np
-
 __all__ = [
     "encode_transactions",
     "frequent_itemsets",
@@ -32,7 +30,7 @@ __all__ = [
 
 def encode_transactions(
     transactions: Sequence[Iterable[str]],
-) -> tuple[np.ndarray, list[str]]:
+) -> tuple[list[list[bool]], list[str]]:
     """Convert a list of baskets into a binary transaction matrix.
 
     Args:
@@ -41,7 +39,7 @@ def encode_transactions(
 
     Returns:
         A tuple ``(matrix, items)`` where:
-            matrix: Boolean numpy array of shape (n_transactions, n_items).
+            matrix: List of boolean rows, one per transaction.
                 ``matrix[i, j]`` is True if item ``items[j]`` appears in
                 transaction i.
             items: Sorted list of all unique item names.
@@ -51,7 +49,7 @@ def encode_transactions(
         >>> matrix, items = encode_transactions(baskets)
         >>> items
         ['bread', 'eggs', 'milk']
-        >>> matrix.shape
+        >>> len(matrix), len(matrix[0])
         (3, 3)
     """
     all_items: set[str] = set()
@@ -66,16 +64,16 @@ def encode_transactions(
     n_tx = len(basket_sets)
     n_items = len(items)
 
-    matrix: np.ndarray = np.zeros((n_tx, n_items), dtype=bool)
+    matrix: list[list[bool]] = [[False] * n_items for _ in range(n_tx)]
     for row, basket in enumerate(basket_sets):
         for item in basket:
-            matrix[row, item_idx[item]] = True
+            matrix[row][item_idx[item]] = True
 
     return matrix, items
 
 
 def frequent_itemsets(
-    matrix: np.ndarray,
+    matrix: list[list[bool]],
     items: list[str],
     min_support: float,
     max_length: int = 4,
@@ -100,7 +98,6 @@ def frequent_itemsets(
         Sorted by support descending.
 
     Example:
-        >>> import numpy as np
         >>> baskets = [["milk","bread"],["milk","eggs"],["bread","eggs"],["milk","bread","eggs"]]
         >>> mat, its = encode_transactions(baskets)
         >>> fs = frequent_itemsets(mat, its, min_support=0.5)
@@ -110,7 +107,8 @@ def frequent_itemsets(
     if not 0 <= min_support <= 1:
         raise ValueError("min_support must be in [0, 1].")
 
-    n_tx, n_items = matrix.shape
+    n_tx = len(matrix)
+    n_items = len(matrix[0]) if n_tx else 0
     if n_tx == 0:
         return []
 
@@ -118,7 +116,7 @@ def frequent_itemsets(
 
     # Size-1 candidates
     for j, item in enumerate(items):
-        sup = float(matrix[:, j].mean())
+        sup = sum(1 for row in matrix if row[j]) / n_tx
         if sup >= min_support:
             supports[frozenset([item])] = sup
 
@@ -135,7 +133,9 @@ def frequent_itemsets(
             if fs in supports:
                 continue
             col_indices = [items.index(c) for c in combo]
-            sup = float(matrix[:, col_indices].all(axis=1).mean())
+            sup = sum(
+                1 for row in matrix if all(row[c] for c in col_indices)
+            ) / n_tx
             if sup >= min_support:
                 supports[fs] = sup
                 new_frequent.append(fs)
@@ -179,13 +179,7 @@ def association_rules(
         Sorted by lift descending, then confidence descending.
 
     Example:
-        >>> import numpy as np
-        >>> rng = np.random.default_rng(0)
-        >>> baskets = []
-        >>> for _ in range(200):
-        ...     b = list(rng.choice(["A","B","C","D"], size=3, replace=False))
-        ...     if rng.random() < 0.4: b += ["A","B"]
-        ...     baskets.append(b)
+        >>> baskets = [["A", "B", "C"], ["A", "B"], ["A", "C"], ["B", "C"]] * 25
         >>> mat, its = encode_transactions(baskets)
         >>> fs = frequent_itemsets(mat, its, min_support=0.1)
         >>> rules = association_rules(fs, min_confidence=0.5)

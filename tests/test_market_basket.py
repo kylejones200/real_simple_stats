@@ -18,7 +18,7 @@ class TestEncodeTransactions:
     def test_basic_shape(self):
         baskets = [["milk", "bread"], ["milk", "eggs"], ["bread", "eggs"]]
         mat, items = encode_transactions(baskets)
-        assert mat.shape == (3, 3)
+        assert (len(mat), len(mat[0])) == (3, 3)
         assert sorted(items) == ["bread", "eggs", "milk"]
 
     def test_items_sorted(self):
@@ -30,19 +30,19 @@ class TestEncodeTransactions:
         baskets = [["A", "B"], ["B", "C"]]
         mat, items = encode_transactions(baskets)
         idx = {item: i for i, item in enumerate(items)}
-        assert mat[0, idx["A"]]
-        assert mat[0, idx["B"]]
-        assert not mat[0, idx["C"]]
-        assert not mat[1, idx["A"]]
+        assert mat[0][idx["A"]]
+        assert mat[0][idx["B"]]
+        assert not mat[0][idx["C"]]
+        assert not mat[1][idx["A"]]
 
     def test_duplicates_within_basket_ignored(self):
         baskets = [["A", "A", "B"]]
         mat, items = encode_transactions(baskets)
-        assert mat.shape == (1, 2)
+        assert (len(mat), len(mat[0])) == (1, 2)
 
     def test_empty_transactions(self):
         mat, items = encode_transactions([])
-        assert mat.shape == (0, 0)
+        assert mat == []
         assert items == []
 
 

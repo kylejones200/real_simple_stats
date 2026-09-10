@@ -1,6 +1,8 @@
 import math
 from collections.abc import Sequence
 
+from . import _rss
+
 # --- BINOMIAL CORE FUNCTIONS ---
 
 
@@ -84,6 +86,32 @@ def normal_approximation(
     mu = binomial_mean(n, p)
     sigma = binomial_std_dev(n, p)
     z = (k + 0.5 - mu) / sigma if use_continuity else (k - mu) / sigma
-    from scipy.stats import norm
 
-    return float(norm.cdf(z))
+    return _rss.norm_cdf(z)
+
+
+def binomial_cdf(n: int, k: int, p: float) -> float:
+    """P(X <= k): the chance of at most k successes in n independent trials.
+
+    Args:
+        n: Number of trials (non-negative)
+        k: Success count to accumulate through
+        p: Probability of success on a single trial, in [0, 1]
+
+    Returns:
+        Cumulative probability between 0 and 1
+
+    Raises:
+        ValueError: If n is negative or p is outside [0, 1]
+
+    Example:
+        >>> round(binomial_cdf(n=10, k=3, p=0.5), 6)
+        0.171875
+        >>> binomial_cdf(n=5, k=5, p=0.3)
+        1.0
+    """
+    if n < 0:
+        raise ValueError("n must be non-negative")
+    if not 0.0 <= p <= 1.0:
+        raise ValueError("p must be between 0 and 1")
+    return _rss.binom_cdf(k, n, p)

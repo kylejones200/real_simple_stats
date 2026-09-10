@@ -6,11 +6,11 @@ required sample sizes for various statistical tests.
 Refactored for Pythonic elegance and maintainability.
 """
 
+import math
 from collections.abc import Callable
 from functools import lru_cache
 
-import numpy as np
-from scipy import optimize, stats
+from . import _rss
 
 # Module-level constants
 VALID_ALTERNATIVES = {"two-sided", "greater", "less"}
@@ -52,7 +52,7 @@ def _cached_norm_ppf(alpha: float) -> float:
     Returns:
         Critical value from standard normal distribution
     """
-    return stats.norm.ppf(1 - alpha)
+    return _rss.norm_ppf(1 - alpha)
 
 
 @lru_cache(maxsize=512)
@@ -66,7 +66,7 @@ def _cached_t_ppf(alpha: float, df: int) -> float:
     Returns:
         Critical value from t distribution
     """
-    return stats.t.ppf(1 - alpha, df=df)
+    return _rss.t_ppf(1 - alpha, df)
 
 
 @lru_cache(maxsize=512)
@@ -81,7 +81,7 @@ def _cached_f_ppf(alpha: float, dfn: int, dfd: int) -> float:
     Returns:
         Critical value from F distribution
     """
-    return stats.f.ppf(1 - alpha, dfn, dfd)
+    return _rss.f_ppf(1 - alpha, dfn, dfd)
 
 
 def _validate_alternative(alternative: str) -> None:
@@ -178,7 +178,7 @@ def _calculate_t_test_n(
     z_alpha = _cached_norm_ppf(alpha_adj)
     z_beta = _cached_norm_ppf(1 - power)
 
-    n_calculated = int(np.ceil(((z_alpha + z_beta) ** 2) / (effect_size**2)))
+    n_calculated = math.ceil(((z_alpha + z_beta) ** 2) / (effect_size**2))
 
     return {
         "n": n_calculated,
@@ -196,7 +196,7 @@ def _calculate_t_test_delta(
     t_crit = _cached_t_ppf(alpha_adj, df=n - 1)
     t_beta = _cached_t_ppf(1 - power, df=n - 1)
 
-    effect_size = (t_crit + abs(t_beta)) / np.sqrt(n)
+    effect_size = (t_crit + abs(t_beta)) / math.sqrt(n)
     delta_calculated = effect_size * base_params["sd"]
 
     sign = -1.0 if base_params["alternative"] == "less" else 1.0
@@ -214,21 +214,21 @@ def _calculate_t_test_power(
 ) -> dict[str, float]:
     """Calculate statistical power for t-test."""
     effect_size = delta / base_params["sd"]
-    ncp = effect_size * np.sqrt(n)
+    ncp = effect_size * math.sqrt(n)
     df = n - 1
     sig_level = base_params["sig_level"]
     alternative = base_params["alternative"]
 
     if alternative == "greater":
-        t_crit = stats.t.ppf(1 - sig_level, df=df)
-        power_calculated = 1 - stats.nct.cdf(t_crit, df=df, nc=ncp)
+        t_crit = _rss.t_ppf(1 - sig_level, df)
+        power_calculated = 1 - _rss.nct_cdf(t_crit, df, ncp)
     elif alternative == "less":
-        t_crit = stats.t.ppf(sig_level, df=df)
-        power_calculated = stats.nct.cdf(t_crit, df=df, nc=ncp)
+        t_crit = _rss.t_ppf(sig_level, df)
+        power_calculated = _rss.nct_cdf(t_crit, df, ncp)
     else:
-        t_crit = stats.t.ppf(1 - sig_level / 2, df=df)
-        power_calculated = (1 - stats.nct.cdf(t_crit, df=df, nc=ncp)) + stats.nct.cdf(
-            -t_crit, df=df, nc=ncp
+        t_crit = _rss.t_ppf(1 - sig_level / 2, df)
+        power_calculated = (1 - _rss.nct_cdf(t_crit, df, ncp)) + _rss.nct_cdf(
+            -t_crit, df, ncp
         )
 
     return {
@@ -299,13 +299,13 @@ def _calculate_proportion_n(
         raise ValueError("p1 must be different from p2")
 
     # Cohen's h effect size
-    h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(base_params["p2"])))
+    h = 2 * (math.asin(math.sqrt(p1)) - math.asin(math.sqrt(base_params["p2"])))
 
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = stats.norm.ppf(power)
+    z_alpha = _rss.norm_ppf(1 - alpha_adj)
+    z_beta = _rss.norm_ppf(power)
 
-    n_calculated = int(np.ceil(((z_alpha + z_beta) / h) ** 2))
+    n_calculated = math.ceil(((z_alpha + z_beta) / h) ** 2)
 
     return {
         "n": n_calculated,
@@ -320,14 +320,14 @@ def _calculate_proportion_p1(
 ) -> dict[str, float]:
     """Calculate detectable proportion difference."""
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = stats.norm.ppf(power)
+    z_alpha = _rss.norm_ppf(1 - alpha_adj)
+    z_beta = _rss.norm_ppf(power)
 
-    h = (z_alpha + z_beta) / np.sqrt(n)
+    h = (z_alpha + z_beta) / math.sqrt(n)
     if base_params["alternative"] == "less":
         h *= -1
-    phi1 = np.arcsin(np.sqrt(base_params["p2"])) + h / 2
-    p1_calculated = np.sin(phi1) ** 2
+    phi1 = math.asin(math.sqrt(base_params["p2"])) + h / 2
+    p1_calculated = math.sin(phi1) ** 2
 
     return {
         "n": n,
@@ -341,20 +341,20 @@ def _calculate_proportion_power(
     n: int, p1: float, tails: int, base_params: dict
 ) -> dict[str, float]:
     """Calculate statistical power for proportion test."""
-    h = 2 * (np.arcsin(np.sqrt(p1)) - np.arcsin(np.sqrt(base_params["p2"])))
-    mean_shift = h * np.sqrt(n)
+    h = 2 * (math.asin(math.sqrt(p1)) - math.asin(math.sqrt(base_params["p2"])))
+    mean_shift = h * math.sqrt(n)
     sig_level = base_params["sig_level"]
     alternative = base_params["alternative"]
 
     if alternative == "greater":
-        z_alpha = stats.norm.ppf(1 - sig_level)
-        power_calculated = stats.norm.sf(z_alpha - mean_shift)
+        z_alpha = _rss.norm_ppf(1 - sig_level)
+        power_calculated = _rss.norm_sf(z_alpha - mean_shift)
     elif alternative == "less":
-        z_alpha = stats.norm.ppf(sig_level)
-        power_calculated = stats.norm.cdf(z_alpha - mean_shift)
+        z_alpha = _rss.norm_ppf(sig_level)
+        power_calculated = _rss.norm_cdf(z_alpha - mean_shift)
     else:
-        z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        power_calculated = stats.norm.sf(z_alpha - mean_shift) + stats.norm.cdf(
+        z_alpha = _rss.norm_ppf(1 - sig_level / 2)
+        power_calculated = _rss.norm_sf(z_alpha - mean_shift) + _rss.norm_cdf(
             -z_alpha - mean_shift
         )
 
@@ -428,10 +428,10 @@ def _calculate_anova_n(
         df1 = n_groups - 1
         df2 = n_groups * (n - 1)
         ncp = n * n_groups * (effect_size**2)
-        f_crit = stats.f.ppf(1 - sig_level, df1, df2)
-        return 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
+        f_crit = _rss.f_ppf(1 - sig_level, df1, df2)
+        return 1 - _rss.ncf_cdf(f_crit, df1, df2, ncp)
 
-    n_calculated = int(optimize.brentq(lambda n: power_func(n) - power, 2, 10000))
+    n_calculated = int(_rss.brentq(lambda n: power_func(n) - power, 2, 10000))
 
     return {
         "n_per_group": n_calculated,
@@ -450,13 +450,13 @@ def _calculate_anova_effect(
 
     df1 = n_groups - 1
     df2 = n_groups * (n_per_group - 1)
-    f_crit = stats.f.ppf(1 - sig_level, df1, df2)
+    f_crit = _rss.f_ppf(1 - sig_level, df1, df2)
 
     def power_func(es):
         ncp = n_per_group * n_groups * (es**2)
-        return 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
+        return 1 - _rss.ncf_cdf(f_crit, df1, df2, ncp)
 
-    effect_size_calculated = optimize.brentq(
+    effect_size_calculated = _rss.brentq(
         lambda es: power_func(es) - power, 0.01, 10
     )
 
@@ -478,9 +478,9 @@ def _calculate_anova_power(
     df1 = n_groups - 1
     df2 = n_groups * (n_per_group - 1)
     ncp = n_per_group * n_groups * (effect_size**2)
-    f_crit = stats.f.ppf(1 - sig_level, df1, df2)
+    f_crit = _rss.f_ppf(1 - sig_level, df1, df2)
 
-    power_calculated = 1 - stats.ncf.cdf(f_crit, df1, df2, ncp)
+    power_calculated = 1 - _rss.ncf_cdf(f_crit, df1, df2, ncp)
 
     return {
         "n_per_group": n_per_group,
@@ -542,13 +542,13 @@ def _calculate_correlation_n(
     if abs(r) >= 1:
         raise ValueError("r must be between -1 and 1")
 
-    z_r = 0.5 * np.log((1 + r) / (1 - r))  # Fisher's z transformation
+    z_r = 0.5 * math.log((1 + r) / (1 - r))  # Fisher's z transformation
 
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = stats.norm.ppf(power)
+    z_alpha = _rss.norm_ppf(1 - alpha_adj)
+    z_beta = _rss.norm_ppf(power)
 
-    n_calculated = int(np.ceil(((z_alpha + z_beta) / z_r) ** 2 + 3))
+    n_calculated = math.ceil(((z_alpha + z_beta) / z_r) ** 2 + 3)
 
     return {
         "n": n_calculated,
@@ -563,11 +563,11 @@ def _calculate_correlation_r(
 ) -> dict[str, float]:
     """Calculate detectable correlation coefficient."""
     alpha_adj = _get_alpha_adjusted(base_params["sig_level"], tails)
-    z_alpha = stats.norm.ppf(1 - alpha_adj)
-    z_beta = stats.norm.ppf(power)
+    z_alpha = _rss.norm_ppf(1 - alpha_adj)
+    z_beta = _rss.norm_ppf(power)
 
-    z_r = (z_alpha + z_beta) / np.sqrt(n - 3)
-    r_calculated = (np.exp(2 * z_r) - 1) / (np.exp(2 * z_r) + 1)
+    z_r = (z_alpha + z_beta) / math.sqrt(n - 3)
+    r_calculated = (math.exp(2 * z_r) - 1) / (math.exp(2 * z_r) + 1)
 
     sign = -1.0 if base_params["alternative"] == "less" else 1.0
 
@@ -583,20 +583,20 @@ def _calculate_correlation_power(
     n: int, r: float, tails: int, base_params: dict
 ) -> dict[str, float]:
     """Calculate statistical power for correlation test."""
-    z_r = 0.5 * np.log((1 + r) / (1 - r))
+    z_r = 0.5 * math.log((1 + r) / (1 - r))
     sig_level = base_params["sig_level"]
     alternative = base_params["alternative"]
 
     if alternative == "greater":
-        z_alpha = stats.norm.ppf(1 - sig_level)
-        power_calculated = stats.norm.sf(z_alpha - z_r * np.sqrt(n - 3))
+        z_alpha = _rss.norm_ppf(1 - sig_level)
+        power_calculated = _rss.norm_sf(z_alpha - z_r * math.sqrt(n - 3))
     elif alternative == "less":
-        z_alpha = stats.norm.ppf(sig_level)
-        power_calculated = stats.norm.cdf(z_alpha - z_r * np.sqrt(n - 3))
+        z_alpha = _rss.norm_ppf(sig_level)
+        power_calculated = _rss.norm_cdf(z_alpha - z_r * math.sqrt(n - 3))
     else:
-        z_alpha = stats.norm.ppf(1 - sig_level / 2)
-        mean_shift = z_r * np.sqrt(n - 3)
-        power_calculated = stats.norm.sf(z_alpha - mean_shift) + stats.norm.cdf(
+        z_alpha = _rss.norm_ppf(1 - sig_level / 2)
+        mean_shift = z_r * math.sqrt(n - 3)
+        power_calculated = _rss.norm_sf(z_alpha - mean_shift) + _rss.norm_cdf(
             -z_alpha - mean_shift
         )
 

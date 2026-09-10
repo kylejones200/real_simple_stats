@@ -15,8 +15,15 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 project = "Real Simple Stats"
 copyright = "2025, Kyle Jones"
 author = "Kyle Jones"
-release = "0.3.0"
-version = "0.3.0"
+# Read the version from the installed package rather than restating it here;
+# this file said 0.3.0 while the package shipped 0.4.1.
+try:
+    from importlib.metadata import version as _pkg_version
+
+    release = _pkg_version("real-simple-stats")
+except Exception:  # pragma: no cover - docs can build from an uninstalled tree
+    release = "0.0.0"
+version = release
 
 
 # -- General configuration ---------------------------------------------------

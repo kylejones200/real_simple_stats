@@ -1,6 +1,6 @@
 import logging
 
-from scipy.stats import expon, geom, nbinom, poisson
+from . import _rss
 
 logger = logging.getLogger(__name__)
 
@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 
 def poisson_pmf(k: int, lam: float) -> float:
     """P(X = k) for Poisson distribution with rate λ."""
-    return float(poisson.pmf(k, lam))
+    return _rss.poisson_pmf(k, lam)
 
 
 def poisson_cdf(k: int, lam: float) -> float:
     """P(X ≤ k) for Poisson distribution."""
-    return float(poisson.cdf(k, lam))
+    return _rss.poisson_cdf(k, lam)
 
 
 # --- GEOMETRIC DISTRIBUTION ---
@@ -22,12 +22,12 @@ def poisson_cdf(k: int, lam: float) -> float:
 
 def geometric_pmf(k: int, p: float) -> float:
     """P(X = k) for geometric distribution (first success on trial k)."""
-    return float(geom.pmf(k, p))
+    return _rss.geom_pmf(k, p)
 
 
 def geometric_cdf(k: int, p: float) -> float:
     """P(X ≤ k) for geometric distribution."""
-    return float(geom.cdf(k, p))
+    return _rss.geom_cdf(k, p)
 
 
 # --- EXPONENTIAL DISTRIBUTION ---
@@ -35,12 +35,12 @@ def geometric_cdf(k: int, p: float) -> float:
 
 def exponential_pdf(x: float, lam: float) -> float:
     """f(x) for exponential distribution. λ = 1/mean"""
-    return float(expon.pdf(x, scale=1 / lam))
+    return _rss.expon_pdf(x, 1 / lam)
 
 
 def exponential_cdf(x: float, lam: float) -> float:
     """P(X ≤ x) for exponential distribution."""
-    return float(expon.cdf(x, scale=1 / lam))
+    return _rss.expon_cdf(x, 1 / lam)
 
 
 # --- NEGATIVE BINOMIAL DISTRIBUTION ---
@@ -48,7 +48,7 @@ def exponential_cdf(x: float, lam: float) -> float:
 
 def negative_binomial_pmf(k: int, r: int, p: float) -> float:
     """P(X = k failures before r successes)"""
-    return float(nbinom.pmf(k, r, p))
+    return _rss.nbinom_pmf(k, r, p)
 
 
 # --- SUMMARY OF EXPECTATIONS AND VARIANCE ---

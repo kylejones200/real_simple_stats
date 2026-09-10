@@ -4,10 +4,10 @@ Quick Start Guide
 This guide will get you up and running with Real Simple Stats in just a few minutes.
 
 Basic Usage
-----------
+-----------
 
 Import and Calculate Statistics
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -35,7 +35,7 @@ Output::
     Variance: 9.17
 
 Probability Calculations
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -70,7 +70,7 @@ Output::
     Permutations P(10,3): 720
 
 Hypothesis Testing
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -95,7 +95,7 @@ Hypothesis Testing
     print(f"Critical value (α=0.05, df={df}): {critical_val:.3f}")
 
 Working with Distributions
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -117,12 +117,12 @@ Working with Distributions
     print(f"Variance: {variance}")
 
 Command Line Interface
----------------------
+----------------------
 
 Real Simple Stats includes a powerful CLI for quick calculations:
 
 Basic Statistics
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -133,7 +133,7 @@ Basic Statistics
     rss-calc stats --data "10,20,30,40,50" --stat all
 
 Probability Calculations
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -150,7 +150,7 @@ Probability Calculations
     rss-calc prob --type bayes --p_b_given_a 0.9 --p_a 0.01 --p_b 0.05
 
 Glossary Lookup
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -159,10 +159,10 @@ Glossary Lookup
     rss-calc glossary --term "p-value"
 
 Common Workflows
----------------
+----------------
 
 Analyzing a Dataset
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -184,7 +184,7 @@ Analyzing a Dataset
     print(f"Coefficient of variation: {desc.coefficient_of_variation(scores):.2f}%")
 
 Comparing Two Groups
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -211,7 +211,7 @@ Comparing Two Groups
     print(f"Group B std: {std_b:.2f}")
 
 Next Steps
----------
+----------
 
 Next steps:
 
@@ -221,10 +221,10 @@ Next steps:
 4. **Read the Examples** - See how others are using the library
 
 Common Patterns
---------------
+---------------
 
 Error Handling
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -241,7 +241,7 @@ Error Handling
         print(f"Error: {e}")
 
 Working with Different Data Types
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
@@ -256,7 +256,7 @@ Working with Different Data Types
     print(f"Mixed mean: {desc.mean(mixed):.2f}")
 
 Getting Help
------------
+------------
 
 * **Documentation**: Check the API reference for function details
 * **Examples**: See the ``examples/`` directory in the repository

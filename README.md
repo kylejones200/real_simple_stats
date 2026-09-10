@@ -5,9 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/kylejones200/real_simple_stats/workflows/CI/badge.svg)](https://github.com/kylejones200/real_simple_stats/actions)
 
-**A statistics library that teaches while it computes.**
+**A statistics library that teaches while it computes — with a Rust core underneath.**
 
 Most libraries hand you a number and walk away. Real Simple Stats hands you the number *and* explains what it means, what assumptions it rests on, what it does not license you to claim, and what to do next.
+
+Since 0.5.0 every numeric routine runs in a bundled Rust extension. The library has **no runtime dependencies at all** — no NumPy, no SciPy — installs as a single wheel, and imports in about 13 ms instead of 470 ms.
 
 ---
 
@@ -18,7 +20,7 @@ import real_simple_stats as rss
 
 result = rss.one_sample_t_test_explained([5.2, 5.4, 5.1, 5.5, 5.3], mu=5.0)
 
-result.p_value    # 0.0421  → use it as data, just like any other library
+result.p_value    # 0.0132  → use it as data, just like any other library
 result.plot()     # → the p-value drawn as a shaded tail area
 
 print(result)     # → the full narrative below
@@ -77,7 +79,50 @@ Every explained function works this way. The numbers are still accessible as pla
 pip install real-simple-stats
 ```
 
-**Requirements**: Python 3.12+, NumPy, SciPy, Matplotlib. No pandas, statsmodels, or scikit-learn required.
+**Requirements**: Python 3.12+. That is the whole list — the statistics engine is a
+compiled Rust extension shipped inside the wheel, so there is nothing else to install
+and nothing to conflict with.
+
+```bash
+pip install "real-simple-stats[plots]"   # adds matplotlib for the .plot() methods
+pip install "real-simple-stats[pandas]"  # adds the pandas helpers
+```
+
+Wheels are published for Linux (x86_64, aarch64), macOS (Apple silicon and Intel), and
+Windows (x64). They are built against the CPython limited API, so one wheel per platform
+covers Python 3.12, 3.13, 3.14 and later. Installing from source instead needs a Rust
+toolchain (`rustup`), and takes a couple of minutes to compile.
+
+### Speed
+
+You do not have to do anything to get the fast path — lists work fine. But the backend can
+read any contiguous `float64` buffer *without copying it*, so if your data is already in a
+`numpy` array, an `array.array('d')`, or a `memoryview`, hand that over and skip the
+unboxing entirely:
+
+```python
+import array, real_simple_stats as rss
+
+data = array.array("d", my_million_floats)
+rss.sample_std_dev(data)     # ~0.15 ms
+rss.sample_std_dev(list(data))  # ~3.7 ms — still 15x faster than 0.4.x
+```
+
+Measured on an M-series Mac, one million values, against the pure-Python 0.4.x
+implementations:
+
+| Operation | 0.4.x | 0.5.0 (list) | 0.5.0 (buffer) |
+|---|---:|---:|---:|
+| `sample_std_dev` | 54.6 ms | 3.7 ms | **0.15 ms** |
+| `five_number_summary` | 165.9 ms | — | **3.8 ms** |
+| `median` | 136.1 ms | — | **3.9 ms** |
+| `bootstrap` (10,000 iterations) | 261.6 ms | **2.1 ms** | — |
+| `permutation_test` (10,000 permutations) | 738.7 ms | **5.9 ms** | — |
+| `import real_simple_stats` | 470 ms | **13 ms** | — |
+
+Resampling runs in parallel across cores, and stays reproducible while doing so: passing
+`random_seed` gives the same answer regardless of how many threads the work is spread
+over, because each iteration draws from its own derived stream rather than a shared one.
 
 ---
 
@@ -126,9 +171,9 @@ Every `ExplainedResult` carries:
 
 ```python
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng   # the bundled generator; no NumPy needed
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 g1 = rng.normal(0, 1, 40)
 g2 = rng.normal(2, 1, 40)
 g3 = rng.normal(4, 1, 40)
@@ -155,12 +200,12 @@ rss.mean(data)                  # 21.25
 rss.median(data)                # 21.0
 rss.sample_std_dev(data)        # 6.41
 rss.five_number_summary(data)   # {'min': 12, 'Q1': 16.5, 'median': 21.0, 'Q3': 26.5, 'max': 30}
-rss.iqr(data)                   # 10.0
+rss.interquartile_range(data)   # 10.0
 rss.coefficient_of_variation(data)  # 30.2 (percent)
 rss.skewness(data)
 rss.kurtosis(data)
 rss.detect_outliers_iqr(data)   # returns list of outlier values
-rss.frequency_table(data)       # value → count mapping
+rss.draw_frequency_table(data)  # value → count mapping
 ```
 
 ---
@@ -172,7 +217,7 @@ rss.frequency_table(data)       # value → count mapping
 rss.simple_probability(favorable=3, total=10)      # 0.3
 rss.joint_probability(0.4, 0.3)                    # 0.12
 rss.conditional_probability(0.12, 0.3)             # 0.4
-rss.bayes_theorem(prior=0.01, sensitivity=0.95, specificity=0.90)
+rss.bayes_theorem(p_b_given_a=0.9, p_a=0.01, p_b=0.05)   # P(A|B) = 0.18
 
 # Combinatorics
 rss.combinations(n=10, k=3)      # 120
@@ -186,12 +231,13 @@ rss.binomial_cdf(n=10, k=3, p=0.5)           # cumulative through k=3
 # Normal
 rss.normal_pdf(x=1.0, mean=0, std_dev=1)     # 0.2420
 rss.normal_cdf(x=1.96, mean=0, std_dev=1)    # 0.9750
-rss.z_score(value=75, mean=70, std_dev=10)   # 0.5
+rss.z_score(x=75, mean=70, std_dev=10)       # 0.5
 
 # Poisson, geometric, exponential
-rss.poisson_probability(k=3, lam=2.5)
-rss.geometric_probability(k=4, p=0.3)
-rss.exponential_probability(x=2.0, lam=0.5)
+rss.poisson_pmf(k=3, lam=2.5)                # exactly 3 events
+rss.poisson_cdf(k=3, lam=2.5)                # 3 or fewer
+rss.geometric_pmf(k=4, p=0.3)                # first success on trial 4
+rss.exponential_cdf(x=2.0, lam=0.5)          # P(X <= 2)
 ```
 
 ---
@@ -240,20 +286,23 @@ rss.wilcoxon_signed_rank(before, after)
 
 ```python
 # Simple linear regression
-slope, intercept = rss.linear_regression(x, y)
-r2 = rss.r_squared(x, y)
+slope, intercept, r, p_value, std_err = rss.linear_regression(x, y)
+r2 = rss.coefficient_of_determination(x, y)
 rss.pearson_correlation(x, y)      # correlation coefficient
 rss.spearman_correlation(x, y)     # rank correlation
 
 # Multiple regression
 result = rss.multiple_regression(X, y)
 result["coefficients"]
+result["intercept"]
 result["r_squared"]
-result["p_values"]
+result["adjusted_r_squared"]
+result["p_value"]        # F-test for the model as a whole
 
 # Predictions and residuals
-y_hat = rss.predict(slope, intercept, x_new)
-residuals = rss.calculate_residuals(y, y_hat)
+rss.regression_equation(x_new, slope, intercept)     # predict a single point
+fitted = [rss.regression_equation(xi, slope, intercept) for xi in x]
+residuals = rss.calculate_residuals(y, fitted)       # observed - predicted
 
 # Diagnostics
 rss.check_regression_assumptions(x, y, verbose=True)
@@ -354,7 +403,10 @@ itemsets = rss.frequent_itemsets(matrix, items, min_support=0.3)
 # Step 3: generate association rules
 rules = rss.association_rules(itemsets, min_confidence=0.6, min_lift=1.0)
 for rule in rules:
-    print(f"{rule['antecedent']} → {rule['consequent']}")
+    # antecedents/consequents are frozensets of item names
+    lhs = ", ".join(sorted(rule["antecedents"]))
+    rhs = ", ".join(sorted(rule["consequents"]))
+    print(f"{lhs} → {rhs}")
     print(f"  support={rule['support']:.2f}, confidence={rule['confidence']:.2f}, lift={rule['lift']:.2f}")
 ```
 
@@ -365,12 +417,13 @@ for rule in rules:
 Measure and model spatial autocorrelation — do similar values cluster together in space?
 
 ```python
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 x = rng.uniform(0, 100, 80)
 y = rng.uniform(0, 100, 80)
-values = np.sin(x / 20) + rng.normal(0, 0.3, 80)   # spatially structured
+import math
+values = [math.sin(xi / 20) + e for xi, e in zip(x, rng.normal(0, 0.3, 80))]
 
 # Moran's I — global spatial autocorrelation
 r = rss.morans_i(x, y, values, distance_threshold=20)
@@ -398,10 +451,12 @@ fit["range_param"]  # distance at which autocorrelation effectively vanishes
 fit["model_fn"]     # callable: h → γ(h)
 fit["rmse"]         # fit quality
 
-# Three model families
-rss.variogram_spherical(lags, nugget, sill, range_param)
-rss.variogram_exponential(lags, nugget, sill, range_param)
-rss.variogram_gaussian(lags, nugget, sill, range_param)
+# Three model families, evaluated at the fitted parameters.
+# Each accepts a single lag or a sequence of them.
+nugget, sill, rng_param = fit["nugget"], fit["sill"], fit["range_param"]
+rss.variogram_spherical(vario["lags"], nugget, sill, rng_param)
+rss.variogram_exponential(vario["lags"], nugget, sill, rng_param)
+rss.variogram_gaussian(vario["lags"], nugget, sill, rng_param)
 ```
 
 ---
@@ -486,35 +541,36 @@ bf = rss.bayes_factor(likelihood_h1=0.8, likelihood_h0=0.2)
 
 ```python
 data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+group1, group2 = [1, 2, 3, 4, 5], [4, 5, 6, 7, 8]
 
-# Bootstrap confidence interval
-result = rss.bootstrap(data, np.mean, n_iterations=1000, confidence_level=0.95)
+# Bootstrap confidence interval. Naming the statistic keeps the whole
+# resample inside Rust and runs it across every core.
+result = rss.bootstrap(data, "mean", n_iterations=1000, confidence_level=0.95)
 result["statistic"]           # bootstrap estimate
 result["confidence_interval"] # (lower, upper)
 
+# "mean", "median", "std", "var", "min", "max" and "sum" take the fast path.
+# Any other callable still works, it just runs in Python:
+rss.bootstrap(data, lambda v: max(v) - min(v), n_iterations=1000)
+
 # Bootstrap hypothesis test
-result = rss.bootstrap_hypothesis_test(
-    group1, group2,
-    test_statistic=lambda x, y: np.mean(x) - np.mean(y),
-    n_iterations=1000
-)
+result = rss.bootstrap_hypothesis_test(group1, group2, "mean", n_iterations=1000)
 
 # Permutation test
 result = rss.permutation_test(
-    group1, group2,
-    test_statistic=lambda x, y: np.mean(x) - np.mean(y),
+    group1, group2, "mean",
     n_permutations=1000, alternative="two-sided"
 )
 
 # Jackknife
-result = rss.jackknife(data, np.mean)
+result = rss.jackknife(data, "mean")
 result["bias"]
 result["std_error"]
 
 # Cross-validation
 result = rss.cross_validate(X, y, model_fn, k_folds=5)
 result["mean_score"]
-result["fold_scores"]
+result["scores"]         # one mean-squared error per fold
 ```
 
 ---
@@ -629,10 +685,13 @@ rss-calc --help
 
 ```python
 rss.multiple_regression(X, y)
-rss.pca(X, n_components=2)
-result["components"]
-result["explained_variance_ratio"]
-rss.mahalanobis_distance(X)
+
+result = rss.pca(X, n_components=2)
+result["components"]                 # each component's loadings
+result["explained_variance_ratio"]   # share of variance per component
+result["transformed"]                # the data in component space
+
+rss.mahalanobis_distance(X)          # distance of each row from the centre
 ```
 
 ---

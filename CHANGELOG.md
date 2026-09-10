@@ -5,6 +5,139 @@ All notable changes to Real Simple Stats will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-09-09
+
+Rewrite of the entire numeric backend in Rust. The public API is unchanged in
+shape — same function names, same arguments, same dictionary keys — but the
+library now has **no runtime dependencies at all**, and several functions
+return lists where they previously returned NumPy arrays. Read the Removed and
+Changed sections before upgrading.
+
+### Added
+
+- **Native Rust core**, shipped inside the wheel as `real_simple_stats._rss`.
+  Two crates: `rss-core` (pure Rust numerics, no Python linkage) and `rss-py`
+  (PyO3 bindings). Covers special functions, 17 distributions, noncentral t and
+  F, Shapiro-Wilk, descriptive statistics, dense linear algebra, three
+  optimizers, maximum-likelihood survival fitting, resampling, Monte Carlo path
+  simulation, and spatial statistics.
+- **Zero-copy input.** Anything exposing the buffer protocol with contiguous
+  float64 data — a NumPy array, `array.array('d')`, a `memoryview` — is read in
+  place and never copied. Lists still work and take a direct unboxing path.
+- **`real_simple_stats.Rng`**, a seeded PCG64 generator, replacing the NumPy
+  generator the library used internally.
+- **Resampling by statistic name.** `bootstrap(data, "mean")`,
+  `permutation_test(a, b, "mean")` and friends keep the whole resample inside
+  Rust and run it across every core. `"mean"`, `"median"`, `"std"`, `"var"`,
+  `"min"`, `"max"` and `"sum"` take that path; any other callable still works
+  and runs in Python.
+- **`pandas` extra**, alongside the existing `plots` extra.
+- **`posterior_predictive(..., random_seed=...)`** for reproducible draws.
+- 44 Rust unit tests, plus a Python parity suite gating the special functions
+  against mpmath at 60 digits and the rest against SciPy.
+- **Fourteen functions the README had always documented but that never
+  existed.** They are thin wrappers over kernels the Rust backend already
+  provides, and each is pinned against SciPy where SciPy has an equivalent:
+  `skewness`, `kurtosis`, `detect_outliers_iqr`, `one_sample_t_test`,
+  `two_sample_t_test`, `paired_t_test`, `z_test`, `one_proportion_z_test`,
+  `mann_whitney_u`, `wilcoxon_signed_rank`, `spearman_correlation`,
+  `calculate_residuals`, `simple_probability`, and `binomial_cdf`.
+
+  Note that `wilcoxon_signed_rank` applies the continuity correction by
+  default, matching this library's `mann_whitney_u` and the textbook
+  treatment. `scipy.stats.wilcoxon` defaults the other way, so pass
+  `correction=False` to reproduce SciPy's default output exactly.
+
+### Changed
+
+- **Performance.** Measured on an M-series Mac against the pure-Python 0.4.x
+  implementations, one million values: `sample_std_dev` 54.6 ms → 0.15 ms on a
+  buffer (372x) or 3.7 ms on a list (15x); `five_number_summary` 165.9 ms →
+  3.8 ms; `median` 136.1 ms → 3.9 ms. Bootstrap over 10,000 iterations
+  261.6 ms → 2.1 ms; a 10,000-permutation test 738.7 ms → 5.9 ms.
+- **Import time: 470 ms → 13 ms**, since SciPy is no longer imported and
+  `__version__` resolves lazily.
+- **Accuracy.** Measured against mpmath rather than SciPy, the normal CDF and
+  survival function are roughly 50x more accurate than SciPy's own
+  (2.5e-15 relative error against 1.3e-13); SciPy is not a valid oracle at that
+  precision. Everything else agrees with SciPy to about 1e-12 or better.
+- **Reproducibility under parallelism.** A given `random_seed` produces
+  identical results regardless of how many cores the work is spread across,
+  because each iteration draws from its own derived stream rather than a shared
+  generator. Verified bit-identical at 1, 2 and 8 threads.
+- **Build backend** is now maturin rather than setuptools. Installing from an
+  sdist needs a Rust toolchain; the published wheels do not.
+- `real_simple_stats.mean`, `.median` and `.mode` now resolve to the documented,
+  validated implementations in `descriptive_statistics`. `pre_statistics`
+  declared no `__all__` and is star-imported later, so its deliberately
+  elementary teaching versions had been shadowing them — `mean([])` raised
+  `ZeroDivisionError` instead of a clear `ValueError`. The teaching versions
+  remain available as `real_simple_stats.pre_statistics.mean`.
+
+### Removed
+
+- **NumPy, SciPy and matplotlib as runtime dependencies.** The dependency list
+  is now empty. matplotlib moved to the `plots` extra; importing
+  `real_simple_stats.plots` without it now raises an `ImportError` naming the
+  extra, rather than a bare "No module named 'numpy'".
+- The unreachable Numba JIT paths in `resampling` and `monte_carlo`. Numba was
+  never a declared dependency, so every default install had been running the
+  pure-Python fallback.
+- The `sys.path` manipulation and pytest plugin-autoload disable in
+  `__init__.py`, both of which existed only to work around incompatible
+  system-wide NumPy/SciPy binaries.
+
+### Breaking
+
+- **Arrays became lists.** These previously returned `numpy.ndarray` and now
+  return plain lists (or lists of lists): `chi_square_independence()["expected"]`,
+  `geometric_brownian_motion()` (`paths`, `mean_path`, `times`, `final_values`),
+  `kaplan_meier()` (`times`, `survival_prob`, `ci_lower`, `ci_upper`),
+  `compute_variogram()` (`lags`, `gamma`, `n_pairs`), `synthetic_control()`
+  (`weights`, `synthetic`, `gap`), `encode_transactions()`, and the
+  `multivariate` results (`pca`, `factor_analysis`, `canonical_correlation`).
+  Code calling `.shape`, `.sum()` or boolean-mask indexing on these needs
+  updating; `len(x)`, iteration and indexing are unaffected.
+- **`monte_carlo_integration` and `monte_carlo_probability` call `func` and
+  `condition` once per sample** — with a float in one dimension, or a tuple of
+  floats in several — instead of passing a whole array. Scalar-style lambdas
+  such as `lambda x: x**2` and `lambda xy: xy[0]**2 + xy[1]**2 <= 1` are
+  unaffected; genuinely vectorised callables need rewriting.
+- **Descriptive results are uniformly `float`.** Integer input previously
+  produced integer output for `min`, `median` and `max`.
+- **Random sequences differ for a given seed**, because the generator changed
+  from NumPy's to PCG64. Seeded runs remain exactly reproducible; they are
+  simply a different sequence than in 0.4.x.
+- **Python 3.12+ and a supported platform are required.** Wheels cover Linux
+  (x86_64, aarch64), macOS (Apple silicon and Intel) and Windows (x64); they are
+  built against the CPython limited API, so one wheel per platform serves 3.12,
+  3.13, 3.14 and later.
+
+### Fixed
+
+- **Twenty-one of the 109 `rss.*` references in the README did not exist.**
+  Seven were renames of functions that do (`iqr` ->
+  `interquartile_range`, `r_squared` -> `coefficient_of_determination`,
+  `predict` -> `regression_equation`, and so on); the other fourteen are
+  listed under Added above. Also corrected in the README: `linear_regression`
+  unpacked as two values when it returns five, wrong keyword names for
+  `bayes_theorem` and `z_score`, three dictionary keys that do not exist
+  (`p_values`, `fold_scores`, `components`), and `antecedent`/`consequent`,
+  which are `antecedents`/`consequents` and are frozensets.
+- **Seven documented outputs that were simply wrong**, each verified by hand
+  or against SciPy: `difference_in_differences` claimed a DiD estimate of 5.0
+  where the correct answer is 9.5; `chi_square_independence` claimed
+  `reject_null` was True for a table whose Yates-corrected p is 0.0562;
+  `empirical_bayes_estimate` checked for a key it does not return;
+  `gamma_poisson_update` referenced an undefined name; `probability_tree`
+  claimed 0.5 for a tree summing to 0.475; plus two formatting mismatches.
+  Every doctest in the package now passes.
+- `median`'s doctest, which was failing at 0.4.1.
+- Two doctests in `survival`, likewise failing at 0.4.1.
+- `pearson_correlation` now returns exactly 1.0 for a perfectly correlated
+  pair. It computed `sxy / (sqrt(sxx) * sqrt(syy))`, which cannot, because
+  squaring a rounded square root does not recover the product.
+
 ## [0.4.1] - 2026-07-16
 
 ### Fixed

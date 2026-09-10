@@ -1,7 +1,7 @@
 import logging
 import math
 
-from scipy.stats import norm
+from . import _rss
 
 logger = logging.getLogger(__name__)
 
@@ -25,27 +25,27 @@ def z_score_standard_error(
 
 def area_between_0_and_z(z: float) -> float:
     """Find area under normal curve between 0 and z (assumes standard normal)."""
-    return float(norm.cdf(abs(z))) - 0.5
+    return _rss.norm_cdf(abs(z)) - 0.5
 
 
 def area_in_tail(z: float) -> float:
     """Area to the right (or left) of a z-score."""
-    return 1 - float(norm.cdf(z))
+    return _rss.norm_sf(z)
 
 
 def area_between_z_scores(z1: float, z2: float) -> float:
     """Area between two z-scores."""
-    return abs(float(norm.cdf(z2)) - float(norm.cdf(z1)))
+    return abs(_rss.norm_cdf(z2) - _rss.norm_cdf(z1))
 
 
 def area_left_of_z(z: float) -> float:
     """Cumulative probability to the left of z."""
-    return float(norm.cdf(z))
+    return _rss.norm_cdf(z)
 
 
 def area_right_of_z(z: float) -> float:
     """Cumulative probability to the right of z."""
-    return 1 - float(norm.cdf(z))
+    return _rss.norm_sf(z)
 
 
 def area_outside_range(z1: float, z2: float) -> float:
@@ -86,7 +86,7 @@ def normal_pdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
     """
     if std_dev <= 0:
         raise ValueError("Standard deviation must be positive")
-    return float(norm.pdf(x, loc=mean, scale=std_dev))
+    return _rss.normal_pdf(x, mean, std_dev)
 
 
 def normal_cdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
@@ -111,7 +111,7 @@ def normal_cdf(x: float, mean: float = 0.0, std_dev: float = 1.0) -> float:
     """
     if std_dev <= 0:
         raise ValueError("Standard deviation must be positive")
-    return float(norm.cdf(x, loc=mean, scale=std_dev))
+    return _rss.normal_cdf(x, mean, std_dev)
 
 
 # Example usage

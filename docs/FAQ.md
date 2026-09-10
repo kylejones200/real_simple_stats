@@ -23,9 +23,11 @@ pip install git+https://github.com/kylejones200/real_simple_stats.git
 ### Q: What are the system requirements?
 
 **A:**
-- **Python**: 3.7 or higher
-- **Dependencies**: NumPy, SciPy (automatically installed)
-- **Optional**: matplotlib (for plotting), pandas (for data handling)
+- **Python**: 3.12 or higher
+- **Dependencies**: none. Since 0.5.0 the statistics engine is a compiled
+  Rust extension shipped inside the wheel, so there is no NumPy or SciPy to
+  install.
+- **Optional extras**: `plots` (matplotlib), `pandas` (DataFrame helpers)
 
 ---
 
@@ -70,10 +72,12 @@ mean([1, 2, 3])
 
 **A:** Most functions accept:
 - Python lists: `[1, 2, 3, 4, 5]`
-- NumPy arrays: `np.array([1, 2, 3, 4, 5])`
 - Tuples: `(1, 2, 3, 4, 5)`
+- Anything supporting the buffer protocol with float64 items:
+  `array.array("d", ...)`, a `memoryview`, or a NumPy array if you have one
 
-For multivariate functions, use lists of lists or 2D NumPy arrays.
+The library does not require NumPy, but it does accept NumPy arrays — and
+reads them without copying. For multivariate functions, use lists of lists.
 
 ---
 
@@ -403,7 +407,11 @@ print(f"Cohen's d = {d:.3f} ({interpretation})")
 
 ### Q: Are the functions vectorized?
 
-**A:** Yes, most functions use NumPy internally for efficient computation.
+**A:** Yes. Every numeric routine runs in a compiled Rust extension, and the
+resampling functions run in parallel across cores. Handing over a contiguous
+float64 buffer (a NumPy array, an `array.array("d")`, a `memoryview`) lets the
+backend read your data without copying it; a plain list is unboxed one element
+at a time, which matters only once the data gets large.
 
 ---
 
@@ -438,7 +446,14 @@ mean_A = rss.mean(df['A'].values)
 
 ### Q: How accurate are the calculations?
 
-**A:** Real Simple Stats uses SciPy and NumPy for numerical computations, which are industry-standard and highly accurate. Results match those from R, SPSS, and other statistical software.
+**A:** The numerics are implemented from scratch in Rust and gated by a parity
+test suite. The special functions are checked against **mpmath at 60 decimal
+digits** rather than SciPy — SciPy's own `erfc`/`ndtr` carry about 1e-13
+relative error in the tails, so testing against it would cap this library's
+accuracy at SciPy's. Measured against true values, the normal CDF here is
+roughly 50x more accurate than SciPy's. Everything above that layer is checked
+against SciPy and NumPy and agrees to about 1e-12. Results match R, SPSS, and
+other statistical software.
 
 ---
 
@@ -447,7 +462,7 @@ mean_A = rss.mean(df['A'].values)
 **A:** Yes! The package is:
 - Well-tested (86% code coverage)
 - Based on established statistical methods
-- Uses reliable numerical libraries (SciPy, NumPy)
+- Free of runtime dependencies, so there is no version-conflict surface
 - Documented with references
 
 However, always validate results for critical applications.
@@ -598,7 +613,7 @@ t_stat, p_value = rss.two_sample_t_test(group1, group2)
 
 2. **Different algorithms**: 
    - Some software uses approximations
-   - Real Simple Stats uses SciPy (exact methods)
+   - Real Simple Stats uses exact methods in its Rust backend
 
 3. **Data handling differences**:
    - Missing value handling
@@ -964,15 +979,17 @@ Practical guidance:
 - **Rule of thumb**: each observation should have at least 2–4 neighbours on average at your chosen threshold.
 
 ```python
-import numpy as np
-from scipy.spatial.distance import cdist
-
-coords = np.column_stack([x, y])
-dists = cdist(coords, coords)
+import math
 
 # Check: how many neighbours at distance d?
 d = 20
-avg_neighbors = (dists < d).sum(axis=1).mean() - 1
+n = len(x)
+avg_neighbors = sum(
+    1
+    for i in range(n)
+    for j in range(n)
+    if i != j and math.dist((x[i], y[i]), (x[j], y[j])) < d
+) / n
 print(f"Average neighbours at d={d}: {avg_neighbors:.1f}")
 
 r = rss.morans_i(x, y, values, distance_threshold=d)

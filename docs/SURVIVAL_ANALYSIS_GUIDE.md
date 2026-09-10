@@ -124,21 +124,20 @@ Even the best-ranked parametric model can be a poor fit overall. Always overlay 
 
 ```python
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 n = 200
 
 # Simulate: churn follows a Weibull distribution
-# Shape > 1 → hazard increases over time (churn accelerates)
-from scipy.stats import weibull_min
+# Shape > 1 -> hazard increases over time (churn accelerates)
 true_shape, true_scale = 1.5, 15.0
-durations = weibull_min.rvs(true_shape, scale=true_scale, size=n, random_state=rng)
+durations = rng.weibull(true_shape, true_scale, n)
 
 # ~30% censored (customers still active)
 censoring_time = rng.uniform(5, 30, n)
-event_observed = (durations <= censoring_time).astype(int)
-durations = np.minimum(durations, censoring_time)
+event_observed = [int(d <= c) for d, c in zip(durations, censoring_time)]
+durations = [min(d, c) for d, c in zip(durations, censoring_time)]
 
 # Step 1: describe the curve
 km_result = rss.kaplan_meier_explained(durations, event_observed)
@@ -167,7 +166,7 @@ for t in [7, 14, 30, 60, 90]:
 
 **Extrapolating past the data without a parametric model**: The KM curve is flat after the last event, but that doesn't mean survival stays high forever. Use `fit_parametric_survival` if you need to project beyond the observation window.
 
-**Comparing groups without a log-rank test**: KM describes one group at a time. To test whether two groups differ (e.g. treated vs. control), you need a log-rank test (not yet in `rss` — use `lifelines` or `scipy` for this).
+**Comparing groups without a log-rank test**: KM describes one group at a time. To test whether two groups differ (e.g. treated vs. control), you need a log-rank test, which is not yet in `rss` — use `lifelines` for that, or compare each group's Kaplan-Meier curve and confidence band visually.
 
 ---
 

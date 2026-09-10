@@ -234,7 +234,7 @@ def bayes_theorem(p_b_given_a: float, p_a: float, p_b: float) -> float:
         ValueError: If probabilities are not between 0 and 1, or P(B) is zero
 
     Example:
-        >>> bayes_theorem(0.9, 0.01, 0.05)
+        >>> round(bayes_theorem(0.9, 0.01, 0.05), 4)
         0.18
     """
     if not 0 <= p_b_given_a <= 1:
@@ -265,7 +265,7 @@ def probability_tree(branches: Sequence[tuple[float, float]]) -> float:
 
     Example:
         >>> probability_tree([(0.5, 0.7), (0.25, 0.25), (0.25, 0.25)])
-        0.5
+        0.475
     """
     if not branches:
         raise ValueError("branches sequence cannot be empty")
@@ -348,3 +348,35 @@ if __name__ == "__main__":
     dist = probability_distribution_table(values, probs)
     logger.info("Probability distribution: %s", dist)
     logger.info("Expected value: %s", expected_value(values, probs))
+
+
+def simple_probability(favorable: int, total: int) -> float:
+    """The classical probability of an event: favorable outcomes over total.
+
+    This is the definition every statistics course opens with, and it assumes
+    all outcomes are equally likely.
+
+    Args:
+        favorable: Number of outcomes counted as a success (non-negative)
+        total: Total number of equally likely outcomes (positive)
+
+    Returns:
+        Probability between 0 and 1
+
+    Raises:
+        ValueError: If total is not positive, favorable is negative, or
+            favorable exceeds total
+
+    Example:
+        >>> simple_probability(favorable=3, total=10)
+        0.3
+        >>> simple_probability(1, 2)
+        0.5
+    """
+    if total <= 0:
+        raise ValueError("total must be positive")
+    if favorable < 0:
+        raise ValueError("favorable must be non-negative")
+    if favorable > total:
+        raise ValueError("favorable cannot exceed total")
+    return favorable / total

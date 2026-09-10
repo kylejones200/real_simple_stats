@@ -47,7 +47,10 @@ class TestGeometricBrownianMotion:
             random_seed=42,
         )
 
-        assert result["paths"].shape == (n_steps + 1, n_simulations)
+        # Since 0.5.0 "paths" is a list of rows (one per time step), not an
+        # ndarray: the library no longer depends on NumPy at runtime.
+        assert len(result["paths"]) == n_steps + 1
+        assert all(len(row) == n_simulations for row in result["paths"])
         assert len(result["times"]) == n_steps + 1
         assert len(result["final_values"]) == n_simulations
 
@@ -64,7 +67,7 @@ class TestGeometricBrownianMotion:
             random_seed=42,
         )
 
-        assert np.all(result["paths"][0] == S0)
+        assert all(v == S0 for v in result["paths"][0])
 
     def test_positive_paths(self):
         """Test that all paths remain positive."""
@@ -78,7 +81,7 @@ class TestGeometricBrownianMotion:
             random_seed=42,
         )
 
-        assert np.all(result["paths"] > 0)
+        assert all(v > 0 for row in result["paths"] for v in row)
 
     def test_percentiles(self):
         """Test that percentiles are in correct order."""
@@ -133,7 +136,7 @@ class TestGeometricBrownianMotion:
             random_seed=42,
         )
 
-        np.testing.assert_array_equal(result1["paths"], result2["paths"])
+        assert result1["paths"] == result2["paths"]
 
     def test_invalid_S0(self):
         """Test that negative S0 raises error."""
@@ -208,7 +211,7 @@ class TestMonteCarloIntegration:
         """Test integration of constant function."""
         # Integral of 5 from 0 to 2 should be 10
         result = monte_carlo_integration(
-            func=lambda x: np.ones_like(x) * 5,
+            func=lambda x: 5.0,
             lower_bounds=0,
             upper_bounds=2,
             n_samples=1000,
@@ -342,30 +345,32 @@ class TestMonteCarloProbability:
 class TestMonteCarloPerformance:
     """Performance tests for Monte Carlo methods."""
 
-    def test_gbm_with_numba(self):
-        """Test that GBM runs with Numba optimization."""
+    def test_gbm_large_simulation(self):
+        """GBM over many paths (formerly the Numba-accelerated branch)."""
         result = geometric_brownian_motion(
             S0=100,
             mu=0.10,
             sigma=0.20,
             T=1.0,
             n_steps=252,
-            n_simulations=1000,  # Triggers Numba
+            n_simulations=1000,
             random_seed=42,
         )
 
-        assert result["paths"].shape == (253, 1000)
+        assert len(result["paths"]) == 253
+        assert all(len(row) == 1000 for row in result["paths"])
 
-    def test_gbm_without_numba(self):
-        """Test that GBM runs without Numba (small simulations)."""
+    def test_gbm_small_simulation(self):
+        """GBM over few paths (formerly the pure-NumPy branch)."""
         result = geometric_brownian_motion(
             S0=100,
             mu=0.10,
             sigma=0.20,
             T=1.0,
             n_steps=252,
-            n_simulations=50,  # Below Numba threshold
+            n_simulations=50,
             random_seed=42,
         )
 
-        assert result["paths"].shape == (253, 50)
+        assert len(result["paths"]) == 253
+        assert all(len(row) == 50 for row in result["paths"])

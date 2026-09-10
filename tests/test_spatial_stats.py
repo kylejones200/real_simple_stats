@@ -69,18 +69,18 @@ class TestComputeVariogram:
     def test_gamma_non_negative(self):
         x, y, v = self._make_data()
         r = compute_variogram(x, y, v)
-        assert np.all(r["gamma"] >= 0)
+        assert all(g >= 0 for g in r["gamma"])
 
     def test_lags_increasing(self):
         x, y, v = self._make_data()
         r = compute_variogram(x, y, v)
-        assert np.all(np.diff(r["lags"]) > 0)
+        assert all(b > a for a, b in zip(r["lags"], r["lags"][1:]))
 
     def test_custom_max_lag(self):
         x, y, v = self._make_data()
         r = compute_variogram(x, y, v, max_lag=40.0)
         assert r["max_lag"] == pytest.approx(40.0)
-        assert np.all(r["lags"] <= 40.0)
+        assert all(lag <= 40.0 for lag in r["lags"])
 
     def test_total_variance_positive(self):
         x, y, v = self._make_data()

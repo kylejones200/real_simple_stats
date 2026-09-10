@@ -12,12 +12,11 @@ from . import descriptive_statistics as desc
 
 logger = logging.getLogger(__name__)
 
-try:
-    from scipy import stats
+from . import _rss
 
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
+# Shapiro-Wilk is part of the native backend now, so it is always available.
+# Kept as a module constant because the public result dicts reference it.
+SCIPY_AVAILABLE = True
 
 
 def check_t_test_assumptions(
@@ -218,10 +217,10 @@ def _check_normality(
         else:
             logger.info("  Mean and median differ (may indicate skewness)")
 
-    # Method 4: Shapiro-Wilk test (if scipy available and n <= 5000)
-    if SCIPY_AVAILABLE and 3 <= n <= 5000:
+    # Method 4: Shapiro-Wilk test (valid for 3 <= n <= 5000)
+    if 3 <= n <= 5000:
         try:
-            shapiro_stat, shapiro_p = stats.shapiro(data)
+            shapiro_stat, shapiro_p = _rss.shapiro_wilk([float(v) for v in data])
             shapiro_ok = shapiro_p > 0.05  # Not significant = normal
 
             result["methods"]["shapiro_wilk"] = {

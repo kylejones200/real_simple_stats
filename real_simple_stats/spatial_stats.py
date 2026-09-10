@@ -17,7 +17,8 @@ that spatial structure.
   :func:`variogram_gaussian` — the three standard variogram model functions,
   exposed directly for plotting or custom fitting.
 
-All functions use only numpy and scipy.
+All computation runs in the native Rust backend; there are no runtime
+dependencies.
 """
 
 from __future__ import annotations
@@ -26,9 +27,7 @@ import math
 from collections.abc import Sequence
 from typing import Any
 
-import numpy as np
-from scipy.optimize import curve_fit
-from scipy.spatial import distance_matrix as _dist_matrix
+from . import _rss
 
 __all__ = [
     "morans_i",
@@ -45,12 +44,19 @@ __all__ = [
 # ---------------------------------------------------------------------------
 
 
+def _elementwise(fn, h):
+    """Apply `fn` to a scalar or to every element of a sequence."""
+    if isinstance(h, (int, float)):
+        return fn(float(h))
+    return [fn(float(v)) for v in h]
+
+
 def variogram_spherical(
-    h: np.ndarray,
+    h: float | Sequence[float],
     nugget: float,
     sill: float,
     range_param: float,
-) -> np.ndarray:
+) -> float | list[float]:
     """Spherical variogram model.
 
     Rises linearly near the origin, levels off at the *sill* beyond the
@@ -63,22 +69,24 @@ def variogram_spherical(
         range_param: Distance beyond which spatial correlation is negligible.
 
     Returns:
-        Array of semivariance values.
+        Semivariance: a float for a scalar lag, otherwise a list.
     """
-    h = np.asarray(h, dtype=float)
-    gamma = np.full_like(h, float(sill))
-    mask = h < range_param
-    hr = h[mask] / range_param
-    gamma[mask] = nugget + (sill - nugget) * (1.5 * hr - 0.5 * hr**3)
-    return gamma
+
+    def one(hi: float) -> float:
+        if hi >= range_param:
+            return float(sill)
+        hr = hi / range_param
+        return nugget + (sill - nugget) * (1.5 * hr - 0.5 * hr**3)
+
+    return _elementwise(one, h)
 
 
 def variogram_exponential(
-    h: np.ndarray,
+    h: float | Sequence[float],
     nugget: float,
     sill: float,
     range_param: float,
-) -> np.ndarray:
+) -> float | list[float]:
     """Exponential variogram model.
 
     Approaches the sill asymptotically — never fully flattens.  Good for
@@ -91,18 +99,19 @@ def variogram_exponential(
         range_param: Practical range parameter (effective range ≈ 3× range_param).
 
     Returns:
-        Array of semivariance values.
+        Semivariance: a float for a scalar lag, otherwise a list.
     """
-    h = np.asarray(h, dtype=float)
-    return nugget + (sill - nugget) * (1.0 - np.exp(-h / range_param))
+    return _elementwise(
+        lambda hi: nugget + (sill - nugget) * (1.0 - math.exp(-hi / range_param)), h
+    )
 
 
 def variogram_gaussian(
-    h: np.ndarray,
+    h: float | Sequence[float],
     nugget: float,
     sill: float,
     range_param: float,
-) -> np.ndarray:
+) -> float | list[float]:
     """Gaussian variogram model.
 
     Very smooth near the origin — suitable for highly continuous phenomena.
@@ -114,10 +123,11 @@ def variogram_gaussian(
         range_param: Scale parameter controlling how fast the sill is reached.
 
     Returns:
-        Array of semivariance values.
+        Semivariance: a float for a scalar lag, otherwise a list.
     """
-    h = np.asarray(h, dtype=float)
-    return nugget + (sill - nugget) * (1.0 - np.exp(-((h / range_param) ** 2)))
+    return _elementwise(
+        lambda hi: nugget + (sill - nugget) * (1.0 - math.exp(-((hi / range_param) ** 2))), h
+    )
 
 
 _VARIOGRAM_MODELS = {
@@ -167,64 +177,25 @@ def morans_i(
             n: Number of observations.
 
     Example:
-        >>> import numpy as np
-        >>> rng = np.random.default_rng(0)
+        >>> from real_simple_stats import Rng
+        >>> rng = Rng(0)
         >>> x = rng.uniform(0, 100, 50)
         >>> y = rng.uniform(0, 100, 50)
-        >>> v = 5 + 0.1 * x + rng.normal(0, 2, 50)  # correlated with location
+        >>> noise = rng.normal(0, 2, 50)
+        >>> v = [5 + 0.1 * xi + e for xi, e in zip(x, noise)]  # varies with location
         >>> r = morans_i(x, y, v, distance_threshold=30)
         >>> r["moran_i"] > 0  # expect positive autocorrelation
         True
     """
-    x_: np.ndarray = np.asarray(x, dtype=float)
-    y_: np.ndarray = np.asarray(y, dtype=float)
-    v: np.ndarray = np.asarray(values, dtype=float)
+    x_ = [float(t) for t in x]
+    y_ = [float(t) for t in y]
+    v = [float(t) for t in values]
     n = len(v)
-    if not (len(x_) == len(y_) == n):
-        raise ValueError("x, y, and values must have the same length.")
-    if n < 3:
-        raise ValueError("Need at least 3 observations.")
 
-    coords = np.column_stack([x_, y_])
-    D = _dist_matrix(coords, coords)
-
-    if distance_threshold is not None:
-        W = ((D > 0) & (D <= distance_threshold)).astype(float)
-    else:
-        W = (D > 0).astype(float)
-
-    W_sum = W.sum()
-    if W_sum == 0:
-        raise ValueError(
-            "Spatial weights matrix is all zeros — no neighbours found. "
-            "Try increasing distance_threshold."
-        )
-
-    z = v - v.mean()
-    numerator = float(np.sum(W * np.outer(z, z)))
-    denominator = float(np.sum(z**2))
-
-    if denominator == 0:
-        raise ValueError("All values are identical; Moran's I is undefined.")
-
-    moran_I = (n / W_sum) * (numerator / denominator)
-    E_I = -1.0 / (n - 1)
-
-    # Variance under normality assumption (Moran 1950)
-    S1 = 0.5 * float(np.sum((W + W.T) ** 2))
-    S2 = float(np.sum((W.sum(axis=1) + W.sum(axis=0)) ** 2))
-    m2 = float(np.sum(z**2)) / n
-    m4 = float(np.sum(z**4)) / n
-    b2 = m4 / (m2**2) if m2 > 0 else 0.0
-
-    A = n * ((n**2 - 3 * n + 3) * S1 - n * S2 + 3 * W_sum**2)
-    B = b2 * ((n**2 - n) * S1 - 2 * n * S2 + 6 * W_sum**2)
-    C = (n - 1) * (n - 2) * (n - 3) * W_sum**2
-    var_I = max((A - B) / C - E_I**2, 1e-12)
-
-    z_score = (moran_I - E_I) / math.sqrt(var_I)
-    from scipy.stats import norm as _norm
-    p_value = float(2 * _norm.sf(abs(z_score)))
+    # The O(n^2) pair loop and the Moran (1950) variance run in Rust.
+    moran_I, E_I, var_I, z_score, p_value = _rss.morans_i(
+        x_, y_, v, distance_threshold
+    )
 
     if moran_I > 0.1:
         interp = "Positive spatial autocorrelation — similar values cluster together."
@@ -277,54 +248,27 @@ def compute_variogram(
 
     Example:
         >>> import numpy as np
-        >>> rng = np.random.default_rng(1)
+        >>> from real_simple_stats import Rng
+        >>> rng = Rng(1)
         >>> x, y = rng.uniform(0, 100, 80), rng.uniform(0, 100, 80)
-        >>> v = np.sin(x / 20) + rng.normal(0, 0.3, 80)
+        >>> v = [math.sin(xi / 20) + e for xi, e in zip(x, rng.normal(0, 0.3, 80))]
         >>> r = compute_variogram(x, y, v, n_lags=10)
         >>> len(r["lags"]) == 10
         True
     """
-    x_: np.ndarray = np.asarray(x, dtype=float)
-    y_: np.ndarray = np.asarray(y, dtype=float)
-    v: np.ndarray = np.asarray(values, dtype=float)
-    n = len(v)
-    if not (len(x_) == len(y_) == n):
-        raise ValueError("x, y, and values must have the same length.")
-    if n < 4:
-        raise ValueError("Need at least 4 observations.")
-    if n_lags < 2:
-        raise ValueError("n_lags must be at least 2.")
+    x_ = [float(t) for t in x]
+    y_ = [float(t) for t in y]
+    v = [float(t) for t in values]
 
-    coords = np.column_stack([x_, y_])
-    D = _dist_matrix(coords, coords)
-
-    # Upper triangle only (unique pairs)
-    idx = np.triu_indices(n, k=1)
-    distances = D[idx]
-    sq_diffs = (v[idx[0]] - v[idx[1]]) ** 2
-
-    if max_lag is None:
-        max_lag = float(distances.max()) / 2.0
-
-    bins = np.linspace(0.0, max_lag, n_lags + 1)
-    lag_centers = (bins[:-1] + bins[1:]) / 2.0
-
-    gamma = np.zeros(n_lags)
-    n_pairs: np.ndarray = np.zeros(n_lags, dtype=int)
-
-    for i in range(n_lags):
-        mask = (distances >= bins[i]) & (distances < bins[i + 1])
-        cnt = int(mask.sum())
-        if cnt > 0:
-            gamma[i] = 0.5 * float(sq_diffs[mask].mean())
-            n_pairs[i] = cnt
-
+    lag_centers, gamma, n_pairs, max_lag_used, total_var = _rss.variogram(
+        x_, y_, v, n_lags, max_lag
+    )
     return {
         "lags": lag_centers,
         "gamma": gamma,
         "n_pairs": n_pairs,
-        "max_lag": float(max_lag),
-        "total_variance": float(np.var(v, ddof=1)),
+        "max_lag": max_lag_used,
+        "total_variance": total_var,
     }
 
 
@@ -361,7 +305,7 @@ def fit_variogram(
 
     Example:
         >>> import numpy as np
-        >>> lags = np.linspace(1, 50, 15)
+        >>> lags = [1 + i * 49 / 14 for i in range(15)]
         >>> gamma = variogram_spherical(lags, nugget=1, sill=10, range_param=30)
         >>> r = fit_variogram(lags, gamma, model="spherical")
         >>> abs(r["sill"] - 10) < 1
@@ -373,44 +317,52 @@ def fit_variogram(
             f"Unknown model {model!r}. Choose from: {', '.join(_VARIOGRAM_MODELS)}."
         )
 
-    h: np.ndarray = np.asarray(lags, dtype=float)
-    g: np.ndarray = np.asarray(gamma, dtype=float)
+    h = [float(v) for v in lags]
+    g = [float(v) for v in gamma]
 
-    # Use only bins that have pairs (non-zero bins)
-    valid = g > 0
-    if valid.sum() < 3:
+    # Keep only bins that actually contain pairs.
+    keep = [i for i, gi in enumerate(g) if gi > 0]
+    if len(keep) < 3:
         raise ValueError("Need at least 3 non-zero bins to fit a variogram model.")
 
-    h_fit = h[valid]
-    g_fit = g[valid]
-    sigma = None
+    h_fit = [h[i] for i in keep]
+    g_fit = [g[i] for i in keep]
+
+    # Weight each bin by its pair count, as the SciPy version did via `sigma`.
     if n_pairs is not None:
-        counts = np.asarray(n_pairs, dtype=float)[valid]
-        sigma = 1.0 / np.maximum(counts, 1.0)
+        counts = [max(float(list(n_pairs)[i]), 1.0) for i in keep]
+        weights = [c for c in counts]
+    else:
+        weights = [1.0] * len(h_fit)
 
     model_fn = _VARIOGRAM_MODELS[model]
-    sill_guess = float(g_fit.max())
-    range_guess = float(h_fit.max()) / 3.0
+    sill_guess = max(g_fit)
+    range_guess = max(h_fit) / 3.0
 
-    try:
-        params, _ = curve_fit(
-            model_fn,
-            h_fit,
-            g_fit,
-            p0=[0.0, sill_guess, range_guess],
-            bounds=([0, 0, 1e-6], [sill_guess, 2 * sill_guess, h_fit.max() * 2]),
-            sigma=sigma,
-            maxfev=5000,
-        )
-    except RuntimeError as e:
-        raise ValueError(f"Variogram fitting failed: {e}") from e
+    def residual(params: list[float]) -> list[float]:
+        nugget_, sill_, range_ = params
+        if range_ <= 0:
+            return [1e6] * len(h_fit)
+        pred = model_fn(h_fit, nugget_, sill_, range_)
+        return [(p - o) * w for p, o, w in zip(pred, g_fit, weights)]
+
+    params = _rss.curve_fit_lm(
+        residual,
+        [0.0, sill_guess, range_guess],
+        [0.0, 0.0, 1e-6],
+        [sill_guess, 2 * sill_guess, max(h_fit) * 2],
+        len(h_fit),
+        500,
+    )
 
     nugget, sill, range_param = params
-    residuals = g_fit - model_fn(h_fit, *params)
-    rmse = float(np.sqrt((residuals**2).mean()))
+    fitted = model_fn(h_fit, nugget, sill, range_param)
+    rmse = math.sqrt(
+        sum((f - o) ** 2 for f, o in zip(fitted, g_fit)) / len(g_fit)
+    )
 
     def fitted_fn(h_new: float) -> float:
-        return float(model_fn(np.asarray([h_new]), nugget, sill, range_param)[0])
+        return float(model_fn(float(h_new), nugget, sill, range_param))
 
     return {
         "model": model,
