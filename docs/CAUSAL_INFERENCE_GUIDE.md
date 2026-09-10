@@ -30,9 +30,9 @@ outcome = β₀ + β₁·Post + β₂·Treated + β₃·(Post × Treated) + ε
 
 ```python
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(42)
+rng = Rng(42)
 n = 60
 
 # Simulate: treatment adds 8 units, control group rises by 2 due to time trend

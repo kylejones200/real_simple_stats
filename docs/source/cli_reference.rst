@@ -15,7 +15,7 @@ Verify installation::
     rss-calc --help
 
 Basic Usage
-----------
+-----------
 
 The CLI uses subcommands for different types of operations::
 
@@ -29,7 +29,7 @@ Available subcommands:
 * ``glossary`` - Statistical term lookup
 
 Global Options
--------------
+--------------
 
 .. option:: --help, -h
 
@@ -40,19 +40,19 @@ Global Options
    Show version information
 
 Statistics Commands
-------------------
+-------------------
 
 Calculate descriptive statistics for datasets.
 
 Basic Usage
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: bash
 
     rss-calc stats --data "1,2,3,4,5" --stat mean
 
 Options
-~~~~~~
+~~~~~~~
 
 .. option:: --data DATA
 
@@ -71,7 +71,7 @@ Options
    * ``all`` - All available statistics
 
 Examples
-~~~~~~~
+~~~~~~~~
 
 Calculate mean::
 
@@ -90,19 +90,19 @@ Calculate all statistics::
     # Coefficient of Variation: 55.56%
 
 Probability Commands
--------------------
+--------------------
 
 Perform probability calculations and work with distributions.
 
 Basic Usage
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: bash
 
     rss-calc probability --type binomial --n 10 --k 3 --p 0.5
 
 Options
-~~~~~~
+~~~~~~~
 
 .. option:: --type TYPE
 
@@ -113,7 +113,7 @@ Options
    * ``bayes`` - Bayes' theorem
 
 Normal Distribution Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. option:: --x X
 
@@ -132,7 +132,7 @@ Normal Distribution Options
    Calculate cumulative distribution function (CDF) instead of PDF
 
 Binomial Distribution Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. option:: --n N
 
@@ -147,7 +147,7 @@ Binomial Distribution Options
    Probability of success (required for binomial, must be between 0 and 1)
 
 Bayes' Theorem Options
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. option:: --p_b_given_a P_B_GIVEN_A
 
@@ -162,7 +162,7 @@ Bayes' Theorem Options
    Prior probability P(B) (required, must be between 0 and 1, cannot be zero)
 
 Combination/Permutation Options
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. option:: --n N
 
@@ -173,7 +173,7 @@ Combination/Permutation Options
    Number of items to choose/arrange
 
 Simple Probability Options
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. option:: --favorable F
 
@@ -184,7 +184,7 @@ Simple Probability Options
    Total number of possible outcomes
 
 Examples
-~~~~~~~
+~~~~~~~~
 
 Normal distribution PDF::
 
@@ -207,19 +207,19 @@ Bayes' theorem::
     # Output: P(A|B) = 0.180000
 
 Hypothesis Testing Commands
---------------------------
+---------------------------
 
 Perform statistical hypothesis tests.
 
 Basic Usage
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: bash
 
     rss-calc hypothesis --test t-test --data "1,2,3,4,5" --mu 3.0
 
 Options
-~~~~~~
+~~~~~~~
 
 .. option:: --test TEST
 
@@ -240,7 +240,7 @@ Options
    Significance level (default: 0.05)
 
 Examples
-~~~~~~~
+~~~~~~~~
 
 One-sample t-test::
 
@@ -252,19 +252,19 @@ One-sample t-test::
     # Significance level: α = 0.05
 
 Glossary Commands
-----------------
+-----------------
 
 Look up definitions of statistical terms.
 
 Basic Usage
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: bash
 
     rss-calc glossary --term "standard deviation"
 
 Options
-~~~~~~
+~~~~~~~
 
 .. option:: --term TERM
 
@@ -275,7 +275,7 @@ Options
    List all available terms
 
 Examples
-~~~~~~~
+~~~~~~~~
 
 Look up a term::
 
@@ -288,10 +288,10 @@ List all terms::
     # Output: [List of all available terms]
 
 Advanced Usage
--------------
+--------------
 
 Piping and Redirection
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 Save results to file::
 
@@ -302,7 +302,7 @@ Use with other commands::
     echo "10,20,30,40,50" | rss-calc stats --stat mean
 
 Batch Processing
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 Process multiple datasets::
 
@@ -316,7 +316,7 @@ Process multiple datasets::
     done
 
 Integration with Scripts
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use in Python scripts::
 
@@ -331,10 +331,10 @@ Use in Python scripts::
     print(result.stdout)
 
 Error Handling
--------------
+--------------
 
 Common Errors and Solutions
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Command not found: rss-calc**
     * Ensure the package is installed: ``pip install real-simple-stats``
@@ -370,12 +370,12 @@ Tips and Best Practices
 5. **Use appropriate precision**: Consider rounding results for readability
 
 Output Formats
--------------
+--------------
 
 The CLI provides human-readable output by default.
 
 Getting More Help
-----------------
+-----------------
 
 * Use ``--help`` with any command for detailed usage
 * Check the main documentation for Python API details

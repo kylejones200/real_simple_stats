@@ -6,12 +6,12 @@ We welcome contributions to Real Simple Stats! This guide will help you get star
 
 
 Code Quality Standards
----------------------
+----------------------
 
 We maintain high code quality standards. All contributions must meet these requirements:
 
 Code Style
-~~~~~~~~~
+~~~~~~~~~~
 
 * **Formatting**: Code is automatically formatted with Black (88 character line length)
 * **Linting**: Must pass Flake8 linting with our configuration
@@ -42,7 +42,7 @@ Example of properly formatted function::
         return sum(values) / len(values)
 
 Testing Requirements
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 * **Test Coverage**: New code should maintain or improve test coverage
 * **Test Types**: Include unit tests for all new functions
@@ -65,7 +65,7 @@ Example test structure::
             calculate_mean([])
 
 Quality Checks
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 Before submitting, ensure all quality checks pass::
 
@@ -80,10 +80,10 @@ Or run everything at once::
     make quality
 
 Types of Contributions
----------------------
+----------------------
 
 Bug Reports
-~~~~~~~~~~
+~~~~~~~~~~~
 
 When reporting bugs, please include:
 
@@ -94,7 +94,7 @@ When reporting bugs, please include:
 * **Minimal code example** that demonstrates the issue
 
 Feature Requests
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 For new features, please:
 
@@ -104,7 +104,7 @@ For new features, please:
 * **Consider implementation complexity**
 
 Code Contributions
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 We welcome various types of code contributions:
 
@@ -134,10 +134,10 @@ We welcome various types of code contributions:
     * Update development tools
 
 Coding Guidelines
-----------------
+-----------------
 
 Function Design
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 * **Single Responsibility**: Each function should do one thing well
 * **Clear Naming**: Use descriptive names that explain what the function does
@@ -145,7 +145,7 @@ Function Design
 * **Educational Value**: Include mathematical explanations in docstrings
 
 Statistical Accuracy
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 * **Verify Formulas**: Ensure statistical formulas are mathematically correct
 * **Test Against Known Values**: Compare results with established statistical software
@@ -153,7 +153,7 @@ Statistical Accuracy
 * **Document Assumptions**: Clearly state any assumptions made by the function
 
 Error Handling
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
 * **Meaningful Messages**: Error messages should help users understand what went wrong
 * **Appropriate Exceptions**: Use standard Python exceptions (ValueError, TypeError, etc.)
@@ -162,7 +162,7 @@ Error Handling
 Example::
 
     if not isinstance(values, (list, tuple, np.ndarray)):
-        raise TypeError("Values must be a list, tuple, or numpy array")
+        raise TypeError("Values must be a sequence of numbers")
 
     if len(values) == 0:
         raise ValueError("Cannot calculate statistics for empty dataset")
@@ -171,10 +171,10 @@ Example::
         raise ValueError("All values must be numeric (int or float)")
 
 Documentation Standards
-----------------------
+-----------------------
 
 Docstring Format
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 We use Google-style docstrings::
 
@@ -203,17 +203,17 @@ We use Google-style docstrings::
         """
 
 Code Comments
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 * **Explain Why**: Comments should explain why something is done, not what is done
 * **Mathematical Context**: Explain statistical concepts and formulas
 * **Complex Logic**: Break down complex calculations with comments
 
 Release Process
---------------
+---------------
 
 Version Numbers
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 We follow semantic versioning (MAJOR.MINOR.PATCH):
 
@@ -222,7 +222,7 @@ We follow semantic versioning (MAJOR.MINOR.PATCH):
 * **PATCH**: Bug fixes, backward compatible
 
 Changelog
-~~~~~~~~
+~~~~~~~~~
 
 All changes are documented in the changelog with:
 
@@ -234,7 +234,7 @@ All changes are documented in the changelog with:
 * **Security**: Security improvements
 
 Getting Help
------------
+------------
 
 If you need help with contributing:
 
@@ -244,7 +244,7 @@ If you need help with contributing:
 * **Review Examples**: Look at existing code for patterns and style
 
 Communication
-------------
+-------------
 
 * **Be Respectful**: Follow our code of conduct
 * **Be Patient**: Maintainers review contributions in their spare time
@@ -252,7 +252,7 @@ Communication
 * **Be Collaborative**: We're all working together to improve the project
 
 Recognition
-----------
+-----------
 
 Contributors are recognized in:
 

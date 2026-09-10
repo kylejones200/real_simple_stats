@@ -899,7 +899,9 @@ $$\gamma(h) = c_0 + c\left[1 - \exp\!\left(-\frac{h}{a}\right)\right]$$
 
 $$\gamma(h) = c_0 + c\left[1 - \exp\!\left(-\frac{h^2}{a^2}\right)\right]$$
 
-Models are fit by minimising the weighted sum of squared residuals using `scipy.optimize.curve_fit`.
+Models are fit by minimising the weighted sum of squared residuals with a
+bounded Levenberg-Marquardt solver in the native backend, weighting each lag
+bin by its pair count.
 
 **Code**: `rss.fit_variogram(lags, gamma, model="spherical")`
 

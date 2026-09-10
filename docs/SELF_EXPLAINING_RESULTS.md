@@ -178,9 +178,9 @@ The ANOVA case shows the pattern when the result carries both a "which groups di
 
 ```python
 import real_simple_stats as rss
-import numpy as np
+from real_simple_stats import Rng
 
-rng = np.random.default_rng(0)
+rng = Rng(0)
 control  = rng.normal(50, 8, 40)
 dose_low = rng.normal(56, 8, 40)
 dose_hi  = rng.normal(65, 8, 40)

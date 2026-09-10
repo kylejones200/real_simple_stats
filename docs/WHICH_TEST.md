@@ -99,8 +99,9 @@ Time-to-event (days to churn, failure, conversion, recovery)
 │   predict P(survive past time t) for any t, including future time points.
 │
 └── I need to compare two groups' survival curves ────────────────────────────► Log-rank test
-    Not yet in rss — use scipy.stats.ttest_ind on survival times as proxy,
-    or compute Kaplan-Meier for each group and inspect visually.
+    Not yet in rss. As a rough proxy, use rss.two_sample_t_test on the
+    survival times, or compute Kaplan-Meier for each group and compare the
+    curves and their confidence bands visually.
 ```
 
 ---

@@ -12,7 +12,7 @@ This section contains step-by-step tutorials for using Real Simple Stats in vari
    tutorials/data_visualization
 
 Tutorial Overview
-----------------
+-----------------
 
 Our tutorials are designed to take you from basic concepts to advanced statistical analysis:
 
@@ -29,7 +29,7 @@ Our tutorials are designed to take you from basic concepts to advanced statistic
     Create meaningful statistical plots and charts to visualize your data.
 
 Getting Started
---------------
+---------------
 
 Each tutorial includes:
 
@@ -40,7 +40,7 @@ Each tutorial includes:
 * **Practice exercises** - Test your understanding
 
 Before You Begin
----------------
+----------------
 
 Make sure you have Real Simple Stats installed::
 
@@ -55,7 +55,7 @@ Then you can run the example notebooks::
     jupyter notebook examples/getting_started.ipynb
 
 Tutorial Data
-------------
+-------------
 
 Most tutorials use sample datasets that are either:
 
@@ -64,7 +64,7 @@ Most tutorials use sample datasets that are either:
 * **Generated programmatically** - Synthetic data for specific scenarios
 
 Next Steps
----------
+----------
 
 1. **Start with Basic Statistics** if you're new to statistics
 2. **Jump to specific topics** if you have experience

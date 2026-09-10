@@ -1,5 +1,5 @@
 Real Simple Stats Documentation
-==============================
+===============================
 
 **Real Simple Stats** is a comprehensive Python library for statistical analysis and education.
 It provides easy-to-use functions for descriptive statistics, probability calculations,
@@ -18,7 +18,7 @@ hypothesis testing, and data visualization.
    :alt: License
 
 Key Features
------------
+------------
 
 * **Descriptive Statistics**: Mean, median, mode, variance, standard deviation, and more
 * **Probability Utilities**: Simple, joint, conditional probability calculations
@@ -36,7 +36,7 @@ Key Features
 * **Educational Focus**: Clear explanations and examples for learning
 
 Quick Start
-----------
+-----------
 
 Installation::
 
@@ -59,7 +59,7 @@ Command line usage::
     rss-calc probability --type binomial --n 10 --k 3 --p 0.5
 
 Documentation Contents
-=====================
+======================
 
 .. toctree::
    :maxdepth: 2

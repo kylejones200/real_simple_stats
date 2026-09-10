@@ -149,13 +149,100 @@ Changed
 * Removed emojis project-wide from docs, examples, and scripts
 * Interactive examples documentation now recommends Chart.js and Observable for web visualizations instead of Streamlit
 
+[0.5.0] - 2026-09-09
+--------------------
+
+The numeric backend is now Rust, and the library has **no runtime dependencies
+at all**. The public API keeps its shape -- same names, same arguments, same
+dictionary keys -- but several functions return lists where they previously
+returned NumPy arrays. Read *Breaking* before upgrading.
+
+Added
+~~~~~
+
+* **Native Rust core**, shipped inside the wheel as ``real_simple_stats._rss``.
+  Special functions, 17 distributions, noncentral t and F, Shapiro-Wilk,
+  descriptive statistics, dense linear algebra, three optimizers,
+  maximum-likelihood survival fitting, resampling, Monte Carlo simulation and
+  spatial statistics.
+* **Zero-copy input.** Anything exposing the buffer protocol with contiguous
+  float64 data -- a NumPy array, ``array.array('d')``, a ``memoryview`` -- is
+  read in place rather than copied. Lists still work.
+* **``real_simple_stats.Rng``**, a seeded PCG64 generator.
+* **Resampling by statistic name**: ``bootstrap(data, "mean")`` and friends keep
+  the whole resample inside Rust and run it across every core.
+* **Fourteen functions this documentation had always described but that did not
+  exist**: ``skewness``, ``kurtosis``, ``detect_outliers_iqr``,
+  ``one_sample_t_test``, ``two_sample_t_test``, ``paired_t_test``, ``z_test``,
+  ``one_proportion_z_test``, ``mann_whitney_u``, ``wilcoxon_signed_rank``,
+  ``spearman_correlation``, ``calculate_residuals``, ``simple_probability`` and
+  ``binomial_cdf``.
+* ``pandas`` extra, alongside the existing ``plots`` extra.
+
+Changed
+~~~~~~~
+
+* **Performance** (one million values, against the previous pure-Python
+  implementations): ``sample_std_dev`` 52.8 ms to 0.12 ms on a buffer;
+  ``five_number_summary`` 164.9 ms to 3.8 ms; a 10,000-iteration bootstrap
+  265.0 ms to 1.9 ms; a 10,000-permutation test 739.9 ms to 5.4 ms. Each is also
+  two to four times faster than the NumPy equivalent.
+* **Import time: 470 ms to 13 ms.**
+* **Accuracy.** The special functions are gated against mpmath at 60 decimal
+  digits rather than SciPy, because SciPy's own ``erfc``/``ndtr`` carry about
+  1e-13 relative error in the tails. Measured against true values, the normal
+  CDF and survival function here are roughly 50x more accurate than SciPy's.
+* **Reproducibility under parallelism.** A given ``random_seed`` produces
+  identical results regardless of core count, because each iteration draws from
+  its own derived stream rather than a shared generator.
+* Build backend is maturin rather than setuptools. Installing from an sdist
+  needs a Rust toolchain; the published wheels do not.
+* ``mean``, ``median`` and ``mode`` now resolve to the documented, validated
+  implementations. ``pre_statistics`` declared no ``__all__`` and is
+  star-imported later, so its deliberately elementary teaching versions had been
+  shadowing them.
+
+Removed
+~~~~~~~
+
+* **NumPy, SciPy and matplotlib as runtime dependencies.** matplotlib moved to
+  the ``plots`` extra.
+* The unreachable Numba code paths in ``resampling`` and ``monte_carlo``. Numba
+  was never a declared dependency, so every default install had been running the
+  pure-Python fallback.
+
+Breaking
+~~~~~~~~
+
+* These now return plain lists rather than ``numpy.ndarray``:
+  ``chi_square_independence()["expected"]``, ``geometric_brownian_motion``,
+  ``kaplan_meier``, ``compute_variogram``, ``synthetic_control``,
+  ``encode_transactions``, and the ``multivariate`` results.
+* ``monte_carlo_integration`` and ``monte_carlo_probability`` call ``func`` and
+  ``condition`` once per sample -- a float in one dimension, a tuple in several
+  -- instead of passing a whole array. Scalar-style lambdas are unaffected.
+* Descriptive results are uniformly ``float``; integer input previously produced
+  integer output for ``min``, ``median`` and ``max``.
+* Random sequences differ for a given seed, because the generator changed to
+  PCG64. Seeded runs remain exactly reproducible.
+* Python 3.12 or later is required.
+
+Fixed
+~~~~~
+
+* Twenty-one of the 109 ``rss.*`` references in the README did not exist, and
+  seven documented outputs were simply wrong -- among them a
+  difference-in-differences estimate given as 5.0 where the correct answer is
+  9.5. Every doctest in the package now passes.
+* ``pearson_correlation`` returns exactly 1.0 for a perfectly correlated pair.
+
 [Unreleased]
------------
+------------
 
 (No unreleased changes)
 
 Migration Guide
---------------
+---------------
 
 Upgrading from 0.1.1 to 0.2.0
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,7 +273,7 @@ Upgrading from 0.1.1 to 0.2.0
 * Contribute to the project using our development tools
 
 Version Support
---------------
+---------------
 
 **Supported Versions**:
 
